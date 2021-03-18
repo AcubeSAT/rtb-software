@@ -45,6 +45,7 @@ DAC_HandleTypeDef hdac1;
 UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_lpuart1_tx;
+DMA_HandleTypeDef hdma_lpuart1_rx;
 
 /* USER CODE BEGIN PV */
 
@@ -74,12 +75,35 @@ int _write(int file, char *ptr, int len)
         while (hdma_lpuart1_tx.State != HAL_DMA_STATE_READY || hlpuart1.gState != HAL_UART_STATE_READY) {
             // ...
         }
-        HAL_UART_Transmit_DMA(&hlpuart1, (uint8_t *) ptr, len);
+        HAL_UART_Transmit(&hlpuart1, (uint8_t *) ptr, len, 1000);
 
     }
     return len;
 }
 
+uint8_t uart_rx_raw[1];
+
+/**
+ * Handler from any received messages by UART
+ */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    static uint8_t buffer[256];
+    static uint8_t current_point = 0;
+
+    uint8_t bit = uart_rx_raw[0];
+    if (bit == '\n' || bit == '\r') {
+        // Process new command received
+        log_debug("Received UART message: %.*s", current_point, buffer);
+
+        // Clean-up buffer to prepare for the new message
+        current_point = 0;
+    } else {
+        // Process new byte received
+        buffer[current_point++] = bit;
+    }
+
+    HAL_UART_Receive_IT(&hlpuart1, uart_rx_raw, sizeof(uart_rx_raw)); // Don't abort!
+}
 /* USER CODE END 0 */
 
 /**
@@ -115,7 +139,7 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
+    HAL_UART_Receive_IT(&hlpuart1, uart_rx_raw, sizeof(uart_rx_raw));
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -261,7 +285,7 @@ static void MX_LPUART1_UART_Init(void)
   hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
   hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  hlpuart1.FifoMode = UART_FIFOMODE_DISABLE;
+  hlpuart1.FifoMode = UART_FIFOMODE_ENABLE;
   if (HAL_UART_Init(&hlpuart1) != HAL_OK)
   {
     Error_Handler();
@@ -274,12 +298,11 @@ static void MX_LPUART1_UART_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
+  if (HAL_UARTEx_EnableFifoMode(&hlpuart1) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN LPUART1_Init 2 */
-
   /* USER CODE END LPUART1_Init 2 */
 
 }
@@ -344,8 +367,11 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Channel1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+  /* DMA1_Channel2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 
 }
 
