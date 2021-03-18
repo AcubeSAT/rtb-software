@@ -44,6 +44,7 @@ DAC_HandleTypeDef hdac1;
 
 UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart3;
+DMA_HandleTypeDef hdma_lpuart1_tx;
 
 /* USER CODE BEGIN PV */
 
@@ -52,6 +53,7 @@ UART_HandleTypeDef huart3;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_USART3_UART_Init(void);
@@ -69,7 +71,11 @@ static void MX_USART3_UART_Init(void);
 int _write(int file, char *ptr, int len)
 {
     if (file == 1 || file == 2) { // stdout, stderr
-        HAL_UART_Transmit(&hlpuart1, (uint8_t *) ptr, len, HAL_MAX_DELAY);
+        while (hdma_lpuart1_tx.State != HAL_DMA_STATE_READY || hlpuart1.gState != HAL_UART_STATE_READY) {
+            // ...
+        }
+        HAL_UART_Transmit_DMA(&hlpuart1, (uint8_t *) ptr, len);
+
     }
     return len;
 }
@@ -104,6 +110,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_DAC1_Init();
   MX_LPUART1_UART_Init();
   MX_USART3_UART_Init();
@@ -259,7 +266,7 @@ static void MX_LPUART1_UART_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -322,6 +329,23 @@ static void MX_USART3_UART_Init(void)
   /* USER CODE BEGIN USART3_Init 2 */
 
   /* USER CODE END USART3_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMAMUX1_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 }
 
