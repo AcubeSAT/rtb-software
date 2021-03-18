@@ -46,11 +46,11 @@ else ()
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(Core/Inc Drivers/STM32L4xx_HAL_Driver/Inc Drivers/STM32L4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32L4xx/Include Drivers/CMSIS/Include)
+include_directories(Core/Inc Drivers/STM32L4xx_HAL_Driver/Inc Drivers/STM32L4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32L4xx/Include Drivers/CMSIS/Include lib/log.c/src)
 
 add_definitions(-DUSE_HAL_DRIVER -DSTM32L4R5xx)
 
-file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Core/*.*")
+file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Core/*.*" lib/**/*.c)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32L4R5ZITx_FLASH.ld)
 

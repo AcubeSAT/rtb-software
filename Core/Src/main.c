@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "log.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +61,18 @@ static void MX_USART3_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+ * This function overwrites the default printf() and std::cout/cerr outputs,
+ * redirecting them to a UART port.
+ */
+int _write(int file, char *ptr, int len)
+{
+    if (file == 1 || file == 2) { // stdout, stderr
+        HAL_UART_Transmit(&hlpuart1, (uint8_t *) ptr, len, HAL_MAX_DELAY);
+    }
+    return len;
+}
 
 /* USER CODE END 0 */
 
@@ -103,8 +115,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      HAL_UART_Transmit(&hlpuart1, "kalispera\r\n", strlen("kalispera\r\n"), 1000);
       HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+      log_error("Hello %s", "world");
       HAL_Delay(1000);
     /* USER CODE END WHILE */
 
