@@ -37,7 +37,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+extern DAC_HandleTypeDef hdac1;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

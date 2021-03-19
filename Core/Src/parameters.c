@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <log.h>
 #include <stdlib.h>
+#include <stm32l4xx_hal.h>
+#include "main.h"
 
 double floating_parameters[] = {
         0.0f,
@@ -13,6 +15,23 @@ uint32_t integer_parameters[] = {
         0,
         0
 };
+
+floating_callback floating_callbacks[] = {
+    callback_dac_output,
+    callback_dac_output
+};
+integer_callback integer_callbacks[] = {
+    NULL,
+    NULL
+};
+
+void callback_dac_output(uint32_t parameter, double * value) {
+    uint8_t parsed_value = *value / 3.3f * 255;
+
+    log_trace("Setting DAC %ld to %d", parameter, parsed_value);
+
+    HAL_DAC_SetValue(&hdac1, parameter == 0 ? DAC_CHANNEL_1 : DAC_CHANNEL_2, DAC_ALIGN_8B_R, parsed_value);
+}
 
 /**
  * Receive a UART string that sets a parameter to a value
@@ -49,6 +68,10 @@ bool uart_set_parameter(char* command, uint16_t len) {
 
             integer_parameters[parameter_number] = new_value;
             log_debug("Set integer parameter %ld to %ld", parameter_number, new_value);
+            
+            if (integer_callbacks[parameter_number] != NULL) {
+                integer_callbacks[parameter_number](parameter_number, &(integer_parameters[parameter_number]));
+            }
         } else {
             // Floating parameter
             double new_value = strtod(command_value + 1, NULL);
@@ -60,6 +83,10 @@ bool uart_set_parameter(char* command, uint16_t len) {
 
             floating_parameters[parameter_number] = new_value;
             log_debug("Set floating parameter %ld to %lf", parameter_number, new_value);
+
+            if (floating_callbacks[parameter_number] != NULL) {
+                floating_callbacks[parameter_number](parameter_number, &(floating_parameters[parameter_number]));
+            }
         }
     } else {
         return false;
