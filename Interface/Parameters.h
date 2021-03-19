@@ -19,4 +19,6 @@ extern std::array<Parameter<int>, 2> integerParameters;
 
 void parameterWindow();
 
+void updateParameters();
+
 #endif //RADIATIONINTERFACE_PARAMETERS_H

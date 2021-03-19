@@ -21,6 +21,8 @@
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include "Parameters.h"
+#include "Experiment.h"
+#include "main.h"
 
 const char* glsl_version = "#version 130";
 
@@ -217,10 +219,10 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_Always);
             ImGui::Begin("SpaceDot CubeSAT");
 
-            if (ImGui::Button("what")) {
-//                boost::asio::write(serial, boost::asio::buffer(message.c_str(), message.size()));
-                boost::asio::async_write(*serial, boost::asio::buffer("what\n", 5), [](auto a, auto b) {});
+            if (ImGui::Button("!!")) {
+                boost::asio::async_write(*serial, boost::asio::buffer("what\n", 5), txHandler);
             }
+            ImGui::SameLine();
 
             ImGui::Checkbox("Test", &show_test_window);
             ImGui::SameLine();
@@ -253,6 +255,12 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_Appearing);
             ImGui::Begin("Parameters");
             parameterWindow();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(450, 20), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
+            ImGui::Begin("Experiments");
+            experimentWindow();
             ImGui::End();
 
             // Rendering

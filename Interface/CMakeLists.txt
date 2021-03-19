@@ -23,8 +23,8 @@ include_directories (
 add_subdirectory(lib)
 add_subdirectory(lib/plog)
 
-set(SOURCE_FILES main.cpp Parameters.cpp)
-set(VARIOUS )
+set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp)
+set(VARIOUS)
 add_executable(RadiationInterface ${SOURCE_FILES} ${VARIOUS})
 target_link_libraries (RadiationInterface ImGui ImGuiBackend ImGuiDemo gl3w GL ${glfw3_LIBRARIES} dl rt)
 target_link_libraries (RadiationInterface pthread ${Boost_LIBRARIES})
