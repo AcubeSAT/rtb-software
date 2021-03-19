@@ -17,9 +17,11 @@ include_directories (
         "${PROJECT_SOURCE_DIR}/lib/imgui"
         "${PROJECT_SOURCE_DIR}/lib/imgui/backends"
         "${PROJECT_SOURCE_DIR}/lib/imgui/examples/libs/gl3w"
+        "${PROJECT_SOURCE_DIR}/lib/plog/include"
         "${PROJECT_SOURCE_DIR}/lib"
 )
-add_subdirectory (lib)
+add_subdirectory(lib)
+add_subdirectory(lib/plog)
 
 set(SOURCE_FILES main.cpp Parameters.cpp)
 set(VARIOUS )

@@ -16,6 +16,10 @@
 #include <queue>
 #include <deque>
 #include <algorithm>
+#include <plog/Log.h>
+#include "plog/Init.h"
+#include <plog/Appenders/ColorConsoleAppender.h>
+#include <plog/Formatters/TxtFormatter.h>
 #include "Parameters.h"
 
 const char* glsl_version = "#version 130";
@@ -31,6 +35,7 @@ static void error_callback(int error, const char *description) {
 
 std::string port;
 
+bool dataSending = false;
 bool dataSent = false;
 bool dataReceived = false;
 bool dataError = false;
@@ -39,151 +44,75 @@ bool popupOpen = false;
 bool ImguiStarted = false;
 bool stop = false;
 
+/**
+ * A queue of serial messages to be sent
+ * \n is appended after every message
+ */
+std::queue<std::string> txMessages;
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 
+std::unique_ptr<boost::asio::io_service> io;
+std::unique_ptr<boost::asio::serial_port> serial;
+
+boost::asio::streambuf receivedData;
+void dataReception(const boost::system::error_code& error, std::size_t size) {
+    if (!error) {
+        LOG_VERBOSE << "Read " << size << " bytes of data";
+
+        std::string receivedAll(reinterpret_cast<const char *>(receivedData.data().data()), size);
+
+        // Find the first ocurrence of a newline
+        size_t zeroLocation = receivedAll.find('\n');
+        std::string receivedRaw(reinterpret_cast<const char *>(receivedData.data().data()), zeroLocation);
+        receivedData.consume(zeroLocation + 1);
+
+        if (receivedData.size() != 0) {
+            LOG_ERROR << "There is leftover data in the buffer!";
+        }
+
+        LOG_INFO << "Received message: " << receivedRaw;
+    } else {
+        LOG_ERROR << error;
+    }
+
+    boost::asio::async_read_until(*serial, receivedData, '\n', dataReception);
+}
+
 void dataAcquisition() {
-    return;
-//    while (!stop) {
-//        std::this_thread::sleep_for(500ms);
-////        LOG_INFO << "Starting data acquisition thread";
+    while (!stop) {
+        std::this_thread::sleep_for(500ms);
+        LOG_INFO << "Starting data acquisition thread";
 //
-//        try {
-//            // Serial interface initialisation
-//            boost::asio::io_service io;
-//            boost::asio::serial_port serial(io, port);
-//            serial.set_option(boost::asio::serial_port_base::baud_rate(115200));
-//
-//            boost::asio::streambuf buf;
-//            std::istream is(&buf);
-//            std::istringstream iss;
-//
-//            std::string line;
-//            boost::system::error_code ec;
-//
-////            LOG_INFO << "Connection successful";
-//
-//            if (popupOpen && ImguiStarted) {
-//                // Close the popup
-//                popupOpen = false;
-//            }
-//
-//            // Time when the last MySQL data was sent; used to prevent too frequent updates
-////        std::chrono::steady_clock::time_point last_update = std::chrono::steady_clock::now();
-////        std::chrono::steady_clock::time_point last_zmq_update = std::chrono::steady_clock::now();
-//            while (!stop) {
-//                try {
-////                if (pendingCommand != 0) {
-////                    // Send pending command to arduino
-////                    std::ostringstream oss;
-////                    oss << pendingCommand << '\n';
-////                    boost::asio::write(serial, boost::asio::buffer(oss.str()));
-////                    dataSent = true;
-////                    pendingCommand = 0;
-////                }
-//
-//                    //TODO: Parallelism fixes
-//                    if (!txMessages.empty()) {
-//                        Message message = txMessages.back();
-//                        txMessages.pop();
-//
-//                        auto data = MessageParser::composeECSS(message);
-//
-//                        // Now encode the data via COBS
-//                        data.insert(data.begin(), static_cast<uint8_t>(MessageType::SpacePacket)); // Append packet type
-//
-//                        LOG_TRACE << "Will send " << data.size() << " bytes of data. " << data[0];
-//
-//                        dataSendingDB = true;
-//                        uint8_t encoded[258];
-//                        auto result = cobs_encode(encoded, 257, data.c_str(), data.size());
-//                        encoded[result.out_len] = 0; // The null byte
-//                        boost::asio::write(serial, boost::asio::buffer(encoded, result.out_len + 1));
-//
-//                        dataError = true;
-//                    }
-//
-//                    boost::asio::read_until(serial, buf, '\0', ec);
-//                    Logger::format.decimal();
-////                LOG_TRACE << "Read " << buf.size() << " bytes of data";
-//
-//                    std::string receivedAll(reinterpret_cast<const char *>(buf.data().data()), buf.size());
-//
-//                    // Find the first occurence of a zero
-//                    size_t zeroLocation = receivedAll.find('\0');
-//                    std::string receivedRaw(reinterpret_cast<const char *>(buf.data().data()), zeroLocation);
-//                    buf.consume(zeroLocation + 1);
-//
-//
-//                    // Decode the received data with cobs
-//                    uint8_t received[300];
-//                    auto result = cobs_decode(received, 300, receivedRaw.c_str(),
-//                                              receivedRaw.size()); // strip the last byte
-//
-//                    Logger::format.hex();
-//                    if (result.status != COBS_DECODE_OK) {
-//                        LOG_ERROR << "COBS status returned " << (uint8_t) result.status;
-//                    }
-//
-//                    if (result.out_len < 1) {
-//                        // Error
-//                        LOG_WARNING << "Too small packet received";
-//                        continue;
-//                    }
-//
-//                    if (received[0] == Log) {
-//                        // Incoming log
-//                        LOG_TRACE << "[inc. log] " << std::string(reinterpret_cast<char *>(received + 1),
-//                                                                  result.out_len - 2); // strip last newline
-//                    } else if (received[0] == SpacePacket) {
-//                        dataReceived = true;
-//
-//                        // Space packet
-//                        std::optional<Message> message = MessageParser::parse(received + 1, std::min(static_cast<int>(result.out_len),255) - 1);
-//
-//                        if (message) {
-//                            LOG_TRACE << "Received ECSS[" << message->serviceType << "," << message->messageType << "]";
-//
-//                            if (message->serviceType == 3 && message->messageType == 25) {
-//                                // Housekeeping received
-//                                Services.housekeeping.applyHousekeeping(*message);
-//                            }
-//                        } else {
-//                            dataError = true;
-//                        }
-//                    } else if (received[0] == Ping) {
-//                        // Do nothing
-//                    } else {
-//                        Logger::format.hex();
-//                        LOG_WARNING << "Unknown data received: " << received[0] << " "
-//                                    << std::string((char *) received, result.out_len);
-//                    }
-//
-//
-//
-////                    float norm = sqrtf(powf(valMagx, 2) + powf(valMagy, 2) + powf(valMagz, 2));
-//
-//                    //valMagz *= 100;
-//                    //valPressure *= 100;
-//                    //valBat *= 100;
-//
-////        serial.close();
-//                } catch (boost::system::system_error &e) {
-//                    LOG_ERROR << "UART error: " << e.what();
-//                }
-//            }
-//        } catch (boost::system::system_error &e) {
-//            LOG_EMERGENCY << "Unable to open interface " << port << ": " << e.what();
-//            if (!popupOpen && ImguiStarted) {
-//                popupOpen = true;
-//                ImGui::OpenPopup("Connection");
-//            }
-////        exit(5);
-//        } catch (...) {
-//            std::string exception = typeid(std::current_exception()).name();
-//            LOG_EMERGENCY << "Unhandled exception in data acquisition thread: " << exception;
-//        }
-//    }
+        try {
+            // Serial interface initialisation
+            io = std::make_unique<boost::asio::io_service>();
+            serial = std::make_unique<boost::asio::serial_port>(*io, port);
+            serial->set_option(boost::asio::serial_port_base::baud_rate(1000000));
+
+            boost::asio::streambuf buf;
+
+            LOG_INFO << "Serial connection successful";
+
+            if (popupOpen && ImguiStarted) {
+                // Close the popup
+                popupOpen = false;
+            }
+
+            boost::asio::async_read_until(*serial, receivedData, '\n', dataReception);
+            io->run();
+        } catch (boost::system::system_error &e) {
+            LOG_FATAL << "Unable to open interface " << port << ": " << e.what();
+            if (!popupOpen && ImguiStarted) {
+                popupOpen = true;
+                ImGui::OpenPopup("Connection");
+            }
+        } catch (...) {
+            std::string exception = typeid(std::current_exception()).name();
+            LOG_FATAL << "Unhandled exception in data acquisition thread: " << exception;
+        }
+    }
 }
 
 #pragma clang diagnostic pop
@@ -196,6 +125,10 @@ int main(int argc, char *argv[]) {
         return 5;
     }
     port = argv[1];
+
+    static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
+    plog::init(plog::verbose, &consoleAppender);
+    LOG_INFO << "Hello world!";
 
     std::thread dataThread(dataAcquisition);
 
@@ -284,7 +217,16 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_Always);
             ImGui::Begin("SpaceDot CubeSAT");
 
+            if (ImGui::Button("what")) {
+//                boost::asio::write(serial, boost::asio::buffer(message.c_str(), message.size()));
+                boost::asio::async_write(*serial, boost::asio::buffer("what\n", 5), [](auto a, auto b) {});
+            }
+
             ImGui::Checkbox("Test", &show_test_window);
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.1f, 0.9f, 0.05f, 1.0f}));
+            ImGui::Checkbox("", &dataSending);
+            ImGui::PopStyleColor();
             ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.1f, 0.9f, 0.05f, 1.0f}));
             ImGui::Checkbox("", &dataReceived);
@@ -334,6 +276,7 @@ int main(int argc, char *argv[]) {
     // Stop the acquisition thread
 //    LOG_DEBUG << "Stopping threads...";
     stop = true;
+    io->stop();
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
