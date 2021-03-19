@@ -22,6 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "parameters.h"
 #include "log.h"
 /* USER CODE END Includes */
 
@@ -97,9 +98,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
         // Clean-up buffer to prepare for the new message
         current_point = 0;
+
+        // Close indicator LED when reception is complete
+        HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
     } else {
         // Process new byte received
         buffer[current_point++] = bit;
+
+        // Open indicator LED when reception starts
+        HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
     }
 
     HAL_UART_Receive_IT(&hlpuart1, uart_rx_raw, sizeof(uart_rx_raw)); // Don't abort!
@@ -139,20 +146,25 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+
+    // Initialise background UART reception
     HAL_UART_Receive_IT(&hlpuart1, uart_rx_raw, sizeof(uart_rx_raw));
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
-      HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
       log_error("Hello %s", "world");
       HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
+#pragma clang diagnostic pop
   /* USER CODE END 3 */
 }
 
