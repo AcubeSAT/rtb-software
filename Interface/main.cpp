@@ -16,6 +16,7 @@
 #include <queue>
 #include <deque>
 #include <algorithm>
+#include "Parameters.h"
 
 const char* glsl_version = "#version 130";
 
@@ -221,6 +222,7 @@ int main(int argc, char *argv[]) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& imguiIo = ImGui::GetIO(); (void)imguiIo;
+//    imguiIo.FontGlobalScale = 1.3;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -236,7 +238,7 @@ int main(int argc, char *argv[]) {
     std::string directory = __FILE__;
     directory.erase(directory.end() - 9, directory.end());
 
-    imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 16.0f);
+    imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 22.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -279,7 +281,7 @@ int main(int argc, char *argv[]) {
             }
 
             ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(400, 80), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_Always);
             ImGui::Begin("SpaceDot CubeSAT");
 
             ImGui::Checkbox("Test", &show_test_window);
@@ -301,22 +303,15 @@ int main(int argc, char *argv[]) {
             dataReceived = dataSent = false;
             dataError = false;
 
-            /*
-            glBegin(GL_LINE_LOOP);//start drawing a line loop
-            glVertex3f(-1.0f, 0.0f, 0.0f);//left of window
-            glVertex3f(0.0f, -1.0f, 0.0f);//bottom of window
-            glVertex3f(1.0f, 0.0f, 0.0f);//right of window
-            glVertex3f(0.0f, 1.0f, 0.0f);//top of window
-            glEnd();//end drawing of line loo
-        */
-//        ImGui::Checkbox("Enable ZeroMQ Data Transmission", &zmqEnabled);
-
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                         ImGui::GetIO().Framerate);
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 100), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_Always);
+            ImGui::SetNextWindowPos(ImVec2(20, 120), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_Appearing);
+            ImGui::Begin("Parameters");
+            parameterWindow();
+            ImGui::End();
 
             // Rendering
             ImGui::Render();
