@@ -1,0 +1,6 @@
+add_library(ImGui imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_tables.cpp imgui/imgui_widgets.cpp)
+add_library(ImGuiBackend imgui/backends/imgui_impl_glfw.cpp imgui/backends/imgui_impl_opengl3.cpp)
+add_library(ImGuiDemo imgui/imgui_demo.cpp)
+add_library(gl3w imgui/examples/libs/gl3w/GL/gl3w.c)
+
+add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GL3W)
