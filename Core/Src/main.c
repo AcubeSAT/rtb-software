@@ -94,7 +94,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     uint8_t bit = uart_rx_raw[0];
     if (bit == '\n' || bit == '\r') {
         // Process new command received
-        log_debug("Received UART message: %.*s", current_point, buffer);
+        log_trace("Received UART message: %.*s", current_point, buffer);
+
+        if (!uart_set_parameter(buffer, current_point)) {
+            log_error("I could not understand your command. Please try again");
+        }
 
         // Clean-up buffer to prepare for the new message
         current_point = 0;
