@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <chrono>
+#include "main.h"
 
 using namespace std::chrono_literals;
 using namespace plog;
@@ -30,7 +31,22 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
         // async_read will automatically deals with over-abundance of buffer data, so no need to handle anything after
         // the newline
 
-        std::cout << time().str() << receivedRaw << std::endl;
+        if (!receivedRaw.empty()) {
+            if (receivedRaw[0] == UART_CONTROL) {
+                if (receivedRaw.size() <= 1) {
+                    LOG_WARNING << "Received empty command?";
+                    return;
+                }
+
+                if (receivedRaw[1] == 'l') {
+                    latchups.logLatchup();
+                } else {
+                    LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
+                }
+            } else {
+                std::cout << time().str() << receivedRaw << std::endl;
+            }
+        }
     } else {
         LOG_ERROR << error;
         dataError = true;

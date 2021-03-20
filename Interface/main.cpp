@@ -25,6 +25,7 @@
 #include "main.h"
 #include "SerialHandler.h"
 #include "Clock.h"
+#include "Latchups.h"
 
 const char* glsl_version = "#version 130";
 
@@ -42,6 +43,7 @@ bool popupOpen = false;
 bool ImguiStarted = false;
 
 std::unique_ptr<SerialHandler> serialHandler;
+Latchups latchups;
 ImFont * largeFont;
 
 #pragma clang diagnostic push
@@ -65,6 +67,7 @@ int main(int argc, char *argv[]) {
     serialHandler = std::make_unique<SerialHandler>();
     serialHandler->port = argv[1];
     std::thread dataThread(&SerialHandler::thread, &*serialHandler);
+
 
     // Setup window
     glfwSetErrorCallback(error_callback);
@@ -164,7 +167,13 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(20, 190), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 250), ImGuiCond_Appearing);
+            ImGui::Begin("Single Event Latchups");
+            latchups.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 295), ImGuiCond_Appearing);
             ImGui::Begin("Parameters");
             parameterWindow();
             ImGui::End();
@@ -193,14 +202,14 @@ int main(int argc, char *argv[]) {
             glfwSwapBuffers(window);
     } catch (...) {
             std::string exception = typeid(std::current_exception()).name();
-//            LOG_EMERGENCY << "Unhandled exception in main thread: " << exception;
+            LOG_FATAL << "Unhandled exception in main thread: " << exception;
 
             std::this_thread::sleep_for(50ms);
         }
     }
 
     // Stop the acquisition thread
-//    LOG_DEBUG << "Stopping threads...";
+    LOG_DEBUG << "Stopping threads...";
     serialHandler->stop();
 
     // Cleanup
@@ -216,8 +225,6 @@ int main(int argc, char *argv[]) {
         LOG_ERROR << "Could not kill data acquisition thread, terminating with force";
         std::terminate();
     }
-
-//    LOG_NOTICE << "Threads stopped";
 
     return 0;
 }

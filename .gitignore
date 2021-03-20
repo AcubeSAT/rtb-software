@@ -88,3 +88,5 @@ cmake-build-*/
 *.sch-bak
 fp-info-cache
 
+# Imgui files
+imgui.ini

@@ -60,7 +60,7 @@ extern bool uart_mutex;
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+#define UART_CONTROL "\x11"
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
