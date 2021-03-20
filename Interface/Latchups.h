@@ -3,17 +3,17 @@
 
 #include <boost/circular_buffer.hpp>
 #include <atomic>
+#include <mutex>
 
 class Latchups {
     std::atomic_int latchupCounter = 0;
 public:
-    boost::circular_buffer<std::string> timeLog;
+    std::mutex timeLogMutex;
+    std::vector<std::string> timeLog;
 
     void window();
 
-    void logLatchup() {
-        latchupCounter++;
-    };
+    void logLatchup();
 
     void resetCounter() {
         latchupCounter = 0;

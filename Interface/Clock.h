@@ -1,7 +1,10 @@
 #ifndef RADIATIONINTERFACE_CLOCK_H
 #define RADIATIONINTERFACE_CLOCK_H
 
-std::string currentDatetime();
+#include <sstream>
+
+std::stringstream currentDatetime();
+std::stringstream currentDatetimeMilliseconds();
 
 void clockWindow();
 
