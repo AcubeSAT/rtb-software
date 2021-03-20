@@ -100,6 +100,13 @@ void uart_command_received(const uint8_t* command, uint32_t len) {
         log_error("I could not understand your command. Please try again");
     }
 }
+
+/**
+  * Handler for any pin interrupts
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+    log_warn("SEL triggered!");
+}
 /* USER CODE END 0 */
 
 /**
@@ -484,6 +491,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USB_VBUS_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
