@@ -70,9 +70,7 @@ void dataReception(const boost::system::error_code& error, std::size_t size) {
         std::string receivedRaw(reinterpret_cast<const char *>(receivedData.data().data()), zeroLocation);
         receivedData.consume(zeroLocation + 1);
 
-        if (receivedData.size() != 0) {
-            LOG_ERROR << "There is leftover data in the buffer!";
-        }
+        // async_read automatically deals with over-abundance of buffer data
 
         LOG_INFO << "Received message: " << receivedRaw;
     } else {

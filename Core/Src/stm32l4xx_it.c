@@ -23,6 +23,8 @@
 #include "stm32l4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <log.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +44,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+uint8_t cool_buffer[90000] = {'\0'};
+uint32_t cool_counter = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,9 +59,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern DMA_HandleTypeDef hdma_lpuart1_tx;
-extern DMA_HandleTypeDef hdma_lpuart1_rx;
-extern UART_HandleTypeDef hlpuart1;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -173,10 +174,28 @@ void DebugMon_Handler(void)
 void PendSV_Handler(void)
 {
   /* USER CODE BEGIN PendSV_IRQn 0 */
+  // Immediately grab values to transmit
+//  uint32_t uart_size_clone = uart_size;
+//  uint32_t uart_current_clone = uart_current;
+  while (uart_write - uart_read > 0) {
+      volatile uint32_t uart_write_clone = uart_write; // Get value once, explicitly, to ease atomic operations
+      uint32_t bytes_to_read = uart_write_clone - uart_read;
+
+      for (int i = 0; i < bytes_to_read; i++) {
+          /* Wait for TXE flag to be raised */
+            while (!LL_LPUART_IsActiveFlag_TXE_TXFNF(LPUART1)) {}
+          LL_LPUART_TransmitData8(LPUART1, uart_buffer[(uart_read + i) % UART_BUFFER_MAX]);
+      }
+
+      while (!LL_LPUART_IsActiveFlag_TC(LPUART1)) {}
+
+
+      uart_read += bytes_to_read;
+  }
 
   /* USER CODE END PendSV_IRQn 0 */
   /* USER CODE BEGIN PendSV_IRQn 1 */
-
+    NVIC_ClearPendingIRQ(PendSV_IRQn);
   /* USER CODE END PendSV_IRQn 1 */
 }
 
@@ -190,7 +209,6 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -209,7 +227,7 @@ void DMA1_Channel1_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
 
   /* USER CODE END DMA1_Channel1_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_lpuart1_tx);
+
   /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
 
   /* USER CODE END DMA1_Channel1_IRQn 1 */
@@ -223,7 +241,7 @@ void DMA1_Channel2_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
 
   /* USER CODE END DMA1_Channel2_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_lpuart1_rx);
+
   /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
 
   /* USER CODE END DMA1_Channel2_IRQn 1 */
@@ -236,9 +254,46 @@ void LPUART1_IRQHandler(void)
 {
   /* USER CODE BEGIN LPUART1_IRQn 0 */
 
+  // The information is received in bytes, but we need a buffer to store complete commands
+  static uint8_t buffer[256];
+  static uint8_t current_point = 0;
+  volatile uint32_t a = 0;
+
+    // Handle any received bytes
+    // Note that, since the FIFO is active, one interrupt call may amount to more than 1 byte. This is why we're using a
+  // loop instead of a condition.
+  while (LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)) {
+      // Perform an explicit copy, since every read from the RDR gets a new byte from the FIFO
+      uint8_t data = LPUART1->RDR;
+      if (data == '\n' || data == '\r') {
+          // New command received! Make sure to handle it
+          uart_command_received(buffer, current_point);
+
+          // Reset the received buffer
+          current_point = 0;
+
+          // Close indicator LED when reception is complete
+          HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+      } else {
+          if (current_point >= sizeof(buffer)) {
+              log_error("Input buffer is full, forgetting everything");
+              current_point = 0;
+          }
+
+          // Add the new data to the buffer and move on
+          buffer[current_point++] = data;
+
+          // Enable indicator LED to show that there is pending reception
+          HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+      }
+  }
+  if (LL_LPUART_IsActiveFlag_ORE(LPUART1)) {
+      log_error("UART RX overrun error detected");
+      LL_LPUART_ClearFlag_ORE(LPUART1);
+  }
   /* USER CODE END LPUART1_IRQn 0 */
-  HAL_UART_IRQHandler(&hlpuart1);
   /* USER CODE BEGIN LPUART1_IRQn 1 */
+    __NOP();
 
   /* USER CODE END LPUART1_IRQn 1 */
 }

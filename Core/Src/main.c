@@ -24,6 +24,9 @@
 /* USER CODE BEGIN Includes */
 #include "parameters.h"
 #include "log.h"
+#include "stm32l4xx_ll_lpuart.h"
+#include <memory.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,13 +46,13 @@
 /* Private variables ---------------------------------------------------------*/
 DAC_HandleTypeDef hdac1;
 
-UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart3;
-DMA_HandleTypeDef hdma_lpuart1_tx;
-DMA_HandleTypeDef hdma_lpuart1_rx;
 
 /* USER CODE BEGIN PV */
-
+uint8_t uart_buffer[UART_BUFFER_MAX];
+atomic_uint uart_write = 0;
+atomic_uint uart_read = 0;
+bool reserved = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,11 +76,14 @@ static void MX_USART3_UART_Init(void);
 int _write(int file, char *ptr, int len)
 {
     if (file == 1 || file == 2) { // stdout, stderr
-        while (hdma_lpuart1_tx.State != HAL_DMA_STATE_READY || hlpuart1.gState != HAL_UART_STATE_READY) {
-            // ...
+        for (int i = 0; i < len; i++) {
+            // Write data into buffer in a cyclic format
+            uart_buffer[(uart_write + i) % UART_BUFFER_MAX] = ptr[i];
         }
-        HAL_UART_Transmit(&hlpuart1, (uint8_t *) ptr, len, 1000);
+        uart_write += len;
 
+        // Notify the PendSV interrupt handler that there are new items in the queue
+        SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
     }
     return len;
 }
@@ -87,33 +93,12 @@ uint8_t uart_rx_raw[1];
 /**
  * Handler from any received messages by UART
  */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    static uint8_t buffer[256];
-    static uint8_t current_point = 0;
+void uart_command_received(const uint8_t* command, uint32_t len) {
+    log_trace("Received UART message: %.*s", len, command);
 
-    uint8_t bit = uart_rx_raw[0];
-    if (bit == '\n' || bit == '\r') {
-        // Process new command received
-        log_trace("Received UART message: %.*s", current_point, buffer);
-
-        if (!uart_set_parameter(buffer, current_point)) {
-            log_error("I could not understand your command. Please try again");
-        }
-
-        // Clean-up buffer to prepare for the new message
-        current_point = 0;
-
-        // Close indicator LED when reception is complete
-        HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-    } else {
-        // Process new byte received
-        buffer[current_point++] = bit;
-
-        // Open indicator LED when reception starts
-        HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+    if (!uart_set_parameter(command, len)) {
+        log_error("I could not understand your command. Please try again");
     }
-
-    HAL_UART_Receive_IT(&hlpuart1, uart_rx_raw, sizeof(uart_rx_raw)); // Don't abort!
 }
 /* USER CODE END 0 */
 
@@ -150,9 +135,6 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
-    // Initialise background UART reception
-    HAL_UART_Receive_IT(&hlpuart1, uart_rx_raw, sizeof(uart_rx_raw));
 
   /* USER CODE END 2 */
 
@@ -289,37 +271,84 @@ static void MX_LPUART1_UART_Init(void)
 
   /* USER CODE END LPUART1_Init 0 */
 
+  LL_LPUART_InitTypeDef LPUART_InitStruct = {0};
+
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_LPUART1);
+
+  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOG);
+  HAL_PWREx_EnableVddIO2();
+  /**LPUART1 GPIO Configuration
+  PG7   ------> LPUART1_TX
+  PG8   ------> LPUART1_RX
+  */
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_7|LL_GPIO_PIN_8;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  GPIO_InitStruct.Alternate = LL_GPIO_AF_8;
+  LL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /* LPUART1 DMA Init */
+
+  /* LPUART1_TX Init */
+  LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_LPUART1_TX);
+
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_1, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PRIORITY_LOW);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_BYTE);
+
+  /* LPUART1_RX Init */
+  LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_2, LL_DMAMUX_REQ_LPUART1_RX);
+
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_2, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_2, LL_DMA_PRIORITY_MEDIUM);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_2, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_2, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_2, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_2, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_2, LL_DMA_MDATAALIGN_BYTE);
+
+  /* LPUART1 interrupt Init */
+  NVIC_SetPriority(LPUART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),1, 0));
+  NVIC_EnableIRQ(LPUART1_IRQn);
+
   /* USER CODE BEGIN LPUART1_Init 1 */
 
   /* USER CODE END LPUART1_Init 1 */
-  hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 1000000;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
-  hlpuart1.Init.StopBits = UART_STOPBITS_1;
-  hlpuart1.Init.Parity = UART_PARITY_NONE;
-  hlpuart1.Init.Mode = UART_MODE_TX_RX;
-  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  hlpuart1.FifoMode = UART_FIFOMODE_ENABLE;
-  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_EnableFifoMode(&hlpuart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
+  LPUART_InitStruct.PrescalerValue = LL_LPUART_PRESCALER_DIV1;
+  LPUART_InitStruct.BaudRate = 1000000;
+  LPUART_InitStruct.DataWidth = LL_LPUART_DATAWIDTH_8B;
+  LPUART_InitStruct.StopBits = LL_LPUART_STOPBITS_1;
+  LPUART_InitStruct.Parity = LL_LPUART_PARITY_NONE;
+  LPUART_InitStruct.TransferDirection = LL_LPUART_DIRECTION_TX_RX;
+  LPUART_InitStruct.HardwareFlowControl = LL_LPUART_HWCONTROL_NONE;
+  LL_LPUART_Init(LPUART1, &LPUART_InitStruct);
+  LL_LPUART_SetTXFIFOThreshold(LPUART1, LL_LPUART_FIFOTHRESHOLD_1_2);
+  LL_LPUART_SetRXFIFOThreshold(LPUART1, LL_LPUART_FIFOTHRESHOLD_1_2);
+  LL_LPUART_EnableFIFO(LPUART1);
+  LL_LPUART_Enable(LPUART1);
   /* USER CODE BEGIN LPUART1_Init 2 */
+  LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
   /* USER CODE END LPUART1_Init 2 */
 
 }
@@ -384,11 +413,11 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Channel1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+  NVIC_SetPriority(DMA1_Channel1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(DMA1_Channel1_IRQn);
   /* DMA1_Channel2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+  NVIC_SetPriority(DMA1_Channel2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 
 }
 

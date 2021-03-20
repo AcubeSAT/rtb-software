@@ -50,7 +50,7 @@ include_directories(Core/Inc Drivers/STM32L4xx_HAL_Driver/Inc Drivers/STM32L4xx_
 
 add_definitions(-DUSE_HAL_DRIVER -DSTM32L4R5xx)
 
-file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Core/*.*" lib/**/*.c)
+file(GLOB_RECURSE SOURCES "startup/*.*" "Drivers/*.*" "Core/*.*" lib/log.c/**/*.c)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32L4R5ZITx_FLASH.ld)
 
@@ -68,3 +68,5 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
         COMMENT "Building ${HEX_FILE}
 Building ${BIN_FILE}")
+
+add_compile_definitions(USE_FULL_LL_DRIVER)

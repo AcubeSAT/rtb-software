@@ -29,15 +29,33 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
+#include "stm32l4xx_ll_lpuart.h"
+#include "stm32l4xx_ll_rcc.h"
+#include "stm32l4xx_ll_bus.h"
+#include "stm32l4xx_ll_cortex.h"
+#include "stm32l4xx_ll_system.h"
+#include "stm32l4xx_ll_utils.h"
+#include "stm32l4xx_ll_pwr.h"
+#include "stm32l4xx_ll_gpio.h"
+#include "stm32l4xx_ll_dma.h"
+
+#include "stm32l4xx_ll_exti.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdatomic.h>
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 extern DAC_HandleTypeDef hdac1;
+
+#define UART_BUFFER_MAX 2048
+extern uint8_t uart_buffer[UART_BUFFER_MAX];
+extern atomic_uint uart_write;
+extern atomic_uint uart_read;
+extern bool uart_mutex;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -54,7 +72,7 @@ extern DAC_HandleTypeDef hdac1;
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void uart_command_received(const uint8_t* command, uint32_t len);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
