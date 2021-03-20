@@ -1,6 +1,7 @@
 #ifndef RTB_SOFTWARE_SERIALHANDLER_H
 #define RTB_SOFTWARE_SERIALHANDLER_H
 
+#include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_error.hpp>
 

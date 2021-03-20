@@ -24,6 +24,7 @@
 #include "Experiment.h"
 #include "main.h"
 #include "SerialHandler.h"
+#include "Clock.h"
 
 const char* glsl_version = "#version 130";
 
@@ -41,6 +42,7 @@ bool popupOpen = false;
 bool ImguiStarted = false;
 
 std::unique_ptr<SerialHandler> serialHandler;
+std::shared_ptr<ImFont> largeFont;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
@@ -104,6 +106,7 @@ int main(int argc, char *argv[]) {
     directory.erase(directory.end() - 9, directory.end());
 
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
+    largeFont.reset(imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f));
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 22.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -146,16 +149,21 @@ int main(int argc, char *argv[]) {
             }
 
             ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_Always);
             ImGui::Begin("SpaceDot CubeSAT");
 
             ImGui::Checkbox("Test", &show_test_window);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                        ImGui::GetIO().Framerate);
+            ImGui::SameLine();
+            ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 120), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_Appearing);
+            ImGui::Begin("Time");
+            clockWindow();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(20, 190), ImGuiCond_Appearing);
             ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_Appearing);
             ImGui::Begin("Parameters");
             parameterWindow();
