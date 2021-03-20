@@ -104,7 +104,7 @@ void uart_command_received(const uint8_t* command, uint32_t len) {
 /**
   * Handler for any pin interrupts
   */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     log_warn("SEL triggered!");
 }
 /* USER CODE END 0 */

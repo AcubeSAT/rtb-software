@@ -23,6 +23,7 @@
 #include "Parameters.h"
 #include "Experiment.h"
 #include "main.h"
+#include "SerialHandler.h"
 
 const char* glsl_version = "#version 130";
 
@@ -35,7 +36,7 @@ static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-std::string port;
+
 
 bool dataSending = false;
 bool dataSent = false;
@@ -46,74 +47,10 @@ bool popupOpen = false;
 bool ImguiStarted = false;
 bool stop = false;
 
-/**
- * A queue of serial messages to be sent
- * \n is appended after every message
- */
-std::queue<std::string> txMessages;
+std::unique_ptr<SerialHandler> serialHandler;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
-
-std::unique_ptr<boost::asio::io_service> io;
-std::unique_ptr<boost::asio::serial_port> serial;
-
-boost::asio::streambuf receivedData;
-void dataReception(const boost::system::error_code& error, std::size_t size) {
-    if (!error) {
-        LOG_VERBOSE << "Read " << size << " bytes of data";
-
-        std::string receivedAll(reinterpret_cast<const char *>(receivedData.data().data()), size);
-
-        // Find the first ocurrence of a newline
-        size_t zeroLocation = receivedAll.find('\n');
-        std::string receivedRaw(reinterpret_cast<const char *>(receivedData.data().data()), zeroLocation);
-        receivedData.consume(zeroLocation + 1);
-
-        // async_read automatically deals with over-abundance of buffer data
-
-        LOG_INFO << "Received message: " << receivedRaw;
-    } else {
-        LOG_ERROR << error;
-    }
-
-    boost::asio::async_read_until(*serial, receivedData, '\n', dataReception);
-}
-
-void dataAcquisition() {
-    while (!stop) {
-        std::this_thread::sleep_for(500ms);
-        LOG_INFO << "Starting data acquisition thread";
-//
-        try {
-            // Serial interface initialisation
-            io = std::make_unique<boost::asio::io_service>();
-            serial = std::make_unique<boost::asio::serial_port>(*io, port);
-            serial->set_option(boost::asio::serial_port_base::baud_rate(1000000));
-
-            boost::asio::streambuf buf;
-
-            LOG_INFO << "Serial connection successful";
-
-            if (popupOpen && ImguiStarted) {
-                // Close the popup
-                popupOpen = false;
-            }
-
-            boost::asio::async_read_until(*serial, receivedData, '\n', dataReception);
-            io->run();
-        } catch (boost::system::system_error &e) {
-            LOG_FATAL << "Unable to open interface " << port << ": " << e.what();
-            if (!popupOpen && ImguiStarted) {
-                popupOpen = true;
-                ImGui::OpenPopup("Connection");
-            }
-        } catch (...) {
-            std::string exception = typeid(std::current_exception()).name();
-            LOG_FATAL << "Unhandled exception in data acquisition thread: " << exception;
-        }
-    }
-}
 
 #pragma clang diagnostic pop
 
@@ -124,13 +61,15 @@ int main(int argc, char *argv[]) {
                   << std::endl;
         return 5;
     }
-    port = argv[1];
+
 
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     plog::init(plog::verbose, &consoleAppender);
     LOG_INFO << "Hello world!";
 
-    std::thread dataThread(dataAcquisition);
+    serialHandler = std::make_unique<SerialHandler>();
+    serialHandler->port = argv[1];
+    std::thread dataThread(&SerialHandler::thread, &*serialHandler);
 
     // Setup window
     glfwSetErrorCallback(error_callback);
@@ -199,7 +138,7 @@ int main(int argc, char *argv[]) {
             if (ImGui::BeginPopupModal("Connection", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
                 ImGui::Text("Error in communication with AcubeSAT ground station.");
                 ImGui::Separator();
-                ImGui::Text("Please connect the receiver (port %s).", port.c_str());
+                ImGui::Text("Please connect the receiver (port %s).", "/");
 
                 //static int dummy_i = 0;
                 //ImGui::Combo("Combo", &dummy_i, "Delete\0Delete harder\0");
@@ -218,7 +157,7 @@ int main(int argc, char *argv[]) {
             ImGui::Begin("SpaceDot CubeSAT");
 
             if (ImGui::Button("!!")) {
-                boost::asio::async_write(*serial, boost::asio::buffer("what\n", 5), txHandler);
+                serialHandler->write("what");
             }
             ImGui::SameLine();
 
@@ -281,8 +220,7 @@ int main(int argc, char *argv[]) {
 
     // Stop the acquisition thread
 //    LOG_DEBUG << "Stopping threads...";
-    stop = true;
-    io->stop();
+    serialHandler->stop();
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

@@ -58,9 +58,5 @@ void updateParameters() {
     }
 
     std::string serialCommand = ss.str();
-
-    LOG_DEBUG << serialCommand;
-
-    // Send the serial command
-    boost::asio::async_write(*serial, boost::asio::buffer(serialCommand.c_str(), serialCommand.size()), txHandler);
+    serialHandler->write(serialCommand);
 }
