@@ -144,7 +144,7 @@ int main(void)
 #pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
-      log_error("Hello %s", "world");
+      log_info("Hello %s", "world");
       HAL_Delay(1000);
     /* USER CODE END WHILE */
 

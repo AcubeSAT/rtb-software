@@ -24,6 +24,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <log.h>
+#include <stdlib.h>
+#include <memory.h>
 
 /* USER CODE END Includes */
 
@@ -34,7 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define COMMAND_QUEUE_SIZE 16
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,8 +46,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-uint8_t cool_buffer[90000] = {'\0'};
-uint32_t cool_counter = 0;
+char* command_queue[COMMAND_QUEUE_SIZE];
+uint32_t command_queue_read;
+uint32_t command_queue_write;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -174,19 +177,24 @@ void DebugMon_Handler(void)
 void PendSV_Handler(void)
 {
   /* USER CODE BEGIN PendSV_IRQn 0 */
-  // Immediately grab values to transmit
-//  uint32_t uart_size_clone = uart_size;
-//  uint32_t uart_current_clone = uart_current;
+  // Handle UART RX queue
+  while (command_queue_write - command_queue_read > 0) {
+      uint32_t command_queue_mod = (command_queue_read++) % COMMAND_QUEUE_SIZE;
+      uart_command_received(command_queue[command_queue_mod], strlen(command_queue[command_queue_mod]));
+      free(command_queue[command_queue_mod]);
+  }
+  // Handle UART TX queue
   while (uart_write - uart_read > 0) {
       volatile uint32_t uart_write_clone = uart_write; // Get value once, explicitly, to ease atomic operations
       uint32_t bytes_to_read = uart_write_clone - uart_read;
 
       for (int i = 0; i < bytes_to_read; i++) {
-          /* Wait for TXE flag to be raised */
-            while (!LL_LPUART_IsActiveFlag_TXE_TXFNF(LPUART1)) {}
+          // Wait until the UART can take more data to transmit
+          while (!LL_LPUART_IsActiveFlag_TXE_TXFNF(LPUART1)) {}
           LL_LPUART_TransmitData8(LPUART1, uart_buffer[(uart_read + i) % UART_BUFFER_MAX]);
       }
 
+      // Wait until all data has been transmitted
       while (!LL_LPUART_IsActiveFlag_TC(LPUART1)) {}
 
 
@@ -266,8 +274,14 @@ void LPUART1_IRQHandler(void)
       // Perform an explicit copy, since every read from the RDR gets a new byte from the FIFO
       uint8_t data = LPUART1->RDR;
       if (data == '\n' || data == '\r') {
-          // New command received! Make sure to handle it
-          uart_command_received(buffer, current_point);
+          // New command received! Add it to the queue
+          char * copied_command = malloc(current_point + 1);
+          memcpy(copied_command, buffer, current_point);
+          copied_command[current_point] = '\0'; // Add null byte so we can call strlen() later
+          command_queue[(command_queue_write++) % COMMAND_QUEUE_SIZE] = copied_command;
+
+          // Notify the PendSV interrupt handler that there are new items in the queue
+          SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 
           // Reset the received buffer
           current_point = 0;
@@ -293,8 +307,6 @@ void LPUART1_IRQHandler(void)
   }
   /* USER CODE END LPUART1_IRQn 0 */
   /* USER CODE BEGIN LPUART1_IRQn 1 */
-    __NOP();
-
   /* USER CODE END LPUART1_IRQn 1 */
 }
 
