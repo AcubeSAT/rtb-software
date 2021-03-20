@@ -7,6 +7,11 @@
 
 class Latchups {
     std::atomic_int latchupCounter = 0;
+
+    int newLatchupCounter = 0;
+
+    void setPopup();
+    void resetPopup();
 public:
     std::mutex timeLogMutex;
     std::vector<std::string> timeLog;

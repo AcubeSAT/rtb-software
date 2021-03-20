@@ -10,5 +10,6 @@ extern std::unique_ptr<SerialHandler> serialHandler;
 extern Latchups latchups;
 
 extern ImFont* largeFont;
+extern ImFont* veryLargeFont;
 
 #endif //RADIATIONINTERFACE_MAIN_H

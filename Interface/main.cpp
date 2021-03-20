@@ -45,6 +45,7 @@ bool ImguiStarted = false;
 std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
 ImFont * largeFont;
+ImFont * veryLargeFont;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
@@ -110,6 +111,7 @@ int main(int argc, char *argv[]) {
 
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
     largeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f);
+    veryLargeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 64.0f);
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 22.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -167,13 +169,7 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(20, 190), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 250), ImGuiCond_Appearing);
-            ImGui::Begin("Single Event Latchups");
-            latchups.window();
-            ImGui::End();
-
-            ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 295), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_Appearing);
             ImGui::Begin("Parameters");
             parameterWindow();
             ImGui::End();
@@ -188,6 +184,12 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
             ImGui::Begin("Experiments");
             Experiment::window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(900, 20), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(300, 645), ImGuiCond_Appearing);
+            ImGui::Begin("Single Event Latchups");
+            latchups.window();
             ImGui::End();
 
             // Rendering
