@@ -1,42 +1,49 @@
 #include <imgui.h>
+#include <functional>
 #include "Experiment.h"
 
-void experimentWindow() {
-    const char* items[] = {
-            "CAN transceivers",
-            "CAN transceivers silent",
-            "MRAM static",
-            "MRAM dynamic",
-            "MRAM check 0",
-            "NAND Flash",
-            "N-MOSFET",
-            "P-MOSFET",
-            "555 timer",
-            "NOR gate",
-            "S-R latch",
-            "Op-Amp",
-            "Shift Register",
-    };
-    static int item_current_idx = 0; // Here we store our selection data as an index.
+std::string loremIpsum = "Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here...";
+
+std::vector<Experiment> Experiment::experiments = {
+        Experiment("CAN transceivers", "An awesome CAN transceiver check"),
+        Experiment("CAN transceivers silent", loremIpsum),
+        Experiment("MRAM static", loremIpsum),
+        Experiment("MRAM dynamic", loremIpsum),
+        Experiment("MRAM check 0", loremIpsum),
+        Experiment("NAND Flash", loremIpsum),
+        Experiment("N-MOSFET", loremIpsum),
+        Experiment("P-MOSFET", loremIpsum),
+        Experiment("555 timer", loremIpsum),
+        Experiment("NOR gate", loremIpsum),
+        Experiment("S-R latch", loremIpsum),
+        Experiment("Op-Amp", loremIpsum),
+        Experiment("Shift Register", loremIpsum),
+};
+
+void Experiment::window() {
+    static int currentExperimentId = 0;
+    static auto currentExperiment = std::ref(experiments[0]);
 
     // Custom size: use all width, 5 items tall
     if (ImGui::BeginListBox("Experiments", ImVec2(-FLT_MIN, 10 * ImGui::GetTextLineHeightWithSpacing())))
     {
-        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+        for (int n = 0; n < experiments.size(); n++)
         {
-            const bool is_selected = (item_current_idx == n);
-            if (ImGui::Selectable(items[n], is_selected))
-                item_current_idx = n;
+            const bool is_selected = (currentExperimentId == n);
+            if (ImGui::Selectable(experiments[n].name.c_str(), is_selected)) {
+                currentExperimentId = n;
+                currentExperiment = std::ref(experiments[n]);
+            }
 
-            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-            if (is_selected)
+            if (is_selected) {
                 ImGui::SetItemDefaultFocus();
+            }
         }
         ImGui::EndListBox();
     }
 
     ImGui::Spacing();
-    ImGui::TextWrapped("Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here...");
+    ImGui::TextWrapped("%s", currentExperiment.get().description.c_str());
     ImGui::Spacing();
 
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
@@ -51,6 +58,4 @@ void experimentWindow() {
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0 / 7.0f, 0.8f, 0.8f));
     ImGui::Button("STOP", ImVec2(ImGui::GetContentRegionAvail().x, 100.0f));
     ImGui::PopStyleColor(3);
-
-
 }

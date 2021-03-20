@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowPos(ImVec2(450, 90), ImGuiCond_Appearing);
             ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
             ImGui::Begin("Experiments");
-            experimentWindow();
+            Experiment::window();
             ImGui::End();
 
             // Rendering
