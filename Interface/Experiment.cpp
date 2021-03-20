@@ -68,7 +68,7 @@ void Experiment::window() {
     ImGui::Spacing();
     ImGui::TextWrapped("%s", currentExperiment.get().description.c_str());
 
-    if (currentExperiment.get().status == Started) {
+    if (currentExperiment.get().status != Idle) {
         auto time = currentExperiment.get().duration();
 
         ImGui::Separator();

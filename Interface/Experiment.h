@@ -15,11 +15,13 @@ class Experiment {
         Idle,
         Started,
         Stopped
-    } status;
+    } status = Idle;
 
     std::chrono::duration<double> duration() {
         using namespace std::chrono;
-        if (startTime.has_value()) {
+        if (status == Stopped && stopTime.has_value()) {
+            return stopTime.value() - startTime.value();
+        } else if (startTime.has_value()) {
             auto now = std::chrono::steady_clock::now();
             return now - startTime.value();
         } else {
@@ -42,6 +44,7 @@ public:
 
     void stop() {
         status = Stopped;
+        stopTime = std::chrono::steady_clock::now();
     }
 };
 
