@@ -42,7 +42,7 @@ bool popupOpen = false;
 bool ImguiStarted = false;
 
 std::unique_ptr<SerialHandler> serialHandler;
-std::shared_ptr<ImFont> largeFont;
+ImFont * largeFont;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
     directory.erase(directory.end() - 9, directory.end());
 
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
-    largeFont.reset(imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f));
+    largeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f);
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 22.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
 
     auto future = std::async(std::launch::async, &std::thread::join, &dataThread);
     if (future.wait_for(std::chrono::seconds(1)) == std::future_status::timeout) {
-//        LOG_EMERGENCY << "Could not kill data acquisition thread, terminating with force";
+        LOG_ERROR << "Could not kill data acquisition thread, terminating with force";
         std::terminate();
     }
 

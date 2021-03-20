@@ -5,6 +5,6 @@
 
 extern std::unique_ptr<SerialHandler> serialHandler;
 
-extern std::shared_ptr<ImFont> largeFont;
+extern ImFont* largeFont;
 
 #endif //RADIATIONINTERFACE_MAIN_H

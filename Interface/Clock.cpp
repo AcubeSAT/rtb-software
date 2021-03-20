@@ -19,7 +19,7 @@ std::string currentDatetime()
 void clockWindow() {
     std::string text = currentDatetime();
 
-    ImGui::PushFont(&*largeFont);
+    ImGui::PushFont(largeFont);
     // Place text to the middle
     ImGui::SetCursorPosX(
             ImGui::GetCursorPosX() + (ImGui::GetColumnWidth() - (ImGui::CalcTextSize(text.c_str()).x)
