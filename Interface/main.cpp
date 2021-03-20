@@ -37,15 +37,8 @@ static void error_callback(int error, const char *description) {
 }
 
 
-
-bool dataSending = false;
-bool dataSent = false;
-bool dataReceived = false;
-bool dataError = false;
-
 bool popupOpen = false;
 bool ImguiStarted = false;
-bool stop = false;
 
 std::unique_ptr<SerialHandler> serialHandler;
 
@@ -156,33 +149,7 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_Always);
             ImGui::Begin("SpaceDot CubeSAT");
 
-            if (ImGui::Button("!!")) {
-                serialHandler->write("what");
-            }
-            ImGui::SameLine();
-
             ImGui::Checkbox("Test", &show_test_window);
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.1f, 0.9f, 0.05f, 1.0f}));
-            ImGui::Checkbox("", &dataSending);
-            ImGui::PopStyleColor();
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.1f, 0.9f, 0.05f, 1.0f}));
-            ImGui::Checkbox("", &dataReceived);
-            ImGui::PopStyleColor();
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.9f, 0.3f, 0.05f, 1.0f}));
-            ImGui::Checkbox("Data", &dataSent);
-            ImGui::PopStyleColor();
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.9f, 0.4f, 0.05f, 1.0f}));
-            ImGui::Checkbox("CRC", &dataError);
-            ImGui::PopStyleColor();
-
-
-            // Reset indicators so that they light up just for one frame
-            dataReceived = dataSent = false;
-            dataError = false;
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                         ImGui::GetIO().Framerate);
@@ -195,6 +162,12 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(450, 20), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_Appearing);
+            ImGui::Begin("Serial Connection");
+            serialHandler->window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(450, 90), ImGuiCond_Appearing);
             ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
             ImGui::Begin("Experiments");
             experimentWindow();

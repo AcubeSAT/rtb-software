@@ -10,9 +10,17 @@ private:
     bool popupOpen = false;
 
     void receiveHandler(const boost::system::error_code& error, std::size_t size);
-    void transmitHandler(const boost::system::error_code& error, std::size_t size) {}
+    void transmitHandler(const boost::system::error_code& error, std::size_t size) {
+        dataSent = true;
+        dataSending = false;
+    }
 
-    std::ostringstream time();
+    static std::ostringstream time();
+
+    bool dataSending = false;
+    bool dataSent = false;
+    bool dataReceived = false;
+    bool dataError = false;
 public:
     std::unique_ptr<boost::asio::io_service> io;
     std::unique_ptr<boost::asio::serial_port> serial;
@@ -34,6 +42,11 @@ public:
      * Commands the main ASIO IO worker to stop working
      */
     void stop();
+
+    /**
+     * Designs the ImGui window for the serial stuff
+     */
+     void window();
 };
 
 

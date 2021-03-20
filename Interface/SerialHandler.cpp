@@ -19,6 +19,7 @@ using namespace std::chrono;
 void SerialHandler::receiveHandler(const boost::system::error_code &error, std::size_t size) {
     if (!error) {
         LOG_VERBOSE << "Read " << size << " bytes of data";
+        dataReceived = true;
 
         std::string receivedAll(reinterpret_cast<const char *>(receivedData.data().data()), size);
 
@@ -32,6 +33,8 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
         std::cout << time().str() << receivedRaw << std::endl;
     } else {
         LOG_ERROR << error;
+        dataError = true;
+        std::this_thread::sleep_for(500ms);
     }
 
     boost::asio::async_read_until(*serial, receivedData, '\n', [this](const boost::system::error_code& error, std::size_t size) { receiveHandler(error, size); });
@@ -40,7 +43,7 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
 void SerialHandler::thread() {
     std::this_thread::sleep_for(500ms);
     LOG_INFO << "Starting data acquisition thread";
-//
+
     try {
         // Serial interface initialisation
         io = std::make_unique<boost::asio::io_service>();
@@ -55,6 +58,7 @@ void SerialHandler::thread() {
         io->run();
     } catch (boost::system::system_error &e) {
         LOG_FATAL << "Unable to open interface " << port << ": " << e.what();
+        dataError = true;
 //        if (!popupOpen && ImguiStarted) {
 //            popupOpen = true;
 //            ImGui::OpenPopup("Connection");
@@ -62,6 +66,7 @@ void SerialHandler::thread() {
     } catch (...) {
         std::string exception = typeid(std::current_exception()).name();
         LOG_FATAL << "Unhandled exception in data acquisition thread: " << exception;
+        dataError = true;
     }
 }
 
@@ -70,6 +75,7 @@ void SerialHandler::stop() {
 }
 
 void SerialHandler::write(std::string message) {
+    dataSending = true;
     boost::asio::async_write(*serial, boost::asio::buffer(message, message.size()), [this](const boost::system::error_code& error, std::size_t size) { transmitHandler(error, size); });
 }
 
@@ -91,4 +97,31 @@ std::ostringstream SerialHandler::time() {
     ss << std::setfill(PLOG_NSTR(' '));
 
     return ss;
+}
+
+void SerialHandler::window() {
+    if (ImGui::Button("!!")) {
+        write("what");
+    }
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.1f, 0.9f, 0.05f, 1.0f}));
+    ImGui::RadioButton("RX", dataReceived);
+    ImGui::PopStyleColor();
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.1f, 0.9f, 0.05f, 1.0f}));
+    ImGui::RadioButton("", dataSent);
+    ImGui::PopStyleColor();
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.9f, 0.3f, 0.05f, 1.0f}));
+    ImGui::RadioButton("TX", dataSending);
+    ImGui::PopStyleColor();
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.9f, 0.4f, 0.05f, 1.0f}));
+    ImGui::RadioButton("Error", dataError);
+    ImGui::PopStyleColor();
+
+
+    // Reset indicators so that they light up just for one frame
+    dataReceived = dataSent = false;
+    dataError = false;
 }
