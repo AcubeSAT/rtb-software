@@ -30,6 +30,30 @@ std::stringstream currentDatetimeMilliseconds()
     return ss;
 }
 
+template<typename T>
+std::stringstream formatDuration(std::chrono::duration<T> ns)
+{
+    std::stringstream ss;
+
+    using namespace std;
+    using namespace std::chrono;
+    typedef duration<int, ratio<86400>> days;
+    char fill = ss.fill();
+    ss.fill('0');
+    auto h = duration_cast<hours>(ns);
+    ns -= h;
+    auto m = duration_cast<minutes>(ns);
+    ns -= m;
+    auto s = duration_cast<milliseconds>(ns);
+    ss << setw(2) << h.count() << ":"
+       << setw(2) << m.count() << ":"
+       << setw(4) << fixed << setprecision(1) << (s.count() / 1000.0f);
+    ss.fill(fill);
+    return ss;
+};
+
+template std::stringstream formatDuration<double>(std::chrono::duration<double> ns);
+
 void clockWindow() {
     std::string text = currentDatetime().str();
 
