@@ -43,10 +43,11 @@ void Latchups::window() {
     ImGui::Text("Latchup time log");
     ImGui::Spacing();
     static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-    if (ImGui::BeginTable("table_latchup_timelog", 2, flags)) {
+    if (ImGui::BeginTable("table_latchup_timelog", 3, flags)) {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
-        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 100);
+        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 70);
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("MCU Time", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
@@ -59,7 +60,9 @@ void Latchups::window() {
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("%d", index + 1);
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text("%s", timeLog[index].c_str());
+                ImGui::Text("%s", timeLog[index].computerTime.c_str());
+                ImGui::TableSetColumnIndex(2);
+                ImGui::Text("%s", timeLog[index].mcuTime.c_str());
             }
         }
         ImGui::EndTable();
@@ -74,7 +77,10 @@ void Latchups::logLatchup() {
 
     {
         const std::lock_guard lock(timeLogMutex);
-        timeLog.push_back(currentDatetimeMilliseconds().str());
+        timeLog.push_back(LatchupEvent {
+            currentDatetimeMilliseconds().str(),
+            formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str()
+        });
     }
 }
 

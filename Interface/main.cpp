@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(900, 20), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(300, 645), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
             ImGui::Begin("Single Event Latchups");
             latchups.window();
             ImGui::End();

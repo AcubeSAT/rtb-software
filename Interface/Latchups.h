@@ -13,8 +13,13 @@ class Latchups {
     void setPopup();
     void resetPopup();
 public:
+    struct LatchupEvent {
+        std::string computerTime;
+        std::string mcuTime;
+    };
+
     std::mutex timeLogMutex;
-    std::vector<std::string> timeLog;
+    std::vector<LatchupEvent> timeLog;
 
     void window();
 
