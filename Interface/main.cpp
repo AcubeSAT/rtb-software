@@ -163,13 +163,13 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 110), ImGuiCond_Appearing);
             ImGui::Begin("Time");
             clockWindow();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 190), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(20, 200), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(400, 535), ImGuiCond_Appearing);
             ImGui::Begin("Parameters");
             parameterWindow();
             ImGui::End();

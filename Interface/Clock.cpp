@@ -6,6 +6,8 @@
 #include "Clock.h"
 #include "main.h"
 
+std::atomic<std::uint32_t> microcontrollerClock = 0;
+
 std::stringstream currentDatetime()
 {
     auto now = std::chrono::system_clock::now();
@@ -30,8 +32,8 @@ std::stringstream currentDatetimeMilliseconds()
     return ss;
 }
 
-template<typename T>
-std::stringstream formatDuration(std::chrono::duration<T> ns)
+template<typename T, typename R>
+std::stringstream formatDuration(std::chrono::duration<T, R> ns, bool showFraction)
 {
     std::stringstream ss;
 
@@ -46,15 +48,21 @@ std::stringstream formatDuration(std::chrono::duration<T> ns)
     ns -= m;
     auto s = duration_cast<milliseconds>(ns);
     ss << setw(2) << h.count() << ":"
-       << setw(2) << m.count() << ":"
-       << setw(4) << fixed << setprecision(1) << (s.count() / 1000.0f);
+       << setw(2) << m.count() << ":";
+    if (showFraction) {
+        ss << setw(4) << fixed << setprecision(1) << (s.count() / 1000.0f);
+    } else {
+        ss << setw(2) << std::floor(s.count() / 1000);
+    }
     ss.fill(fill);
     return ss;
 };
 
-template std::stringstream formatDuration<double>(std::chrono::duration<double> ns);
+template std::stringstream formatDuration<double>(std::chrono::duration<double> ns, bool showFraction);
 
 void clockWindow() {
+    using namespace std::chrono;
+
     std::string text = currentDatetime().str();
 
     ImGui::PushFont(largeFont);
@@ -65,4 +73,7 @@ void clockWindow() {
             );
     ImGui::Text("%s", text.c_str());
     ImGui::PopFont();
+
+    ImGui::Spacing();
+    ImGui::Text("MCU clock: %s", formatDuration(milliseconds(microcontrollerClock.load()), false).str().c_str());
 }

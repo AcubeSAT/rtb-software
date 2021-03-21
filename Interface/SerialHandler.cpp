@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <chrono>
 #include "main.h"
+#include "Clock.h"
 
 using namespace std::chrono_literals;
 using namespace plog;
@@ -40,6 +41,8 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
 
                 if (receivedRaw[1] == 'l') {
                     latchups.logLatchup();
+                } else if (receivedRaw[1] == 't') {
+                    microcontrollerClock = std::stoi(receivedRaw.substr(2));
                 } else {
                     LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
                 }

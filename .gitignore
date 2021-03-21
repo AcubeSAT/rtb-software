@@ -58,6 +58,7 @@ Inc/version.h
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/**/.name
 
 # Generated files
 .idea/**/contentModel.xml
