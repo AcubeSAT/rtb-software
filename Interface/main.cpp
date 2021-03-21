@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
 
             ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_Appearing);
             ImGui::SetNextWindowSize(ImVec2(400, 110), ImGuiCond_Appearing);
-            ImGui::Begin("Time");
+            ImGui::Begin("Local Time");
             clockWindow();
             ImGui::End();
 
