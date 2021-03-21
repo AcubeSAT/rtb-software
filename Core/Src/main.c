@@ -48,6 +48,8 @@ DAC_HandleTypeDef hdac1;
 
 UART_HandleTypeDef huart3;
 
+TIM_HandleTypeDef htim17;
+
 /* USER CODE BEGIN PV */
 uint8_t uart_buffer[UART_BUFFER_MAX];
 atomic_uint uart_write = 0;
@@ -62,6 +64,7 @@ static void MX_DMA_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_TIM17_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -108,6 +111,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     puts(UART_CONTROL "l\r\n");
     log_warn("SEL triggered!");
 }
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim == &htim17) {
+        // Print time as a control character on every timer update
+        printf(UART_CONTROL "t%ld\r\n", HAL_GetTick());
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -142,6 +152,7 @@ int main(void)
   MX_DAC1_Init();
   MX_LPUART1_UART_Init();
   MX_USART3_UART_Init();
+  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -406,6 +417,38 @@ static void MX_USART3_UART_Init(void)
   /* USER CODE BEGIN USART3_Init 2 */
 
   /* USER CODE END USART3_Init 2 */
+
+}
+
+/**
+  * @brief TIM17 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM17_Init(void)
+{
+
+  /* USER CODE BEGIN TIM17_Init 0 */
+
+  /* USER CODE END TIM17_Init 0 */
+
+  /* USER CODE BEGIN TIM17_Init 1 */
+
+  /* USER CODE END TIM17_Init 1 */
+  htim17.Instance = TIM17;
+  htim17.Init.Prescaler = 1200;
+  htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim17.Init.Period = 1000;
+  htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim17.Init.RepetitionCounter = 100;
+  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM17_Init 2 */
+  HAL_TIM_Base_Start_IT(&htim17);
+  /* USER CODE END TIM17_Init 2 */
 
 }
 
