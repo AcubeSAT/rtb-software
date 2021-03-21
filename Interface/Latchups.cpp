@@ -58,7 +58,7 @@ void Latchups::window() {
                 int index = timeLog.size() - row - 1;
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::Text("%d", index + 1);
+                ImGui::Selectable(std::to_string(index + 1).c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
                 ImGui::TableSetColumnIndex(1);
                 ImGui::Text("%s", timeLog[index].computerTime.c_str());
                 ImGui::TableSetColumnIndex(2);
