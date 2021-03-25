@@ -4,6 +4,5 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Interface/lib/imgui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Interface/lib/plog" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/lib/Queue" vcs="Git" />
   </component>
 </project>

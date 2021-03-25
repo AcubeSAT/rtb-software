@@ -11,5 +11,6 @@ extern Latchups latchups;
 
 extern ImFont* largeFont;
 extern ImFont* veryLargeFont;
+extern ImFont* logFont;
 
 #endif //RADIATIONINTERFACE_MAIN_H

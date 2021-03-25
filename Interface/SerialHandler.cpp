@@ -20,7 +20,6 @@ using namespace std::chrono;
 
 void SerialHandler::receiveHandler(const boost::system::error_code &error, std::size_t size) {
     if (!error) {
-        LOG_VERBOSE << "Read " << size << " bytes of data";
         dataReceived = true;
 
         std::string receivedAll(reinterpret_cast<const char *>(receivedData.data().data()), size);
@@ -48,6 +47,10 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                 }
             } else {
                 std::cout << time().str() << receivedRaw << std::endl;
+
+                if (log.has_value()) {
+                    log.value().get().addLogEntry(time().str() + receivedRaw);
+                }
             }
         }
     } else {

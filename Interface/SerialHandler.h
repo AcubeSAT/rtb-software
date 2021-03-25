@@ -4,6 +4,8 @@
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_error.hpp>
+#include <optional>
+#include "Log.h"
 
 class SerialHandler {
 private:
@@ -22,7 +24,11 @@ private:
     bool dataSent = false;
     bool dataReceived = false;
     bool dataError = false;
+
+     std::optional<std::reference_wrapper<Log>> log;
 public:
+    explicit SerialHandler(Log &log) : log(log) {};
+
     std::unique_ptr<boost::asio::io_service> io;
     std::unique_ptr<boost::asio::serial_port> serial;
     std::string port;

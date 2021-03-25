@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <plog/Log.h>
 #include "plog/Init.h"
+#include <plog/Appenders/RollingFileAppender.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include "Parameters.h"
@@ -26,6 +27,7 @@
 #include "SerialHandler.h"
 #include "Clock.h"
 #include "Latchups.h"
+#include "Log.h"
 
 const char* glsl_version = "#version 130";
 
@@ -46,6 +48,7 @@ std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
 ImFont * largeFont;
 ImFont * veryLargeFont;
+ImFont * logFont;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
@@ -60,15 +63,20 @@ int main(int argc, char *argv[]) {
         return 5;
     }
 
+    Log hostLog;
+    Log deviceLog;
 
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    plog::init(plog::verbose, &consoleAppender);
+    static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender("NativeEOL.log");
+    static Log::LogAppender windowAppender(hostLog);
+    plog::init(plog::verbose, &consoleAppender)
+        .addAppender(&fileAppender)
+        .addAppender(&windowAppender);
     LOG_INFO << "Hello world!";
 
-    serialHandler = std::make_unique<SerialHandler>();
+    serialHandler = std::make_unique<SerialHandler>(deviceLog);
     serialHandler->port = argv[1];
     std::thread dataThread(&SerialHandler::thread, &*serialHandler);
-
 
     // Setup window
     glfwSetErrorCallback(error_callback);
@@ -88,6 +96,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;
     }
+
+    LOG_ERROR << "Fek";
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -112,7 +122,7 @@ int main(int argc, char *argv[]) {
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
     largeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f);
     veryLargeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 64.0f);
-    imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 22.0f);
+    logFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 15.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
@@ -190,6 +200,18 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
             ImGui::Begin("Single Event Latchups");
             latchups.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(1350, 20), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_Appearing);
+            ImGui::Begin("Host Logs");
+            hostLog.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(1350, 332 + 51), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_Appearing);
+            ImGui::Begin("Device Logs");
+            deviceLog.window();
             ImGui::End();
 
             // Rendering
