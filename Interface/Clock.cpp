@@ -73,6 +73,7 @@ std::stringstream formatDuration(std::chrono::duration<T, R> ns, bool showFracti
 }
 
 template std::stringstream formatDuration<double>(std::chrono::duration<double> ns, bool showFraction);
+template std::stringstream formatDuration<>(std::chrono::steady_clock::duration ns, bool showFraction);
 
 void clockWindow() {
     using namespace std::chrono;

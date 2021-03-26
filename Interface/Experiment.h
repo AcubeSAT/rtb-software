@@ -4,28 +4,31 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <plog/Log.h>
+#include "Clock.h"
+
+using namespace std::chrono_literals;
 
 class Experiment {
     typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
+    typedef std::chrono::steady_clock::duration Duration;
 
+    Duration previousDuration = 0s;
     std::optional<TimePoint> startTime;
     std::optional<TimePoint> stopTime;
 
     enum {
         Idle,
         Started,
-        Stopped
+        Paused
     } status = Idle;
 
-    std::chrono::duration<double> duration() {
-        using namespace std::chrono;
-        if (status == Stopped && stopTime.has_value()) {
-            return stopTime.value() - startTime.value();
-        } else if (startTime.has_value()) {
+    Duration duration() {
+        if (status == Started) {
             auto now = std::chrono::steady_clock::now();
-            return now - startTime.value();
+            return previousDuration + now - startTime.value();
         } else {
-            return 0s;
+            return previousDuration;
         }
     }
 public:
@@ -38,13 +41,48 @@ public:
     static void window();
 
     void start() {
+        if (status == Started) {
+            LOG_ERROR << "The experiment has already started? It cannot be started again.";
+            return;
+        }
+
         status = Started;
         startTime = std::chrono::steady_clock::now();
+
+        LOG_INFO << "Started experiment " << name;
     }
 
     void stop() {
-        status = Stopped;
+        if (status != Started) {
+            LOG_ERROR << "You can't stop an experiment if it's already stopped.";
+            return;
+        }
+
+        status = Paused;
         stopTime = std::chrono::steady_clock::now();
+
+        auto duration = stopTime.value() - startTime.value();
+        previousDuration += duration;
+
+        LOG_INFO << "Ended experiment " << name << " at " << formatDuration(duration).str();
+    }
+
+    void reset() {
+        if (status == Started) {
+            LOG_ERROR << "Please stop this experiment before resetting it";
+            return;
+        }
+
+        status = Idle;
+        previousDuration = 0s;
+        startTime.reset();
+        stopTime.reset();
+
+        LOG_INFO << "Reset experiment " << name << " at total " << formatDuration(previousDuration).str();
+    }
+
+    auto getStatus() {
+        return status;
     }
 };
 
