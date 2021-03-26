@@ -11,7 +11,7 @@ std::atomic<std::uint32_t> microcontrollerClock = 0;
 std::stringstream getLogFileName(const std::string& extra) {
     std::stringstream ss;
 
-    ss << "Radiation." << currentDatetime().rdbuf();
+    ss << "log/Radiation." << currentDatetime("%FT%T").rdbuf();
 
     if (!extra.empty()) {
         ss << "." << extra;
@@ -22,13 +22,13 @@ std::stringstream getLogFileName(const std::string& extra) {
     return ss;
 };
 
-std::stringstream currentDatetime()
+std::stringstream currentDatetime(const std::string& format)
 {
     auto now = std::chrono::system_clock::now();
     auto in_time_t = std::chrono::system_clock::to_time_t(now);
 
     std::stringstream ss;
-    ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
+    ss << std::put_time(std::localtime(&in_time_t), format.c_str());
     return ss;
 }
 

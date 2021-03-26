@@ -21,6 +21,7 @@
 #include <plog/Appenders/RollingFileAppender.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
+#include <filesystem>
 #include "Parameters.h"
 #include "Experiment.h"
 #include "main.h"
@@ -79,6 +80,7 @@ int main(int argc, char *argv[]) {
         Log::LogLevel{"FATAL", 5},
     });
 
+    std::filesystem::create_directory("log");
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender(getLogFileName("host").str().c_str());
     static Log::LogAppender windowAppender(hostLog);
