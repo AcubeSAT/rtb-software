@@ -22,6 +22,7 @@
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include <filesystem>
+#include <implot/implot.h>
 #include "Parameters.h"
 #include "Experiment.h"
 #include "main.h"
@@ -29,6 +30,7 @@
 #include "Clock.h"
 #include "Latchups.h"
 #include "Log.h"
+#include "Measurement.h"
 
 const char* glsl_version = "#version 130";
 
@@ -115,6 +117,7 @@ int main(int argc, char *argv[]) {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO& imguiIo = ImGui::GetIO(); (void)imguiIo;
 //    imguiIo.FontGlobalScale = 1.3;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -252,6 +255,7 @@ int main(int argc, char *argv[]) {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
