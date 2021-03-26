@@ -3,6 +3,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/system/system_error.hpp>
 #include <thread>
 #include <boost/asio.hpp>
@@ -14,6 +15,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <chrono>
+#include <regex>
 #include "main.h"
 #include "Clock.h"
 
@@ -54,14 +56,19 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                 if (log.has_value()) {
                     std::istringstream ss;
                     std::vector<std::string> words;
-                    boost::split(words, receivedRaw, boost::is_any_of("\t "));
+
+                    std::regex ansiControls("\033\\[(.*?)m");
+                    std::string receivedWithoutAnsi = std::regex_replace(receivedRaw, ansiControls, "");
+                    boost::algorithm::trim(receivedWithoutAnsi);
+
+                    boost::algorithm::split(words, receivedWithoutAnsi, boost::is_any_of("\t "));
                     int severity = -1;
 
                     if (words.size() > 1) {
                         std::string entryLogLevel = words[1];
                         // Search for the severity in one of the predefined log levels
                         for (auto &it : log->get().getLogLevels()) {
-                            if (boost::algorithm::ends_with(entryLogLevel, it.name)) { // Takes care of ANSI codes
+                            if (entryLogLevel == it.name) { // Takes care of ANSI codes
                                 severity = it.severity;
                                 break;
                             }
