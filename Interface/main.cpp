@@ -62,8 +62,22 @@ int main(int argc, char *argv[]) {
         return 5;
     }
 
-    Log hostLog;
-    Log deviceLog;
+    Log hostLog({
+        Log::LogLevel{"verbose", -6},
+        Log::LogLevel{"debug", -5,},
+        Log::LogLevel{"info", -4,},
+        Log::LogLevel{"warning", -3,},
+        Log::LogLevel{"error", -2,},
+        Log::LogLevel{"fatal", -1,},
+    });
+    Log deviceLog({
+        Log::LogLevel{"TRACE", 0},
+        Log::LogLevel{"DEBUG", 1},
+        Log::LogLevel{"INFO", 2},
+        Log::LogLevel{"WARN", 3},
+        Log::LogLevel{"ERROR", 4},
+        Log::LogLevel{"FATAL", 5},
+    });
 
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender(getLogFileName("host").str().c_str());
@@ -71,7 +85,7 @@ int main(int argc, char *argv[]) {
     plog::init(plog::verbose, &consoleAppender)
         .addAppender(&fileAppender)
         .addAppender(&windowAppender);
-    LOG_INFO << "Hello world!";
+    LOG_INFO << "RadiationInterface started";
 
     serialHandler = std::make_unique<SerialHandler>(deviceLog);
     serialHandler->port = argv[1];
@@ -95,8 +109,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;
     }
-
-    LOG_ERROR << "Fek";
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

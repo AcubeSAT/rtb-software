@@ -5,15 +5,25 @@
 
 void Log::window() {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-    filter.Draw(R"(Filter ("incl,-excl") ("error"))", 100);
+    filter.Draw("filter", 100);
 
-    if (ImGui::GetContentRegionAvail().x > 500) {
-        ImGui::SameLine(0, 100);
+    if (ImGui::GetContentRegionAvail().x > 800) {
+        ImGui::SameLine(0, 40);
     } else {
         ImGui::SameLine();
     }
 
     ImGui::Checkbox("autoscroll", &scrollToBottom);
+
+    if (ImGui::GetContentRegionAvail().x > 800) {
+        ImGui::SameLine(0, 40);
+        ImGui::Text("Log Level:");
+    }
+
+    for (auto &it : logLevels) {
+        ImGui::SameLine();
+        ImGui::RadioButton(it.name.c_str(), &minSeverity, it.severity);
+    }
 
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     ImGui::PopStyleVar();
@@ -33,7 +43,10 @@ void Log::window() {
         const std::lock_guard<std::mutex> lock(itemMutex);
 
         for (auto &it : items) {
-            const char* item = it.c_str();
+            if (it.first < minSeverity) {
+                continue;
+            }
+            const char* item = it.second.c_str();
             if (!filter.PassFilter(item)) {
                 continue;
             }
@@ -53,23 +66,23 @@ void Log::window() {
     ImGui::Separator();
 }
 
-void Log::addLogEntry(const std::string & entry) {
+void Log::addLogEntry(const std::string & entry, int severity) {
     const std::lock_guard<std::mutex> lock(itemMutex);
 
-    items.push_back(entry);
+    items.push_back(std::make_pair(severity, entry));
 }
 
 
 void Log::LogAppender::write(const plog::Record &record) {
     plog::util::nstring str = plog::TxtFormatter::format(record);
 
-    log.addLogEntry(getColor(record.getSeverity()) + str);
+    log.addLogEntry(getColor(record.getSeverity()) + str, - static_cast<int>(record.getSeverity()));
 }
 
 std::string Log::LogAppender::getColor(plog::Severity severity) {
     switch (severity) {
         case plog::fatal:
-            return "\x1B[37m\x1B[41m"; // white on red background
+            return "\x1B[31m"; // white on red background
             break;
 
         case plog::error:

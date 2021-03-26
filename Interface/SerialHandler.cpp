@@ -1,5 +1,8 @@
 #include <boost/system/error_code.hpp>
 #include <plog/Log.h>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/system/system_error.hpp>
 #include <thread>
 #include <boost/asio.hpp>
@@ -49,7 +52,28 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                 std::cout << time().str() << receivedRaw << std::endl;
 
                 if (log.has_value()) {
-                    log.value().get().addLogEntry(time().str() + receivedRaw);
+                    std::istringstream ss;
+                    std::vector<std::string> words;
+                    boost::split(words, receivedRaw, boost::is_any_of("\t "));
+                    int severity = -1;
+
+                    if (words.size() > 1) {
+                        std::string entryLogLevel = words[1];
+                        // Search for the severity in one of the predefined log levels
+                        for (auto &it : log->get().getLogLevels()) {
+                            if (boost::algorithm::ends_with(entryLogLevel, it.name)) { // Takes care of ANSI codes
+                                severity = it.severity;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (severity < 0) {
+                        LOG_DEBUG << "Could not parse device log message";
+                        severity = 4;
+                    }
+
+                    log.value().get().addLogEntry(time().str() + receivedRaw, severity);
                 }
 
                 if (file.has_value()) {
@@ -86,10 +110,9 @@ void SerialHandler::thread() {
     } catch (boost::system::system_error &e) {
         LOG_FATAL << "Unable to open interface " << port << ": " << e.what();
         dataError = true;
-//        if (!popupOpen && ImguiStarted) {
-//            popupOpen = true;
-//            ImGui::OpenPopup("Connection");
-//        }
+    } catch (std::exception &e) {
+        LOG_FATAL << "Unhandled exception in data acquisition thread: " << e.what();
+        dataError = true;
     } catch (...) {
         std::string exception = typeid(std::current_exception()).name();
         LOG_FATAL << "Unhandled exception in data acquisition thread: " << exception;
