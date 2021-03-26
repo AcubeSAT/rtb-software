@@ -5,7 +5,9 @@
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_error.hpp>
 #include <optional>
+#include <fstream>
 #include "Log.h"
+#include "Clock.h"
 
 class SerialHandler {
 private:
@@ -26,8 +28,12 @@ private:
     bool dataError = false;
 
      std::optional<std::reference_wrapper<Log>> log;
+     std::optional<std::ofstream> file;
 public:
-    explicit SerialHandler(Log &log) : log(log) {};
+    explicit SerialHandler(Log &log) : log(log) {
+        file.emplace();
+        file->open(getLogFileName("device").str(), std::ios::out | std::ios::app | std::ios::binary);
+    };
 
     std::unique_ptr<boost::asio::io_service> io;
     std::unique_ptr<boost::asio::serial_port> serial;

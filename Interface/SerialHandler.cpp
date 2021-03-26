@@ -51,6 +51,11 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                 if (log.has_value()) {
                     log.value().get().addLogEntry(time().str() + receivedRaw);
                 }
+
+                if (file.has_value()) {
+                    file.value() << time().str() << receivedRaw << std::endl;
+                    file->flush();
+                }
             }
         }
     } else {

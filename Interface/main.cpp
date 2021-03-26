@@ -55,7 +55,6 @@ ImFont * logFont;
 
 #pragma clang diagnostic pop
 
-
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         std::cerr << "You have not specified the serial interface to use. Usage: ./RadiationInterface [/dev/ttyACM0]"
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]) {
     Log deviceLog;
 
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender("NativeEOL.log");
+    static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender(getLogFileName("host").str().c_str());
     static Log::LogAppender windowAppender(hostLog);
     plog::init(plog::verbose, &consoleAppender)
         .addAppender(&fileAppender)

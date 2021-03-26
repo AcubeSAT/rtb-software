@@ -8,6 +8,20 @@
 
 std::atomic<std::uint32_t> microcontrollerClock = 0;
 
+std::stringstream getLogFileName(const std::string& extra) {
+    std::stringstream ss;
+
+    ss << "Radiation." << currentDatetime().rdbuf();
+
+    if (!extra.empty()) {
+        ss << "." << extra;
+    }
+
+    ss << ".log";
+
+    return ss;
+};
+
 std::stringstream currentDatetime()
 {
     auto now = std::chrono::system_clock::now();
@@ -56,7 +70,7 @@ std::stringstream formatDuration(std::chrono::duration<T, R> ns, bool showFracti
     }
     ss.fill(fill);
     return ss;
-};
+}
 
 template std::stringstream formatDuration<double>(std::chrono::duration<double> ns, bool showFraction);
 
