@@ -138,6 +138,11 @@ void SerialHandler::stop() {
 }
 
 void SerialHandler::write(std::string message) {
+    if (!serial || !serial->is_open()) {
+        LOG_ERROR << "There is an error with the serial port. Cannot write data.";
+        return;
+    }
+
     dataSending = true;
     boost::asio::async_write(*serial, boost::asio::buffer(message, message.size()), [this](const boost::system::error_code& error, std::size_t size) { transmitHandler(error, size); });
 }
