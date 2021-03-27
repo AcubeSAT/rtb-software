@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <atomic>
+#include <chrono>
 
 extern std::atomic<std::uint32_t> microcontrollerClock;
 

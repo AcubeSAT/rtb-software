@@ -49,6 +49,7 @@ bool ImguiStarted = false;
 
 std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
+Measurement measurements;
 ImFont * largeFont;
 ImFont * veryLargeFont;
 ImFont * logFont;
@@ -228,6 +229,12 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_Appearing);
             ImGui::Begin("Device Logs");
             deviceLog.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(20, 740), ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(imguiIo.DisplaySize.x - 40, 400), ImGuiCond_Appearing);
+            ImGui::Begin("Measurements");
+            measurements.window();
             ImGui::End();
 
             // Rendering

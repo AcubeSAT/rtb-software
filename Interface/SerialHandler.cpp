@@ -43,12 +43,18 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                     return;
                 }
 
-                if (receivedRaw[1] == 'l') {
-                    latchups.logLatchup();
-                } else if (receivedRaw[1] == 't') {
-                    microcontrollerClock = std::stoi(receivedRaw.substr(2));
-                } else {
-                    LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
+                try {
+                    if (receivedRaw[1] == 'l') {
+                        latchups.logLatchup();
+                    } else if (receivedRaw[1] == 't') {
+                        microcontrollerClock = std::stoi(receivedRaw.substr(2));
+                    } else if (receivedRaw[1] == 'm') {
+                        measurements.acquire(0, std::stof(receivedRaw.substr(2)));
+                    } else {
+                        LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
+                    }
+                } catch (std::exception &e) {
+                    LOG_ERROR << "Error decoding message: " << e.what();
                 }
             } else {
                 std::cout << time().str() << receivedRaw << std::endl;

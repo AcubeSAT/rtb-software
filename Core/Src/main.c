@@ -125,14 +125,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         printf(UART_CONTROL "t%ld\r\n", HAL_GetTick());
     } else if (htim == &htim16) { // ADC measurement timer
         // Acquire an ADC measurement
-        printf(UART_CONTROL "m%ld\r\n", HAL_ADC_GetValue(&hadc1));
+        HAL_ADC_Start_IT(&hadc1);
+
     }
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-    uint32_t value = HAL_ADC_GetValue(&hadc1);
-
-    log_info("ADC value: %ld", value);
+    printf(UART_CONTROL "m%ld\r\n", HAL_ADC_GetValue(&hadc1));
 }
 /* USER CODE END 0 */
 

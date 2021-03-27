@@ -1,22 +1,62 @@
 #include "Measurement.h"
+#include "Clock.h"
+#include <plog/Log.h>
 #include <implot/implot.h>
 #include <cmath>
+#include <chrono>
 
 void Measurement::window() {
-    static float xs1[1001], ys1[1001];
-    for (int i = 0; i < 1001; ++i) {
-        xs1[i] = i * 0.001f;
-        ys1[i] = 0.5f + 0.5f * sinf(50 * (xs1[i] + (float) 100 / 10));
+    ImGui::Text("Last values: ");
+    for (auto &measurementStack : measurements) {
+        if (!measurementStack.second.empty()) {
+            ImGui::SameLine();
+            ImGui::SmallButton(std::to_string(measurementStack.second.back()).c_str());
+        }
     }
-    static double xs2[11], ys2[11];
-    for (int i = 0; i < 11; ++i) {
-        xs2[i] = i * 0.1f;
-        ys2[i] = xs2[i] * xs2[i];
+    ImGui::SameLine(0.0f, 40.0f);
+    if (ImGui::SmallButton("Reset")) {
+        clear();
     }
-    if (ImPlot::BeginPlot("Line Plot", "x", "f(x)")) {
-        ImPlot::PlotLine("sin(x)", xs1, ys1, 1001);
-        ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
-        ImPlot::PlotLine("x^2", xs2, ys2, 11);
+
+
+    static ImPlotFlags plotFlags = 0;
+    static ImPlotAxisFlags xAxisFlags = ImPlotAxisFlags_None;
+    static ImPlotAxisFlags yAxisFlags = xAxisFlags | ImPlotAxisFlags_LockMin;
+
+    if (!measurements[0].first.empty()) {
+        ImPlot::SetNextPlotLimitsX(measurements[0].first.front(), measurements[0].first.back(), ImGuiCond_Always);
+        ImPlot::SetNextPlotLimitsY(0, 4096, ImGuiCond_Always);
+    }
+    if (ImPlot::BeginPlot("Measurements", "t (ms)", nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
+        const std::lock_guard lock(measurementMutex);
+        ImPlot::PlotLine("Data 1", measurements[0].first.data(), measurements[0].second.data(), measurements[0].first.size());
         ImPlot::EndPlot();
     }
 }
+
+void Measurement::acquire(int index, float value) {
+    using namespace std::chrono;
+
+    static auto startTime = system_clock::now();
+
+    if (microcontrollerClock != 0) { // Ignore wrong initial values
+        milliseconds ms = duration_cast< milliseconds >(
+                system_clock::now() - startTime
+        );
+
+        const std::lock_guard lock(measurementMutex);
+
+        measurements[index].first.push_back(ms.count());
+        measurements[index].second.push_back(value);
+    }
+}
+
+void Measurement::clear() {
+    for (auto &measurementStack : measurements) {
+        measurementStack.first.clear();
+        measurementStack.second.clear();
+    }
+
+    LOG_DEBUG << "Cleared measurement display";
+}
+
