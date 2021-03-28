@@ -11,9 +11,14 @@ struct Parameter {
 
     T min;
     T max;
+
+    std::function<void(T)> callback;
+    void callCallback() {
+        if (callback) callback(value);
+    }
 };
 
-extern std::array<Parameter<float>, 2> floatingParameters;
+extern std::array<Parameter<float>, 3> floatingParameters;
 
 extern std::array<Parameter<int>, 2> integerParameters;
 

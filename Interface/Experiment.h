@@ -73,12 +73,12 @@ public:
             return;
         }
 
+        LOG_INFO << "Reset experiment " << name << " at total " << formatDuration(previousDuration).str();
+
         status = Idle;
         previousDuration = 0s;
         startTime.reset();
         stopTime.reset();
-
-        LOG_INFO << "Reset experiment " << name << " at total " << formatDuration(previousDuration).str();
     }
 
     auto getStatus() {

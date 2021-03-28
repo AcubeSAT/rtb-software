@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-extern double floating_parameters[2];
+extern double floating_parameters[3];
 extern uint32_t integer_parameters[2];
 
 typedef void (*floating_callback)(uint32_t parameter, double * value);

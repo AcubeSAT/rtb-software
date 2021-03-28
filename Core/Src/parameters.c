@@ -7,7 +7,14 @@
 #include <stm32l4xx_hal.h>
 #include "main.h"
 
+enum floating_parameter_names {
+    MaxVoltage = 0,
+    Dac1 = 1,
+    Dac2,
+};
+
 double floating_parameters[] = {
+        3.3f,
         0.0f,
         0.0f,
 };
@@ -16,7 +23,13 @@ uint32_t integer_parameters[] = {
         0
 };
 
+enum integer_parameter_names {
+    Test1 = 0,
+    Test2 = 1,
+};
+
 floating_callback floating_callbacks[] = {
+    NULL,
     callback_dac_output,
     callback_dac_output
 };
@@ -26,11 +39,11 @@ integer_callback integer_callbacks[] = {
 };
 
 void callback_dac_output(uint32_t parameter, double * value) {
-    uint8_t parsed_value = *value / 3.3f * 255;
+    uint8_t parsed_value = *value / floating_parameters[MaxVoltage] * 255;
 
     log_trace("Setting DAC %ld to %d", parameter, parsed_value);
 
-    HAL_DAC_SetValue(&hdac1, parameter == 0 ? DAC_CHANNEL_1 : DAC_CHANNEL_2, DAC_ALIGN_8B_R, parsed_value);
+    HAL_DAC_SetValue(&hdac1, parameter == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2, DAC_ALIGN_8B_R, parsed_value);
 }
 
 /**

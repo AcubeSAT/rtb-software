@@ -6,7 +6,11 @@
 #include "Parameters.h"
 #include "main.h"
 
-std::array<Parameter<float>, 2> floatingParameters = {
+std::array<Parameter<float>, 3> floatingParameters = {
+        Parameter<float>{"Board Voltage", 3.3, 1, 4, [](float voltage) {
+            floatingParameters[1].max = voltage;
+            floatingParameters[2].max = voltage;
+        }},
         Parameter<float>{"DAC 1", 0, 0, 3.3},
         Parameter<float>{"DAC 2", 0, 0, 3.3},
 };
@@ -22,7 +26,9 @@ void parameterWindow() {
 
     for (auto& parameter : floatingParameters) {
 //        ImGui::SliderScalar(parameter.name.c_str(), ImGuiDataType_Double, &parameter.value, &parameter.min, &parameter.max, "%f");
-        ImGui::SliderFloat(parameter.name.c_str(), &parameter.value, parameter.min, parameter.max);
+        if (ImGui::SliderFloat(parameter.name.c_str(), &parameter.value, parameter.min, parameter.max)) {
+            parameter.callCallback();
+        }
     }
 
     ImGui::Separator();
@@ -30,7 +36,9 @@ void parameterWindow() {
     ImGui::Spacing();
 
     for (auto& parameter : integerParameters) {
-        ImGui::SliderInt(parameter.name.c_str(), &parameter.value, parameter.min, parameter.max);
+        if (ImGui::SliderInt(parameter.name.c_str(), &parameter.value, parameter.min, parameter.max)) {
+            parameter.callCallback();
+        }
     }
 
     ImGui::Separator();
