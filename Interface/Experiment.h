@@ -17,6 +17,9 @@ class Experiment {
     std::optional<TimePoint> startTime;
     std::optional<TimePoint> stopTime;
 
+    static int currentExperimentId;
+    static std::reference_wrapper<Experiment> currentExperiment;
+
     enum {
         Idle,
         Started,
@@ -39,6 +42,7 @@ public:
 
     static std::vector<Experiment> experiments;
     static void window();
+    static void resetPopup();
 
     void start() {
         if (status == Started) {

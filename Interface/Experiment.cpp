@@ -23,10 +23,10 @@ std::vector<Experiment> Experiment::experiments = {
         Experiment("Shift Register", loremIpsum),
 };
 
-void Experiment::window() {
-    static int currentExperimentId = 0;
-    static auto currentExperiment = std::ref(experiments[0]);
+int Experiment::currentExperimentId = 0;
+std::reference_wrapper<Experiment> Experiment::currentExperiment = std::ref(Experiment::experiments[0]);
 
+void Experiment::window() {
     ImGui::Text("Current Experiment:");
     const char * experimentName = currentExperiment.get().name.c_str();
 
@@ -70,7 +70,7 @@ void Experiment::window() {
     ImGui::Separator();
 
     // Custom size: use all width, 5 items tall
-    if (ImGui::BeginListBox("Experiments", ImVec2(-FLT_MIN, 8 * ImGui::GetTextLineHeightWithSpacing()))) {
+    if (currentExperiment.get().status == Idle && ImGui::BeginListBox("Experiments", ImVec2(-FLT_MIN, 8 * ImGui::GetTextLineHeightWithSpacing()))) {
         const bool experimentRunning = currentExperiment.get().status != Idle;
         for (int n = 0; n < experiments.size(); n++) {
             const bool is_selected = (currentExperimentId == n);
@@ -105,8 +105,8 @@ void Experiment::window() {
     };
     ImGui::PopStyleColor(3);
 
-    if (ImGui::Button("RESET", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f))) {
-        currentExperiment.get().reset();
+    if (currentExperiment.get().status != Started && ImGui::Button("RESET", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f))) {
+        ImGui::OpenPopup("Experiment Reset");
     };
 
     static float flux = 1.e10f;
@@ -126,5 +126,23 @@ void Experiment::window() {
         float fluence = flux * std::chrono::duration_cast<std::chrono::duration<int32_t, std::ratio<1,10>>>(time).count();
         ImGui::SameLine();
         ImGui::Text("%.3e /cm²", fluence);
+    }
+
+    resetPopup();
+}
+
+void Experiment::resetPopup() {
+    if (ImGui::BeginPopupModal("Experiment Reset", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Are you sure you want to reset the experiment \"%s\"? All timings will be lost.\n", currentExperiment.get().name.c_str());
+        ImGui::Separator();
+
+        if (ImGui::Button("OK", ImVec2(120, 0))) {
+            currentExperiment.get().reset();
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SetItemDefaultFocus();
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
     }
 }
