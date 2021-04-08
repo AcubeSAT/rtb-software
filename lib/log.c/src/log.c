@@ -20,7 +20,7 @@
  * IN THE SOFTWARE.
  */
 
-#include <stm32l4xx_hal.h>
+#include <stm32h7xx_hal.h>
 #include "log.h"
 
 #define MAX_CALLBACKS 32

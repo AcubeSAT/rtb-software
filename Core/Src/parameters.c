@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <log.h>
 #include <stdlib.h>
-#include <stm32l4xx_hal.h>
+#include <stm32h7xx_hal.h>
 #include "main.h"
 
 enum floating_parameter_names {
