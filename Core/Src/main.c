@@ -185,6 +185,8 @@ int main(void)
     TxHeader.IDE = CAN_ID_STD;
     TxHeader.DLC = 2;
     TxHeader.TransmitGlobalTime = DISABLE;
+
+    HAL_CAN_Start(&hcan1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -202,7 +204,9 @@ int main(void)
           log_error("I could not sent can message because %#010lx", hcan1.ErrorCode);
       };
 
-      volatile uint32_t aaaa = HAL_CAN_GetRxFifoFillLevel(&hcan1, 0);
+//        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
+
+//      volatile uint32_t aaaa = HAL_CAN_GetRxFifoFillLevel(&hcan1, 0);
 
       int a = 5;
 
@@ -350,15 +354,15 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 32;
-  hcan1.Init.Mode = CAN_MODE_NORMAL;
+  hcan1.Init.Prescaler = 64;
+  hcan1.Init.Mode = CAN_MODE_LOOPBACK;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_2TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_3TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
-  hcan1.Init.AutoRetransmission = DISABLE;
+  hcan1.Init.AutoRetransmission = ENABLE;
   hcan1.Init.ReceiveFifoLocked = DISABLE;
   hcan1.Init.TransmitFifoPriority = DISABLE;
   if (HAL_CAN_Init(&hcan1) != HAL_OK)
