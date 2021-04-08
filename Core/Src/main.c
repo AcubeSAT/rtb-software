@@ -46,6 +46,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+CAN_HandleTypeDef hcan1;
+
 DAC_HandleTypeDef hdac1;
 
 UART_HandleTypeDef huart3;
@@ -70,6 +72,7 @@ static void MX_USART3_UART_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM16_Init(void);
+static void MX_CAN1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -170,8 +173,18 @@ int main(void)
   MX_TIM17_Init();
   MX_ADC1_Init();
   MX_TIM16_Init();
+  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
+  CAN_TxHeaderTypeDef   TxHeader;
+  uint8_t               TxData[8];
+  uint32_t              TxMailbox;
 
+    TxHeader.StdId = 0x321;
+    TxHeader.ExtId = 0x01;
+    TxHeader.RTR = CAN_RTR_DATA;
+    TxHeader.IDE = CAN_ID_STD;
+    TxHeader.DLC = 2;
+    TxHeader.TransmitGlobalTime = DISABLE;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -181,7 +194,17 @@ int main(void)
   while (1)
   {
       log_info("Hello %s", "world");
-      HAL_Delay(1000);
+      HAL_Delay(100);
+
+      strcpy(TxData, "hello!!");
+
+      if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
+          log_error("I could not sent can message because %#010lx", hcan1.ErrorCode);
+      };
+
+      volatile uint32_t aaaa = HAL_CAN_GetRxFifoFillLevel(&hcan1, 0);
+
+      int a = 5;
 
     /* USER CODE END WHILE */
 
@@ -308,6 +331,43 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief CAN1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CAN1_Init(void)
+{
+
+  /* USER CODE BEGIN CAN1_Init 0 */
+
+  /* USER CODE END CAN1_Init 0 */
+
+  /* USER CODE BEGIN CAN1_Init 1 */
+
+  /* USER CODE END CAN1_Init 1 */
+  hcan1.Instance = CAN1;
+  hcan1.Init.Prescaler = 32;
+  hcan1.Init.Mode = CAN_MODE_NORMAL;
+  hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_2TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_3TQ;
+  hcan1.Init.TimeTriggeredMode = DISABLE;
+  hcan1.Init.AutoBusOff = DISABLE;
+  hcan1.Init.AutoWakeUp = DISABLE;
+  hcan1.Init.AutoRetransmission = DISABLE;
+  hcan1.Init.ReceiveFifoLocked = DISABLE;
+  hcan1.Init.TransmitFifoPriority = DISABLE;
+  if (HAL_CAN_Init(&hcan1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CAN1_Init 2 */
+
+  /* USER CODE END CAN1_Init 2 */
 
 }
 
