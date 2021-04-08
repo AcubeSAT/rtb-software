@@ -78,6 +78,13 @@ static void MX_TIM17_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+uint8_t TxData[] = {'w', 'h', 'o', ' ', 'd', 'i', 's', '?'};
+FDCAN_FilterTypeDef sFilterConfig;
+FDCAN_RxHeaderTypeDef RxHeader;
+uint8_t RxData[16];
+FDCAN_TxHeaderTypeDef TxHeader;
+
+
 /**
  * This function overwrites the default printf() and std::cout/cerr outputs,
  * redirecting them to a UART port.
@@ -176,14 +183,18 @@ int main(void)
 //  uint8_t               TxData[8];
 //  uint32_t              TxMailbox;
 
-//    TxHeader.StdId = 0x321;
-//    TxHeader.ExtId = 0x01;
-//    TxHeader.RTR = CAN_RTR_DATA;
-//    TxHeader.IDE = CAN_ID_STD;
-//    TxHeader.DLC = 2;
-//    TxHeader.TransmitGlobalTime = DISABLE;
+    TxHeader.Identifier = 0x111;
+    TxHeader.IdType = FDCAN_STANDARD_ID;
+    TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+    TxHeader.DataLength = FDCAN_DLC_BYTES_6;
+    TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    TxHeader.MessageMarker = 0;
 
-//    HAL_CAN_Start(&hcan1);
+    HAL_FDCAN_Start(&hfdcan1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -193,13 +204,13 @@ int main(void)
   while (1)
   {
       log_trace("Hello %s", "world");
-      HAL_Delay(500);
+      HAL_Delay(100);
 
 //      strcpy(TxData, "hello!!");
 
-//      if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
-//          log_error("I could not sent can message because %#010lx", hcan1.ErrorCode);
-//      };
+      if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, &TxData[0]) != HAL_OK) {
+          log_error("I could not sent can message because %#010lx", hfdcan1.ErrorCode);
+      };
 
 //        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
 
@@ -423,7 +434,7 @@ static void MX_FDCAN1_Init(void)
   /* USER CODE END FDCAN1_Init 1 */
   hfdcan1.Instance = FDCAN1;
   hfdcan1.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-  hfdcan1.Init.Mode = FDCAN_MODE_NORMAL;
+  hfdcan1.Init.Mode = FDCAN_MODE_INTERNAL_LOOPBACK;
   hfdcan1.Init.AutoRetransmission = DISABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
   hfdcan1.Init.ProtocolException = DISABLE;
@@ -431,7 +442,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.NominalSyncJumpWidth = 1;
   hfdcan1.Init.NominalTimeSeg1 = 2;
   hfdcan1.Init.NominalTimeSeg2 = 2;
-  hfdcan1.Init.DataPrescaler = 1;
+  hfdcan1.Init.DataPrescaler = 32;
   hfdcan1.Init.DataSyncJumpWidth = 1;
   hfdcan1.Init.DataTimeSeg1 = 1;
   hfdcan1.Init.DataTimeSeg2 = 1;
@@ -446,7 +457,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.RxBufferSize = FDCAN_DATA_BYTES_8;
   hfdcan1.Init.TxEventsNbr = 0;
   hfdcan1.Init.TxBuffersNbr = 0;
-  hfdcan1.Init.TxFifoQueueElmtsNbr = 0;
+  hfdcan1.Init.TxFifoQueueElmtsNbr = 2;
   hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   hfdcan1.Init.TxElmtSize = FDCAN_DATA_BYTES_8;
   if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
@@ -484,7 +495,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.NominalSyncJumpWidth = 1;
   hfdcan2.Init.NominalTimeSeg1 = 2;
   hfdcan2.Init.NominalTimeSeg2 = 2;
-  hfdcan2.Init.DataPrescaler = 1;
+  hfdcan2.Init.DataPrescaler = 32;
   hfdcan2.Init.DataSyncJumpWidth = 1;
   hfdcan2.Init.DataTimeSeg1 = 1;
   hfdcan2.Init.DataTimeSeg2 = 1;
