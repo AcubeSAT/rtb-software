@@ -50,6 +50,8 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 extern DAC_HandleTypeDef hdac1;
+extern FDCAN_HandleTypeDef hfdcan1;
+extern FDCAN_HandleTypeDef hfdcan2;
 
 #define UART_BUFFER_MAX 2048
 extern uint8_t uart_buffer[UART_BUFFER_MAX];

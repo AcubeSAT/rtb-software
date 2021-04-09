@@ -26,6 +26,7 @@
 #include "log.h"
 #include "stm32h7xx_ll_usart.h"
 #include <memory.h>
+#include <can.h>
 
 /* USER CODE END Includes */
 
@@ -77,12 +78,6 @@ static void MX_TIM17_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-uint8_t TxData[] = {'w', 'h', 'o', ' ', 'd', 'i', 's', '?'};
-FDCAN_FilterTypeDef sFilterConfig;
-FDCAN_RxHeaderTypeDef RxHeader;
-uint8_t RxData[16] = {'\0'};
-FDCAN_TxHeaderTypeDef TxHeader;
 
 
 /**
@@ -179,22 +174,8 @@ int main(void)
   MX_TIM16_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-//  CAN_TxHeaderTypeDef   TxHeader;
-//  uint8_t               TxData[8];
-//  uint32_t              TxMailbox;
 
-    TxHeader.Identifier = 0x111;
-    TxHeader.IdType = FDCAN_STANDARD_ID;
-    TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-    TxHeader.DataLength = FDCAN_DLC_BYTES_7;
-    TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-    TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
-    TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
-    TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-    TxHeader.MessageMarker = 0;
-
-    HAL_FDCAN_Start(&hfdcan1);
-    HAL_FDCAN_Start(&hfdcan2);
+    Experiment_CAN_Start();
 
   /* USER CODE END 2 */
 
@@ -207,21 +188,7 @@ int main(void)
 //      log_trace("Hello %s", "world");
       HAL_Delay(100);
 
-//      strcpy(TxData, "hello!!");
-
-      if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader, &TxData[0]) != HAL_OK) {
-          log_error("I could not sent can message because %#010lx", hfdcan1.ErrorCode);
-      };
-
-      if (HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
-          log_warn("Got new message: %s", RxData);
-      }
-
-//        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
-
-//      volatile uint32_t aaaa = HAL_CAN_GetRxFifoFillLevel(&hcan1, 0);
-
-      int a = 5;
+    Experiment_CAN_Loop();
 
     /* USER CODE END WHILE */
 
