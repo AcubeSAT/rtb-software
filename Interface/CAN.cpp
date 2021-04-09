@@ -58,6 +58,18 @@ void CAN::window() {
             ImGui::PopFont();
             draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
 
+            float currentPosition = ImGui::GetCursorPosY();
+
+            ImGui::PushFont(largeFont);
+            ImGui::SameLine(0.0f, 50.0f);
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.59, 0.2f, 0.4f, 0.5f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.59, 0.7f, 0.4f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.59, 0.7f, 0.5f, 1.0f));
+            ImGui::Button(std::to_string(timeLog.size()).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 50.0f));
+            ImGui::PopStyleColor(3);
+            ImGui::PopFont();
+            ImGui::SetCursorPosY(currentPosition);
+
             ImGui::Spacing();
 
             ImGui::Text("RX:");
@@ -75,6 +87,7 @@ void CAN::window() {
         }
     }
 
+    ImGui::Spacing();
     ImGui::Separator();
     ImGui::Text("CAN error log");
     ImGui::Spacing();
