@@ -50,6 +50,14 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         microcontrollerClock = std::stoi(receivedRaw.substr(2));
                     } else if (receivedRaw[1] == 'm') {
                         measurements.acquire(0, std::stof(receivedRaw.substr(2)));
+                    } else if (receivedRaw[1] == 'c' ) {
+                        // CAN bus error
+                        std::stringstream ss(receivedRaw.substr(2));
+                        CAN::Event::Data tx;
+                        CAN::Event::Data rx;
+                        ss >> std::hex >> tx >> rx;
+
+                        can.logEvent(rx, tx);
                     } else {
                         LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
                     }
@@ -57,8 +65,6 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                     LOG_ERROR << "Error decoding message: " << e.what();
                 }
             } else {
-                std::cout << time().str() << receivedRaw << std::endl;
-
                 if (log.has_value()) {
                     std::istringstream ss;
                     std::vector<std::string> words;
@@ -84,6 +90,10 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                     if (severity < 0) {
                         LOG_DEBUG << "Could not parse device log message";
                         severity = 4;
+                    }
+
+                    if (severity != 0) { // TODO: Adaptive based on selection?
+                        std::cout << time().str() << receivedRaw << std::endl;
                     }
 
                     log.value().get().addLogEntry(time().str() + receivedRaw, severity);

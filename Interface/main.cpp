@@ -31,6 +31,7 @@
 #include "Latchups.h"
 #include "Log.h"
 #include "Measurement.h"
+#include "CAN.h"
 
 const char* glsl_version = "#version 130";
 
@@ -50,6 +51,7 @@ bool ImguiStarted = false;
 std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
 Measurement measurements;
+CAN can;
 ImFont * largeFont;
 ImFont * veryLargeFont;
 ImFont * logFont;
@@ -235,6 +237,13 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowSize(ImVec2(imguiIo.DisplaySize.x - 40, 400), ImGuiCond_FirstUseEver);
             ImGui::Begin("Measurements");
             measurements.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(20, 740), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(50, 400), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
+            ImGui::Begin("CAN Bus");
+            can.window();
             ImGui::End();
 
             // Rendering
