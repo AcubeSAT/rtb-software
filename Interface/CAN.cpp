@@ -3,6 +3,7 @@
 #include "Clock.h"
 #include "main.h"
 #include <bitset>
+#include "magic_enum.hpp"
 
 void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::MeasuredType type) {
     const std::lock_guard lock(timeLogMutex);
@@ -13,7 +14,7 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
     Event::GuessedType guessedType = Event::SEFI;
     if (flips == 1) {
         guessedType = Event::SET;
-    } else if (flips <= 4) {
+    } else if (flips < 4) {
         guessedType = Event::MBU;
     } else {
         guessedType = Event::SEFI;
@@ -21,7 +22,7 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
 
     Event event {
         type,
-        CAN::Event::SET,
+        guessedType,
         static_cast<uint32_t>(flips),
         rx,
         tx,
@@ -92,10 +93,11 @@ void CAN::window() {
     ImGui::Text("CAN error log");
     ImGui::Spacing();
     static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-    if (ImGui::BeginTable("table_can_timelog", 3, flags)) {
+    if (ImGui::BeginTable("table_can_timelog", 4, flags)) {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
-        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 70);
+        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableSetupColumn("MCU Time", ImGuiTableColumnFlags_WidthFixed, 100);
+        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 50);
         ImGui::TableSetupColumn("#flips", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableHeadersRow();
 
@@ -111,6 +113,9 @@ void CAN::window() {
                 ImGui::TableSetColumnIndex(1);
                 ImGui::Text("%s", timeLog[index].mcuTime.c_str());
                 ImGui::TableSetColumnIndex(2);
+                std::string type(magic_enum::enum_name(timeLog[index].guessedType));
+                ImGui::TextColored(timeLog[index].colour(), "%s", type.c_str());
+                ImGui::TableSetColumnIndex(3);
                 ImGui::Text("%d", timeLog[index].flips);
             }
         }
@@ -131,4 +136,17 @@ std::string CAN::Event::toBits(CAN::Event::Data number) const {
     ss << bitset;
 
     return ss.str();
+}
+
+ImColor CAN::Event::colour() const {
+    switch (guessedType) {
+        case SET:
+            return ImColor::HSV(0.37f, 0.7f, 0.9f);
+        case SEFI:
+            return ImColor::HSV(0.62f, 0.7f, 0.9f);
+        case MBU:
+            return ImColor::HSV(0.09f, 0.8f, 0.87f);
+        case SEL:
+            return ImColor::HSV(0.96f, 0.9f, 0.9f);
+    }
 }

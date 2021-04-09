@@ -31,6 +31,7 @@ public:
         Data tx;
 
         std::string toBits(Data number) const;
+        ImColor colour() const;
 
         std::string computerTime;
         std::string mcuTime;
