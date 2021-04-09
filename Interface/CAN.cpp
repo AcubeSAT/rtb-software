@@ -1,6 +1,8 @@
 #include <imgui.h>
 #include "CAN.h"
 #include "Clock.h"
+#include "main.h"
+#include <bitset>
 
 void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::MeasuredType type) {
     const std::lock_guard lock(timeLogMutex);
@@ -33,15 +35,45 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
 void CAN::window() {
     ImGui::Text("Bytes TX: %05ld\tBytes RX: %05ld", 0, 0);
     ImGui::Text("Packets TX: %05ld\tPackets RX: %05ld", 0, 0);
+    ImGui::Separator();
     ImGui::Spacing();
 
-    ImGui::Text("RX:");
-    ImGui::SameLine(0.0f, 10.0f);
-    ImGui::Text("0xFADI1E0ACBJFADFI");
-    
-    ImGui::Text("RX:");
-    ImGui::SameLine(0.0f, 10.0f);
-    ImGui::Text("0xFADI1E0ACBJFADFI");
+    {
+        const std::lock_guard lock(timeLogMutex);
+
+        if (!timeLog.empty()) {
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            auto lastItem = timeLog.cend() - 1;
+
+            ImGui::Text("TX:");
+            ImGui::SameLine(50.0f, 0.0f);
+            ImGui::PushFont(logFont);
+            ImGui::Text("%#018lx", lastItem->tx);
+            ImGui::PopFont();
+            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
+
+            ImGui::SameLine(200.0f, 0.0f);
+            ImGui::PushFont(logFont);
+            ImGui::Text("%s", lastItem->toBits(lastItem->rx).c_str());
+            ImGui::PopFont();
+            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
+
+            ImGui::Spacing();
+
+            ImGui::Text("RX:");
+            ImGui::SameLine(50.0f, 0.0f);
+            ImGui::PushFont(logFont);
+            ImGui::Text("%#018lx", lastItem->rx);
+            ImGui::PopFont();
+            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
+
+            ImGui::SameLine(200.0f, 0.0f);
+            ImGui::PushFont(logFont);
+            ImGui::Text("%s", lastItem->toBits(lastItem->tx).c_str());
+            ImGui::PopFont();
+            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
+        }
+    }
 
     ImGui::Separator();
     ImGui::Text("CAN error log");
@@ -71,4 +103,19 @@ void CAN::window() {
         }
         ImGui::EndTable();
     }
+}
+
+std::string CAN::Event::toBits(CAN::Event::Data number) const {
+    int byteLocation = __builtin_ctz(rx ^ tx) / 8;
+    if (byteLocation >= sizeof(number) * 8) {
+        byteLocation = 0;
+    }
+    uint8_t byte = (reinterpret_cast<uint8_t*>(&number))[byteLocation];
+
+    std::bitset<8> bitset(byte);
+
+    std::stringstream ss;
+    ss << bitset;
+
+    return ss.str();
 }
