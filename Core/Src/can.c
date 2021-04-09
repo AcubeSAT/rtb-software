@@ -13,12 +13,12 @@ FDCAN_TxHeaderTypeDef TxHeader;
 uint64_t * RxInt = (uint64_t*) RxData;
 uint64_t * TxInt = (uint64_t*) TxData;
 
-struct {
-    uint64_t bytesTX,
-    uint64_t packetsTX,
-    uint64_t bytesRX,
-    uint64_t packetsRX,
-} stats {0, 0, 0, 0};
+struct Stats {
+    uint64_t bytesTX;
+    uint64_t packetsTX;
+    uint64_t bytesRX;
+    uint64_t packetsRX;
+} stats;
 
 const uint32_t can_timeout = 100;
 
@@ -46,6 +46,11 @@ void Experiment_CAN_Start() {
     HAL_FDCAN_Start(&hfdcan1);
     HAL_FDCAN_Start(&hfdcan2);
     HAL_Delay(50);
+
+    stats.bytesTX = 0;
+    stats.bytesRX = 0;
+    stats.packetsRX = 0;
+    stats.packetsTX = 0;
 }
 
 void Experiment_CAN_Loop() {
@@ -93,7 +98,7 @@ void Experiment_CAN_Loop() {
         memset(TxData, 0xFF, 8);
     }
 
-    printf(UART_CONTROL UART_C_STATISTICS "%d %d %d %d\r\n", *TxInt, *RxInt);
+    printf(UART_CONTROL UART_C_STATISTICS "CAN %lld %lld %lld %lld\r\n", stats.bytesTX, stats.packetsTX, stats.bytesRX, stats.packetsRX);
 }
 
 void Experiment_CAN_Stop() {

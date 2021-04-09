@@ -34,8 +34,14 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
 }
 
 void CAN::window() {
-    ImGui::Text("Bytes TX: %05ld\tBytes RX: %05ld", 0, 0);
-    ImGui::Text("Packets TX: %05ld\tPackets RX: %05ld", 0, 0);
+    Stats loadedStats = this->stats.load();
+
+    ImGui::Text("Bytes TX: %08ld", loadedStats.txBytes);
+    ImGui::SameLine(200.0f);
+    ImGui::Text("Packets TX: %08ld", loadedStats.txPackets);
+    ImGui::Text("Bytes RX: %08ld", loadedStats.rxBytes);
+    ImGui::SameLine(200.0f);
+    ImGui::Text("Packets RX: %08ld", loadedStats.rxPackets);
     ImGui::Separator();
     ImGui::Spacing();
 

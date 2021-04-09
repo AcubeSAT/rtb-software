@@ -4,10 +4,18 @@
 #include <cstdint>
 #include <vector>
 #include <mutex>
+#include <atomic>
 
 
 class CAN {
 public:
+    struct Stats {
+        uint64_t rxBytes;
+        uint64_t rxPackets;
+        uint64_t txBytes;
+        uint64_t txPackets;
+    };
+
     struct Event {
         typedef uint64_t Data;
 
@@ -52,7 +60,17 @@ private:
         in.y += pad;
         return in;
     }
+
+    std::atomic<Stats> stats{};
 public:
+    CAN() {
+        stats = {0, 0, 0, 0};
+    };
+
+    void setStats(const Stats& stats) {
+        this->stats.store(stats);
+    }
+
     void window();
 
     void logEvent(Event::Data rx, Event::Data tx, Event::MeasuredType = Event::BitFlip);

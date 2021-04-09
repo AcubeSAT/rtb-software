@@ -58,6 +58,19 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         ss >> std::hex >> tx >> rx;
 
                         can.logEvent(rx, tx);
+                    } else if (receivedRaw[1] == 's') {
+                        // Statistics
+                        std::stringstream ss(receivedRaw.substr(2));
+
+                        std::string type;
+                        ss >> type;
+
+                        if (type == "CAN") {
+                            CAN::Stats stats{};
+
+                            ss >> stats.txBytes >> stats.txPackets >> stats.rxBytes >> stats.rxPackets;
+                            can.setStats(stats);
+                        }
                     } else {
                         LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
                     }
