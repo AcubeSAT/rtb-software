@@ -13,6 +13,13 @@ FDCAN_TxHeaderTypeDef TxHeader;
 uint64_t * RxInt = (uint64_t*) RxData;
 uint64_t * TxInt = (uint64_t*) TxData;
 
+struct {
+    uint64_t bytesTX,
+    uint64_t packetsTX,
+    uint64_t bytesRX,
+    uint64_t packetsRX,
+} stats {0, 0, 0, 0};
+
 const uint32_t can_timeout = 100;
 
 uint64_t flipRandomBit(uint64_t input, uint32_t bits) {
@@ -44,7 +51,9 @@ void Experiment_CAN_Start() {
 void Experiment_CAN_Loop() {
     if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, &TxData[0]) != HAL_OK) {
         log_error("CAN TX error %#010lx", hfdcan1.ErrorCode);
-    };
+    }
+    stats.bytesTX += 8;
+    stats.packetsTX++;
 
     uint32_t fill_level;
     volatile uint32_t time_start = HAL_GetTick();
@@ -83,6 +92,8 @@ void Experiment_CAN_Loop() {
     } else {
         memset(TxData, 0xFF, 8);
     }
+
+    printf(UART_CONTROL UART_C_STATISTICS "%d %d %d %d\r\n", *TxInt, *RxInt);
 }
 
 void Experiment_CAN_Stop() {
