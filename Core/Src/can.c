@@ -68,6 +68,7 @@ void Experiment_CAN_Loop() {
                 uint64_t diff = *RxInt ^ *TxInt;
                 uint32_t flips = __builtin_popcount(diff);
 
+                printf(UART_CONTROL UART_C_CANERROR "%llx %llx\r\n", *TxInt, *RxInt);
                 log_error("CAN data error [%db] %#018llx %#018llx", flips, *TxInt, *RxInt);
             }
         } else {

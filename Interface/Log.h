@@ -16,7 +16,7 @@ public:
         int severity;
     };
 private:
-    const int MaxLogEntries = 1000;
+    const int MaxLogEntries = 1000000;
 
     bool scrollToBottom = true;
     ImGuiTextFilter filter;

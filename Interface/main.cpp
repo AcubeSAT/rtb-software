@@ -189,50 +189,50 @@ int main(int argc, char *argv[]) {
             ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 110), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 110), ImGuiCond_FirstUseEver);
             ImGui::Begin("Local Time");
             clockWindow();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 200), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 535), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(20, 200), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 535), ImGuiCond_FirstUseEver);
             ImGui::Begin("Parameters");
             parameterWindow();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(450, 20), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(450, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_FirstUseEver);
             ImGui::Begin("Serial Connection");
             serialHandler->window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(450, 90), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(450, 90), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_FirstUseEver);
             ImGui::Begin("Experiments");
             Experiment::window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(900, 20), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(900, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_FirstUseEver);
             ImGui::Begin("Single Event Latchups");
             latchups.window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(1350, 20), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(1350, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_FirstUseEver);
             ImGui::Begin("Host Logs");
             hostLog.window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(1350, 332 + 51), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(1350, 332 + 51), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_FirstUseEver);
             ImGui::Begin("Device Logs");
             deviceLog.window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 740), ImGuiCond_Appearing);
-            ImGui::SetNextWindowSize(ImVec2(imguiIo.DisplaySize.x - 40, 400), ImGuiCond_Appearing);
+            ImGui::SetNextWindowPos(ImVec2(20, 740), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(imguiIo.DisplaySize.x - 40, 400), ImGuiCond_FirstUseEver);
             ImGui::Begin("Measurements");
             measurements.window();
             ImGui::End();

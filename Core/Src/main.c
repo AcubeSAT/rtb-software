@@ -117,15 +117,15 @@ void uart_command_received(const uint8_t* command, uint32_t len) {
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     // Send clock update + LCL report on event
-    printf(UART_CONTROL "t%ld\r\n", HAL_GetTick());
-    puts(UART_CONTROL "l\r\n");
+    printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
+    puts(UART_CONTROL UART_C_LATCHUP "\r\n");
     log_warn("SEL triggered!");
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim == &htim17) { // Tick timer
         // Print time as a control character on every timer update
-        printf(UART_CONTROL "t%ld\r\n", HAL_GetTick());
+        printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
     } else if (htim == &htim16) { // ADC measurement timer
         // Acquire an ADC measurement
         HAL_ADC_Start_IT(&hadc1);
@@ -134,7 +134,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-    printf(UART_CONTROL "m%ld\r\n", HAL_ADC_GetValue(&hadc1));
+    printf(UART_CONTROL UART_C_MEASUREMENT "%ld\r\n", HAL_ADC_GetValue(&hadc1));
 }
 /* USER CODE END 0 */
 
@@ -175,7 +175,7 @@ int main(void)
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
 
-    Experiment_CAN_Start();
+  Experiment_CAN_Start();
 
   /* USER CODE END 2 */
 

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="RadiationInterface" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="/dev/ttyACM0" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rtb-software" TARGET_NAME="RadiationInterface" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="rtb-software" RUN_TARGET_NAME="RadiationInterface">
+  <configuration default="false" name="RadiationInterface" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="/dev/ttyACM0" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="RadiationInterface" TARGET_NAME="RadiationInterface" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="RadiationInterface" RUN_TARGET_NAME="RadiationInterface">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>

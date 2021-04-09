@@ -63,6 +63,10 @@ extern bool uart_mutex;
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 #define UART_CONTROL "\x11"
+#define UART_C_TIME "t"
+#define UART_C_LATCHUP "l"
+#define UART_C_MEASUREMENT "m"
+#define UART_C_CANERROR "c"
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
