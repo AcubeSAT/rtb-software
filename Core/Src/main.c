@@ -81,7 +81,7 @@ static void MX_TIM17_Init(void);
 uint8_t TxData[] = {'w', 'h', 'o', ' ', 'd', 'i', 's', '?'};
 FDCAN_FilterTypeDef sFilterConfig;
 FDCAN_RxHeaderTypeDef RxHeader;
-uint8_t RxData[16];
+uint8_t RxData[16] = {'\0'};
 FDCAN_TxHeaderTypeDef TxHeader;
 
 
@@ -186,7 +186,7 @@ int main(void)
     TxHeader.Identifier = 0x111;
     TxHeader.IdType = FDCAN_STANDARD_ID;
     TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-    TxHeader.DataLength = FDCAN_DLC_BYTES_6;
+    TxHeader.DataLength = FDCAN_DLC_BYTES_7;
     TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
     TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
     TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
@@ -194,6 +194,7 @@ int main(void)
     TxHeader.MessageMarker = 0;
 
     HAL_FDCAN_Start(&hfdcan1);
+    HAL_FDCAN_Start(&hfdcan2);
 
   /* USER CODE END 2 */
 
@@ -203,7 +204,7 @@ int main(void)
 #pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
-      log_trace("Hello %s", "world");
+//      log_trace("Hello %s", "world");
       HAL_Delay(100);
 
 //      strcpy(TxData, "hello!!");
@@ -211,6 +212,10 @@ int main(void)
       if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, &TxData[0]) != HAL_OK) {
           log_error("I could not sent can message because %#010lx", hfdcan1.ErrorCode);
       };
+
+      if (HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
+          log_warn("Got new message: %s", RxData);
+      }
 
 //        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
 
@@ -434,18 +439,18 @@ static void MX_FDCAN1_Init(void)
   /* USER CODE END FDCAN1_Init 1 */
   hfdcan1.Instance = FDCAN1;
   hfdcan1.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-  hfdcan1.Init.Mode = FDCAN_MODE_INTERNAL_LOOPBACK;
-  hfdcan1.Init.AutoRetransmission = DISABLE;
+  hfdcan1.Init.Mode = FDCAN_MODE_NORMAL;
+  hfdcan1.Init.AutoRetransmission = ENABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
   hfdcan1.Init.ProtocolException = DISABLE;
-  hfdcan1.Init.NominalPrescaler = 1;
-  hfdcan1.Init.NominalSyncJumpWidth = 1;
-  hfdcan1.Init.NominalTimeSeg1 = 2;
-  hfdcan1.Init.NominalTimeSeg2 = 2;
+  hfdcan1.Init.NominalPrescaler = 32;
+  hfdcan1.Init.NominalSyncJumpWidth = 4;
+  hfdcan1.Init.NominalTimeSeg1 = 16;
+  hfdcan1.Init.NominalTimeSeg2 = 16;
   hfdcan1.Init.DataPrescaler = 32;
-  hfdcan1.Init.DataSyncJumpWidth = 1;
-  hfdcan1.Init.DataTimeSeg1 = 1;
-  hfdcan1.Init.DataTimeSeg2 = 1;
+  hfdcan1.Init.DataSyncJumpWidth = 4;
+  hfdcan1.Init.DataTimeSeg1 = 16;
+  hfdcan1.Init.DataTimeSeg2 = 16;
   hfdcan1.Init.MessageRAMOffset = 0;
   hfdcan1.Init.StdFiltersNbr = 0;
   hfdcan1.Init.ExtFiltersNbr = 0;
@@ -491,20 +496,20 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.AutoRetransmission = DISABLE;
   hfdcan2.Init.TransmitPause = DISABLE;
   hfdcan2.Init.ProtocolException = DISABLE;
-  hfdcan2.Init.NominalPrescaler = 1;
-  hfdcan2.Init.NominalSyncJumpWidth = 1;
-  hfdcan2.Init.NominalTimeSeg1 = 2;
-  hfdcan2.Init.NominalTimeSeg2 = 2;
+  hfdcan2.Init.NominalPrescaler = 32;
+  hfdcan2.Init.NominalSyncJumpWidth = 4;
+  hfdcan2.Init.NominalTimeSeg1 = 16;
+  hfdcan2.Init.NominalTimeSeg2 = 16;
   hfdcan2.Init.DataPrescaler = 32;
-  hfdcan2.Init.DataSyncJumpWidth = 1;
-  hfdcan2.Init.DataTimeSeg1 = 1;
-  hfdcan2.Init.DataTimeSeg2 = 1;
+  hfdcan2.Init.DataSyncJumpWidth = 4;
+  hfdcan2.Init.DataTimeSeg1 = 16;
+  hfdcan2.Init.DataTimeSeg2 = 16;
   hfdcan2.Init.MessageRAMOffset = 0;
   hfdcan2.Init.StdFiltersNbr = 0;
   hfdcan2.Init.ExtFiltersNbr = 0;
-  hfdcan2.Init.RxFifo0ElmtsNbr = 0;
+  hfdcan2.Init.RxFifo0ElmtsNbr = 4;
   hfdcan2.Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
-  hfdcan2.Init.RxFifo1ElmtsNbr = 0;
+  hfdcan2.Init.RxFifo1ElmtsNbr = 4;
   hfdcan2.Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_8;
   hfdcan2.Init.RxBuffersNbr = 0;
   hfdcan2.Init.RxBufferSize = FDCAN_DATA_BYTES_8;
