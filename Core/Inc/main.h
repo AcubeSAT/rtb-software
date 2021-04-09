@@ -66,6 +66,7 @@ extern bool uart_mutex;
 #define UART_C_TIME "t"
 #define UART_C_LATCHUP "l"
 #define UART_C_MEASUREMENT "m"
+#define UART_C_CANBITERROR "b"
 #define UART_C_CANERROR "c"
 #define UART_C_STATISTICS "s"
 /* USER CODE END EC */

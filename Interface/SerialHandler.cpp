@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <chrono>
 #include <regex>
+#include <magic_enum.hpp>
 #include "main.h"
 #include "Clock.h"
 
@@ -50,14 +51,28 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         microcontrollerClock = std::stoi(receivedRaw.substr(2));
                     } else if (receivedRaw[1] == 'm') {
                         measurements.acquire(0, std::stof(receivedRaw.substr(2)));
-                    } else if (receivedRaw[1] == 'c' ) {
-                        // CAN bus error
+                    } else if (receivedRaw[1] == 'b') {
+                        // CAN bus bit flip
                         std::stringstream ss(receivedRaw.substr(2));
                         CAN::Event::Data tx;
                         CAN::Event::Data rx;
                         ss >> std::hex >> tx >> rx;
 
                         can.logEvent(rx, tx);
+                    } else if (receivedRaw[1] == 'c') {
+                        // CAN bus generic error
+                        std::stringstream ss(receivedRaw.substr(2));
+                        std::string type;
+                        std::string extraInfo;
+                        ss >> type >> extraInfo;
+
+                        auto enumType = magic_enum::enum_cast<CAN::Event::MeasuredType>(type);
+                        if (!enumType.has_value()) {
+                            enumType.emplace(CAN::Event::Unknown);
+                            extraInfo = type + " " + extraInfo;
+                        }
+
+                        can.logEvent(0, 0, enumType.value(), extraInfo);
                     } else if (receivedRaw[1] == 's') {
                         // Statistics
                         std::stringstream ss(receivedRaw.substr(2));

@@ -5,7 +5,7 @@
 #include <bitset>
 #include "magic_enum.hpp"
 
-void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::MeasuredType type) {
+void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::MeasuredType type, std::string info) {
     const std::lock_guard lock(timeLogMutex);
 
     Event::Data diff = rx ^ tx;
@@ -26,6 +26,7 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
         static_cast<uint32_t>(flips),
         rx,
         tx,
+        std::move(info),
         currentDatetimeMilliseconds().str(),
         formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str()
     };
@@ -99,12 +100,13 @@ void CAN::window() {
     ImGui::Text("CAN error log");
     ImGui::Spacing();
     static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-    if (ImGui::BeginTable("table_can_timelog", 4, flags)) {
+    if (ImGui::BeginTable("table_can_timelog", 5, flags)) {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableSetupColumn("MCU Time", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 50);
         ImGui::TableSetupColumn("#flips", ImGuiTableColumnFlags_WidthFixed, 100);
+        ImGui::TableSetupColumn("Error Code", ImGuiTableColumnFlags_WidthStretch, 100);
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
@@ -118,11 +120,25 @@ void CAN::window() {
                 ImGui::Selectable(std::to_string(index + 1).c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
                 ImGui::TableSetColumnIndex(1);
                 ImGui::Text("%s", timeLog[index].mcuTime.c_str());
-                ImGui::TableSetColumnIndex(2);
-                std::string type(magic_enum::enum_name(timeLog[index].guessedType));
-                ImGui::TextColored(timeLog[index].colour(), "%s", type.c_str());
-                ImGui::TableSetColumnIndex(3);
-                ImGui::Text("%d", timeLog[index].flips);
+
+                if (timeLog[index].measuredType == Event::BitFlip) {
+                    ImGui::TableSetColumnIndex(2);
+                    std::string type(magic_enum::enum_name(timeLog[index].guessedType));
+                    ImGui::TextColored(timeLog[index].colour(), "%s", type.c_str());
+                    ImGui::TableSetColumnIndex(3);
+                    ImGui::Text("%d", timeLog[index].flips);
+                } else {
+                    ImGui::TableSetColumnIndex(2);
+                    std::string guessedType(magic_enum::enum_name(timeLog[index].guessedType));
+                    ImGui::TextColored(timeLog[index].colour(), "%s", guessedType.c_str());
+
+                    ImGui::TableSetColumnIndex(3);
+                    std::string measuredType(magic_enum::enum_name(timeLog[index].measuredType));
+                    ImGui::Text("%s", measuredType.c_str());
+
+                    ImGui::TableSetColumnIndex(4);
+                    ImGui::Text("%s", timeLog[index].info.c_str());
+                }
             }
         }
         ImGui::EndTable();

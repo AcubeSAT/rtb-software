@@ -22,7 +22,9 @@ public:
         enum MeasuredType {
             BitFlip,
             TXError,
-            RXError
+            RXError,
+            Timeout,
+            Unknown
         };
 
         enum GuessedType {
@@ -37,6 +39,7 @@ public:
         uint32_t flips;
         Data rx;
         Data tx;
+        std::string info;
 
         std::string toBits(Data number) const;
         ImColor colour() const;
@@ -73,7 +76,7 @@ public:
 
     void window();
 
-    void logEvent(Event::Data rx, Event::Data tx, Event::MeasuredType = Event::BitFlip);
+    void logEvent(Event::Data rx, Event::Data tx, Event::MeasuredType = Event::BitFlip, std::string info = "");
 };
 
 

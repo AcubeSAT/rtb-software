@@ -56,6 +56,7 @@ void Experiment_CAN_Start() {
 void Experiment_CAN_Loop() {
     if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, &TxData[0]) != HAL_OK) {
         log_error("CAN TX error %#010lx", hfdcan1.ErrorCode);
+        printf(UART_CONTROL UART_C_CANERROR "%s %#010lx\r\n", "TXError", hfdcan1.ErrorCode);
     }
     stats.bytesTX += 8;
     stats.packetsTX++;
@@ -68,6 +69,8 @@ void Experiment_CAN_Loop() {
 
     if (fill_level != 1) {
         log_error("CAN Timeout");
+        printf(UART_CONTROL UART_C_CANERROR "%s %ldms\r\n", "Timeout", HAL_GetTick() - time_start);
+        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER0);
     } else {
         uint32_t duration = HAL_GetTick() - time_start;
         if (HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
@@ -82,10 +85,11 @@ void Experiment_CAN_Loop() {
                 uint64_t diff = *RxInt ^ *TxInt;
                 uint32_t flips = __builtin_popcount(diff);
 
-                printf(UART_CONTROL UART_C_CANERROR "%llx %llx\r\n", *TxInt, *RxInt);
+                printf(UART_CONTROL UART_C_CANBITERROR "%llx %llx\r\n", *TxInt, *RxInt);
                 log_error("CAN data error [%db] %#018llx %#018llx", flips, *TxInt, *RxInt);
             }
         } else {
+            printf(UART_CONTROL UART_C_CANERROR "%s %#010lx\r\n", "RXError", hfdcan2.ErrorCode);
             log_error("CAN RX error %#010lx", hfdcan2.ErrorCode);
         }
     }
