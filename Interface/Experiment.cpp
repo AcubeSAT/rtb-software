@@ -28,6 +28,9 @@ std::reference_wrapper<Experiment> Experiment::currentExperiment = std::ref(Expe
 
 void Experiment::window() {
     ImGui::Text("Current Experiment:");
+    ImGui::SameLine();
+    HelpMarker(currentExperiment.get().description);
+
     const char * experimentName = currentExperiment.get().name.c_str();
 
     ImU32 experimentColour;
@@ -80,6 +83,9 @@ void Experiment::window() {
                 currentExperimentId = n;
                 currentExperiment = std::ref(experiments[n]);
             }
+
+            ImGui::SameLine();
+            HelpMarker(experiments[n].description);
 
             if (is_selected) {
                 ImGui::SetItemDefaultFocus();

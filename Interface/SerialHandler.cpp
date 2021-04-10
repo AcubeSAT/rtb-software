@@ -209,6 +209,15 @@ void SerialHandler::window() {
     if (ImGui::Button("!!")) {
         write("what");
     }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted("Send example message");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.1f, 0.9f, 0.05f, 1.0f}));
     ImGui::RadioButton("RX", dataReceived);

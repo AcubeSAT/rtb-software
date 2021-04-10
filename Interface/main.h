@@ -17,4 +17,6 @@ extern ImFont* largeFont;
 extern ImFont* veryLargeFont;
 extern ImFont* logFont;
 
+void HelpMarker(const std::string& text);
+
 #endif //RADIATIONINTERFACE_MAIN_H

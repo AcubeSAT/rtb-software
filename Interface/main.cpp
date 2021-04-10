@@ -104,8 +104,9 @@ int main(int argc, char *argv[]) {
         return 1;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHintString(GLFW_X11_CLASS_NAME, "ImGui");
 //    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Radiation Testing Board Interface", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1920, 900, "Radiation Testing Board Interface", NULL, NULL);
     if (window == NULL) {
         return 1;
     }
@@ -145,6 +146,8 @@ int main(int argc, char *argv[]) {
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+
+    imguiIo.IniFilename = nullptr;
 
     bool show_test_window = false;
     ImVec4 clear_color = ImColor(35, 44, 59);
@@ -215,35 +218,35 @@ int main(int argc, char *argv[]) {
             Experiment::window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(900, 20), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(870, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(350, 645), ImGuiCond_FirstUseEver);
             ImGui::Begin("Single Event Latchups");
             latchups.window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(1350, 20), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Host Logs");
-            hostLog.window();
-            ImGui::End();
-
-            ImGui::SetNextWindowPos(ImVec2(1350, 332 + 51), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(1000, 332), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Device Logs");
-            deviceLog.window();
-            ImGui::End();
-
             ImGui::SetNextWindowPos(ImVec2(20, 740), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(imguiIo.DisplaySize.x - 40, 400), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(1200, imguiIo.DisplaySize.y - 780), ImGuiCond_FirstUseEver);
             ImGui::Begin("Measurements");
             measurements.window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 740), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(50, 400), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(1240, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
             ImGui::Begin("CAN Bus");
             can.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(1240, 440), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(650, 270), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Host Logs");
+            hostLog.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(1240, 440 + 270 + 31), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(650, 270), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Device Logs");
+            deviceLog.window();
             ImGui::End();
 
             // Rendering
@@ -284,4 +287,15 @@ int main(int argc, char *argv[]) {
     }
 
     return 0;
+}
+
+void HelpMarker(const std::string &text)  {
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(text.c_str());
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }

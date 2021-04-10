@@ -21,7 +21,9 @@ std::array<Parameter<int>, 2> integerParameters = {
 };
 
 void parameterWindow() {
-    ImGui::Text("Floating Point parameters");
+    ImGui::Text("Set Parameters");
+    ImGui::SameLine();
+    HelpMarker("Use Ctrl+Click to manually set values");
     ImGui::Spacing();
 
     for (auto& parameter : floatingParameters) {
@@ -32,7 +34,6 @@ void parameterWindow() {
     }
 
     ImGui::Separator();
-    ImGui::Text("Integer parameters");
     ImGui::Spacing();
 
     for (auto& parameter : integerParameters) {
@@ -45,9 +46,6 @@ void parameterWindow() {
     if (ImGui::Button("Update all", ImVec2(-FLT_MIN, 0.0f))) {
         updateParameters();
     };
-
-    ImGui::Spacing();
-    ImGui::Text("Hint: Ctrl+Click to input value!");
 }
 
 void updateParameters() {
