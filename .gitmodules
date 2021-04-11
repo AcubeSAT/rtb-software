@@ -13,3 +13,6 @@
 [submodule "Interface/lib/cereal"]
 	path = Interface/lib/cereal
 	url = https://github.com/USCiLab/cereal.git
+[submodule "Interface/lib/Tonic"]
+	path = Interface/lib/Tonic
+	url = https://github.com/TonicAudio/Tonic.git

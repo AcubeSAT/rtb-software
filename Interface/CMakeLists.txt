@@ -12,6 +12,7 @@ find_package(Boost 1.50 COMPONENTS system REQUIRED )
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(glfw3 glfw3 REQUIRED)
+pkg_check_modules(pulse libpulse-simple REQUIRED)
 
 include_directories (
         "${PROJECT_SOURCE_DIR}/lib/imgui"
@@ -20,17 +21,20 @@ include_directories (
         "${PROJECT_SOURCE_DIR}/lib/plog/include"
         "${PROJECT_SOURCE_DIR}/lib/magic_enum/include"
         "${PROJECT_SOURCE_DIR}/lib/cereal/include"
+        "${PROJECT_SOURCE_DIR}/lib/Tonic/src"
+        "${PROJECT_SOURCE_DIR}/lib/Tonic/examples/Standalone/RTAudio"
         "${PROJECT_SOURCE_DIR}/lib"
 )
 add_subdirectory(lib)
 add_subdirectory(lib/plog)
 
-set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp SerialHandler.cpp Clock.cpp Latchups.cpp Settings.cpp Log.cpp Measurement.cpp CAN.cpp)
+set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp SerialHandler.cpp Clock.cpp Latchups.cpp Settings.cpp Log.cpp Measurement.cpp CAN.cpp Beep.cpp)
 set(VARIOUS)
 add_executable(RadiationInterface ${SOURCE_FILES} ${VARIOUS})
-target_link_libraries (RadiationInterface ImGui ImGuiBackend ImGuiDemo ImPlot gl3w GL ${glfw3_LIBRARIES} dl rt atomic)
-target_link_libraries (RadiationInterface pthread ${Boost_LIBRARIES})
+target_link_libraries (RadiationInterface ImGui ImGuiBackend ImGuiDemo ImPlot gl3w GL ${glfw3_LIBRARIES} Tonic RtAudio dl rt atomic)
+target_link_libraries (RadiationInterface pthread ${Boost_LIBRARIES} ${pulse_LIBRARIES})
 
+add_compile_definitions(__LINUX_PULSE__)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_CXX_FLAGS "-O3")

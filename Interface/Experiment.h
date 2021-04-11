@@ -10,9 +10,10 @@
 using namespace std::chrono_literals;
 
 class Experiment {
+public:
     typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
     typedef std::chrono::steady_clock::duration Duration;
-
+private:
     Duration previousDuration = 0s;
     std::optional<TimePoint> startTime;
     std::optional<TimePoint> stopTime;
@@ -25,15 +26,6 @@ class Experiment {
         Started,
         Paused
     } status = Idle;
-
-    Duration duration() {
-        if (status == Started) {
-            auto now = std::chrono::steady_clock::now();
-            return previousDuration + now - startTime.value();
-        } else {
-            return previousDuration;
-        }
-    }
 public:
     std::string name;
     std::string description;
@@ -43,6 +35,15 @@ public:
     static std::vector<Experiment> experiments;
     static void window();
     static void resetPopup();
+
+    Duration duration() {
+        if (status == Started) {
+            auto now = std::chrono::steady_clock::now();
+            return previousDuration + now - startTime.value();
+        } else {
+            return previousDuration;
+        }
+    }
 
     void start() {
         if (status == Started) {

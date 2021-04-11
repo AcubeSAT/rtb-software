@@ -6,6 +6,7 @@
 #include "Measurement.h"
 #include "CAN.h"
 #include "Settings.h"
+#include "Beep.h"
 
 const uint8_t UART_CONTROL = '\x11';
 
@@ -13,6 +14,7 @@ extern std::unique_ptr<SerialHandler> serialHandler;
 extern Latchups latchups;
 extern Measurement measurements;
 extern CAN can;
+extern std::optional<Beep> beep;
 
 extern ImFont* largeFont;
 extern ImFont* veryLargeFont;

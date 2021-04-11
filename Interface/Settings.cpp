@@ -13,7 +13,7 @@ Settings::Settings() {
         LOG_WARNING << "Creating new Settings file";
     }
 
-    output = std::ofstream(filename);
+    output = std::ofstream(filename, std::ios::app);
 }
 
 void Settings::flush() {

@@ -32,6 +32,7 @@
 #include "Log.h"
 #include "Measurement.h"
 #include "CAN.h"
+#include "Beep.h"
 
 const char* glsl_version = "#version 130";
 
@@ -53,6 +54,7 @@ Latchups latchups;
 Measurement measurements;
 CAN can;
 Settings settings;
+std::optional<Beep> beep;
 ImFont * largeFont;
 ImFont * veryLargeFont;
 ImFont * logFont;
@@ -94,6 +96,8 @@ int main(int argc, char *argv[]) {
         .addAppender(&fileAppender)
         .addAppender(&windowAppender);
     LOG_INFO << "RadiationInterface started";
+
+    beep.emplace();
 
     serialHandler = std::make_unique<SerialHandler>(deviceLog);
     serialHandler->port = argv[1];
@@ -193,6 +197,10 @@ int main(int argc, char *argv[]) {
             ImGui::Checkbox("Test", &show_test_window);
             ImGui::SameLine();
             ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
+            ImGui::SameLine();
+            if (ImGui::Button("aaaa")) {
+                beep->ominousBeep();
+            }
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_FirstUseEver);
