@@ -10,3 +10,6 @@
 [submodule "Interface/lib/magic_enum"]
 	path = Interface/lib/magic_enum
 	url = https://github.com/Neargye/magic_enum.git
+[submodule "Interface/lib/cereal"]
+	path = Interface/lib/cereal
+	url = https://github.com/USCiLab/cereal.git

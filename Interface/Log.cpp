@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <plog/Log.h>
+#include <imgui_internal.h>
 #include "Log.h"
 #include "main.h"
 #include "imgui_coloured.h"
@@ -75,7 +76,6 @@ void Log::addLogEntry(const std::string & entry, int severity) {
 
 void Log::customEntryWindow() {
     static char entry[256] = "";
-    static std::array<std::string, 6> buttons {"A", "B", "C", "D", "E", "F"};
 
     ImGuiIO& imguiIo = ImGui::GetIO();
 
@@ -84,18 +84,17 @@ void Log::customEntryWindow() {
     ImGui::SameLine();
     if (ImGui::Button("Log", ImVec2(-1.0f, 0.0f)) || pressed) {
         LOG_WARNING << entry;
-        buttons.back() = entry; // Last button is always the last entry
+        settings.logShortcuts.back() = entry; // Last button is always the last entry
         strcpy(entry, "");
+        settings.flush();
     };
 
-    for (auto& it: buttons) {
-        if (ImGui::Button(it.c_str())) {
+    for (auto& it: settings.logShortcuts) {
+        bool button = it.empty() ? ImGui::Button(" ") : ImGui::Button(it.c_str());
+        if (button) {
             if (imguiIo.KeyCtrl) {
-                if (std::string("") == entry) {
-                    it = " ";
-                } else {
-                    it = entry;
-                }
+                it = entry;
+                settings.flush();
             } else {
                 LOG_WARNING << it;
             }

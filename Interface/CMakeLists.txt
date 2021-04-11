@@ -19,12 +19,13 @@ include_directories (
         "${PROJECT_SOURCE_DIR}/lib/imgui/examples/libs/gl3w"
         "${PROJECT_SOURCE_DIR}/lib/plog/include"
         "${PROJECT_SOURCE_DIR}/lib/magic_enum/include"
+        "${PROJECT_SOURCE_DIR}/lib/cereal/include"
         "${PROJECT_SOURCE_DIR}/lib"
 )
 add_subdirectory(lib)
 add_subdirectory(lib/plog)
 
-set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp SerialHandler.cpp Clock.cpp Latchups.cpp Log.cpp Measurement.cpp CAN.cpp)
+set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp SerialHandler.cpp Clock.cpp Latchups.cpp Settings.cpp Log.cpp Measurement.cpp CAN.cpp)
 set(VARIOUS)
 add_executable(RadiationInterface ${SOURCE_FILES} ${VARIOUS})
 target_link_libraries (RadiationInterface ImGui ImGuiBackend ImGuiDemo ImPlot gl3w GL ${glfw3_LIBRARIES} dl rt atomic)

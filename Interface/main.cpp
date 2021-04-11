@@ -52,6 +52,7 @@ std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
 Measurement measurements;
 CAN can;
+Settings settings;
 ImFont * largeFont;
 ImFont * veryLargeFont;
 ImFont * logFont;

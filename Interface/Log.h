@@ -59,5 +59,10 @@ public:
     static void customEntryWindow();
 };
 
+class CustomLog {
+public:
+    void getCustomEntries(ImGuiContext & context);
+};
+
 
 #endif //RADIATIONINTERFACE_LOG_H
