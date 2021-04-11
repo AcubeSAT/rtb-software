@@ -82,6 +82,8 @@ void Latchups::logLatchup() {
             formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str()
         });
     }
+
+    beep->beep(Beep::BeepType::Ominous);
 }
 
 void Latchups::setPopup() {

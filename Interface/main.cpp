@@ -198,9 +198,8 @@ int main(int argc, char *argv[]) {
             ImGui::Checkbox("Test", &show_test_window);
             ImGui::SameLine();
             ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
-            ImGui::SameLine();
-            if (ImGui::Button("aaaa")) {
-                beep->beep();
+            if (ImGui::Button(" ")) {
+                beep->beep(Beep::BeepType::Soft);
             }
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);

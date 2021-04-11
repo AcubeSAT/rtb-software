@@ -37,21 +37,23 @@ void Beep::beep(BeepType type) {
     ControlMetro metro = ControlMetro().bpm(100);
     ControlGenerator freq = ControlRandom().trigger(metro).min(0).max(1);
 
+    float baseFrequency = type == BeepType::Ominous ? 300 : interval(300, 7);
+
     Generator tone = SquareWaveBL().freq(
-            freq * 0.25 + 100
-            + 200
+            freq * 0.25 + baseFrequency
     ); //* SineWave().freq(50);
 
     ADSR env = ADSR()
             .attack(0.01)
-            .decay( 0.4 )
+            .decay( type == BeepType::Ominous ? 0.4 : 0.2 )
             .sustain(0)
             .release(0)
             .doesSustain(false)
             .trigger(1);
 
+    float filterFrequency = type == BeepType::Ominous ? 1200 : 800;
 
-    LPF24 filter = LPF24().Q(2).cutoff( 1200 );
+    LPF24 filter = LPF24().Q(2).cutoff(filterFrequency);
     Generator output = (( tone * env ) >> filter) * 0.5 * getVolume();
 
     synth.setOutputGen(output);

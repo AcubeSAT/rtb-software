@@ -19,6 +19,10 @@ class Beep {
     std::optional<std::thread> thread;
 
     float getVolume();
+
+    static constexpr float interval(float frequency, float semitones) {
+        return frequency * powf(2, semitones / 12.0f);
+    }
 public:
     enum class BeepType {
         Soft,

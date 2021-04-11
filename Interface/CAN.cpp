@@ -32,6 +32,8 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
     };
 
     timeLog.push_back(event);
+
+    beep->beep(Beep::BeepType::Soft);
 }
 
 void CAN::window() {
