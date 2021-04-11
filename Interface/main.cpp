@@ -213,9 +213,15 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(450, 90), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(400, 645), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_FirstUseEver);
             ImGui::Begin("Experiments");
             Experiment::window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(450, 635), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Custom Log Entry");
+            Log::customEntryWindow();
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(870, 20), ImGuiCond_FirstUseEver);

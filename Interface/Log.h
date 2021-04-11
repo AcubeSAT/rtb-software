@@ -55,6 +55,8 @@ public:
         void write(const plog::Record& record) override;
         std::string getColor(plog::Severity severity);
     };
+
+    static void customEntryWindow();
 };
 
 

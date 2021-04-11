@@ -120,7 +120,6 @@ void Experiment::window() {
     ImGui::InputFloat("/cm²/s", &flux, 0.0f, 0.0f, "%.3e");
 
     ImGui::Spacing();
-    ImGui::TextWrapped("%s", currentExperiment.get().description.c_str());
 
     if (currentExperiment.get().status != Idle) {
         auto time = currentExperiment.get().duration();
