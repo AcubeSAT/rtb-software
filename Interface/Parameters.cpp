@@ -5,6 +5,7 @@
 #include <plog/Log.h>
 #include "Parameters.h"
 #include "main.h"
+#include "CommonEnums.h"
 
 std::array<Parameter<float>, 3> floatingParameters = {
         Parameter<float>{"Board Voltage", 3.3, 1, 4, [](float voltage) {
@@ -15,9 +16,12 @@ std::array<Parameter<float>, 3> floatingParameters = {
         Parameter<float>{"DAC 2", 0, 0, 3.3},
 };
 
-std::array<Parameter<int>, 2> integerParameters = {
-        Parameter<int>{"n/a 1", 0, 0, 255},
-        Parameter<int>{"n/a 2", 0, 0, 255},
+std::array<Parameter<int>, 1> integerParameters = {
+        Parameter<int>{"DAC 1", 0, 0, 0},
+};
+
+std::array<std::shared_ptr<EnumParameterBase>, 1> enumParameters = {
+    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::CANSpeed>>(std::string("CAN baudrate"), parameters::CANSpeed::baud250kbps))
 };
 
 void parameterWindow() {
@@ -43,6 +47,22 @@ void parameterWindow() {
     }
 
     ImGui::Separator();
+    ImGui::Spacing();
+//
+    for (auto& parameter : enumParameters) {
+        try {
+            int formValue = parameter->intValue();
+
+            if (ImGui::SliderInt(parameter->name().c_str(), &formValue, 0, parameter->count() - 1,
+                             parameter->valueText().c_str())) {
+                parameter->setValue(formValue);
+            }
+        } catch (const std::exception & e) {
+            LOG_FATAL << e.what();
+        }
+    }
+
+    ImGui::Separator();
     if (ImGui::Button("Update all", ImVec2(-FLT_MIN, 0.0f))) {
         updateParameters();
     };
@@ -61,6 +81,9 @@ void updateParameters() {
     index = 0;
     for (auto& parameter : integerParameters) {
         ss << 'd' << " " << (index++) << " " << parameter.value << '\n';
+    }
+    for (auto& parameter : enumParameters) {
+        ss << 'd' << " " << (index++) << " " << parameter->intValue() << '\n';
     }
 
     std::string serialCommand = ss.str();

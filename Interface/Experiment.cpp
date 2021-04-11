@@ -8,8 +8,8 @@
 std::string loremIpsum = "Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here...";
 
 std::vector<Experiment> Experiment::experiments = {
-        Experiment("CAN transceivers", "An awesome CAN transceiver check"),
-        Experiment("CAN transceivers silent", loremIpsum),
+        Experiment("CAN transceiver", "CAN RX + TX. Comparison of received messages."),
+        Experiment("CAN transceiver silent", loremIpsum),
         Experiment("MRAM static", loremIpsum),
         Experiment("MRAM dynamic", loremIpsum),
         Experiment("MRAM check 0", loremIpsum),

@@ -3,9 +3,22 @@
 
 #include <string>
 #include <array>
+#include <any>
+#include <magic_enum.hpp>
+#include <utility>
+
+class EnumParameterBase {
+public:
+    virtual int intValue() const = 0;
+    virtual int count() const = 0;
+    virtual std::string valueText() const = 0;
+    virtual std::string name() const = 0;
+    virtual void setValue(int newValue) = 0;
+};
 
 template <typename T>
-struct Parameter {
+class Parameter {
+public:
     std::string name;
     T value;
 
@@ -16,11 +29,50 @@ struct Parameter {
     void callCallback() {
         if (callback) callback(value);
     }
+
+    Parameter(std::string name, T value, const std::function<void(T)> &callback = {}) : name(std::move(name)),
+                                                                                                      value(value),
+                                                                                                      callback(callback) {}
+
+    Parameter(std::string name, T value, T min, T max, const std::function<void(T)> &callback = {}) : name(std::move(name)),
+                                                                                                        value(value),
+                                                                                                        min(min),
+                                                                                                        max(max),
+                                                                                                        callback(callback) {}
+
+    virtual ~Parameter() = default;
+
+
+};
+
+template <typename Enum>
+class EnumParameter : public Parameter<Enum>, public EnumParameterBase {
+    using Parameter<Enum>::Parameter;
+public:
+    int intValue() const override {
+        return static_cast<int>(Parameter<Enum>::value);
+    }
+
+    int count() const override {
+        return magic_enum::enum_count<Enum>();
+    }
+
+    std::string valueText() const override {
+        return std::string(magic_enum::enum_name(Parameter<Enum>::value));
+    }
+
+    std::string name() const override {
+        return Parameter<Enum>::name;
+    }
+
+    void setValue(int newValue) override {
+        Parameter<Enum>::value = static_cast<Enum>(newValue);
+    }
 };
 
 extern std::array<Parameter<float>, 3> floatingParameters;
-
-extern std::array<Parameter<int>, 2> integerParameters;
+extern std::array<Parameter<int>, 1> integerParameters;
+//extern std::array<std::any, 1> enumParameters;
 
 void parameterWindow();
 
