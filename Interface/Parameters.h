@@ -6,6 +6,9 @@
 #include <any>
 #include <magic_enum.hpp>
 #include <utility>
+#include "cereal/cereal.hpp"
+#include <cereal/archives/json.hpp>
+
 
 class EnumParameterBase {
 public:
@@ -14,6 +17,11 @@ public:
     virtual std::string valueText() const = 0;
     virtual std::string name() const = 0;
     virtual void setValue(int newValue) = 0;
+
+    template<class Archive>
+    void serialize(Archive &archive) {
+        archive(cereal::make_nvp("name", name()), cereal::make_nvp("value", intValue()));
+    }
 };
 
 template <typename T>
@@ -42,7 +50,10 @@ public:
 
     virtual ~Parameter() = default;
 
-
+    template<class Archive>
+    void serialize(Archive &archive) {
+        archive(CEREAL_NVP(name), CEREAL_NVP(value));
+    }
 };
 
 template <typename Enum>
@@ -68,11 +79,17 @@ public:
     void setValue(int newValue) override {
         Parameter<Enum>::value = static_cast<Enum>(newValue);
     }
+
+    template <class Archive>
+    void serialize( Archive & ar )
+    {
+        ar( cereal::base_class<EnumParameterBase>(this) );
+    }
 };
 
 extern std::array<Parameter<float>, 3> floatingParameters;
 extern std::array<Parameter<int>, 1> integerParameters;
-//extern std::array<std::any, 1> enumParameters;
+extern std::array<std::shared_ptr<EnumParameterBase>, 1> enumParameters;
 
 void parameterWindow();
 

@@ -266,9 +266,13 @@ int main(int argc, char *argv[]) {
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             glfwSwapBuffers(window);
+    } catch (const std::exception & e) {
+            LOG_FATAL << "Unhandled exception in main thread: " << e.what();
+            std::this_thread::sleep_for(50ms);
     } catch (...) {
-            std::string exception = typeid(std::current_exception()).name();
-            LOG_FATAL << "Unhandled exception in main thread: " << exception;
+            auto exception = std::current_exception();
+            std::string explanation = typeid(exception).name();
+            LOG_FATAL << "Unhandled exception in main thread: " << explanation;
 
             std::this_thread::sleep_for(50ms);
         }

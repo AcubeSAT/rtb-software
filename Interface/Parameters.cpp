@@ -3,6 +3,12 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio.hpp>
 #include <plog/Log.h>
+#include <cereal/archives/json.hpp>
+#include <cereal/cereal.hpp>
+#include <cereal/types/map.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <variant>
 #include "Parameters.h"
 #include "main.h"
 #include "CommonEnums.h"
@@ -23,6 +29,28 @@ std::array<Parameter<int>, 1> integerParameters = {
 std::array<std::shared_ptr<EnumParameterBase>, 1> enumParameters = {
     std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::CANSpeed>>(std::string("CAN baudrate"), parameters::CANSpeed::baud250kbps))
 };
+
+namespace cereal {
+    // Serialise a variant without printing the index
+    template<class Archive, typename VariantType1, typename... VariantTypes>
+    void save(Archive &ar, std::variant<VariantType1, VariantTypes...> const &variant) {
+        std::visit([&ar](auto arg) { ar(arg); }, variant);
+    }
+
+    template<class Archive, typename... VariantTypes>
+    inline
+    void load(Archive &ar, std::variant<VariantTypes...> &variant) {}
+
+    // Don't encapsulate variants and maps
+    template<typename... VariantTypes>
+    void epilogue(cereal::JSONOutputArchive&, const std::variant<VariantTypes...> &){}
+    template<typename... VariantTypes>
+    void prologue(cereal::JSONOutputArchive&, const std::variant<VariantTypes...> &){}
+    template<typename K, typename T>
+    void epilogue(cereal::JSONOutputArchive&, const std::map<K,T> &){}
+    template<typename K, typename T>
+    void prologue(cereal::JSONOutputArchive&, const std::map<K,T> &){}
+}
 
 void parameterWindow() {
     ImGui::Text("Set Parameters");
@@ -68,8 +96,30 @@ void parameterWindow() {
     };
 }
 
+std::string dumpParameters() {
+    std::ostringstream ss;
+
+    std::map<std::string, std::variant<int, float, std::string>> parameters;
+
+    for (auto& parameter : floatingParameters) {
+        parameters[parameter.name] = parameter.value;
+    }
+    for (auto& parameter : integerParameters) {
+        parameters[parameter.name] = parameter.value;
+    }
+    for (auto& parameter : enumParameters) {
+        parameters[parameter->name()] = parameter->valueText();
+    }
+
+    cereal::JSONOutputArchive archive(ss, cereal::JSONOutputArchive::Options::Default());
+    archive(parameters);
+
+    return ss.str();
+}
+
 void updateParameters() {
     LOG_DEBUG << "Updating parameters...";
+    LOG_VERBOSE << "Parameter dump: \n" << dumpParameters();
 
     std::ostringstream ss;
 
