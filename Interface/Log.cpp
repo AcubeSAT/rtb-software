@@ -104,11 +104,31 @@ void Log::customEntryWindow() {
     HelpMarker("Press Ctrl+Click to set button content");
 }
 
+std::stringstream Log::getLogFileName(const std::string& type, const std::string& extension) {
+    std::stringstream ss;
+
+    ss << "log/Radiation." << currentDatetime("%FT%T").rdbuf();
+
+    if (!type.empty()) {
+        ss << "." << type;
+    }
+
+    ss << "." << extension;
+
+    return ss;
+}
+
 
 void Log::LogAppender::write(const plog::Record &record) {
-    plog::util::nstring str = plog::TxtFormatter::format(record);
+    tm t;
+    plog::util::localtime_s(&t, &record.getTime().time);
+    plog::util::nostringstream ss;
+    ss << t.tm_year + 1900 << "-" << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_mon + 1 << PLOG_NSTR("-") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_mday << PLOG_NSTR(" ");
+    ss << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_hour << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_min << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_sec << PLOG_NSTR(".") << std::setfill(PLOG_NSTR('0')) << std::setw(3) << static_cast<int> (record.getTime().millitm) << PLOG_NSTR(" ");
+    ss << std::setfill(PLOG_NSTR(' ')) << std::setw(5) << std::left << severityToString(record.getSeverity()) << PLOG_NSTR(" ");
+    ss << record.getMessage() << PLOG_NSTR("\n");
 
-    log.addLogEntry(getColor(record.getSeverity()) + str, - static_cast<int>(record.getSeverity()));
+    log.addLogEntry(getColor(record.getSeverity()) + ss.str(), - static_cast<int>(record.getSeverity()));
 }
 
 std::string Log::LogAppender::getColor(plog::Severity severity) {

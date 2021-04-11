@@ -32,7 +32,7 @@ private:
 public:
     explicit SerialHandler(Log &log) : log(log) {
         file.emplace();
-        file->open(getLogFileName("device").str(), std::ios::out | std::ios::app | std::ios::binary);
+        file->open(Log::getLogFileName("device").str(), std::ios::out | std::ios::app | std::ios::binary);
     };
 
     std::unique_ptr<boost::asio::io_service> io;

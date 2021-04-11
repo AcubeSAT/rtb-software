@@ -58,9 +58,11 @@ public:
     };
 
     static void customEntryWindow();
+
+    static std::stringstream getLogFileName(const std::string& type, const std::string& extension = "log");
 };
 
-class CustomLog {
+class LogControl {
 public:
     void getCustomEntries(ImGuiContext & context);
 };

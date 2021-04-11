@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 
     std::filesystem::create_directory("log");
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender(getLogFileName("host").str().c_str());
+    static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender(Log::getLogFileName("host").str().c_str());
     static Log::LogAppender windowAppender(hostLog);
     plog::init(plog::verbose, &consoleAppender)
         .addAppender(&fileAppender)

@@ -9,19 +9,7 @@
 
 std::atomic<std::uint32_t> microcontrollerClock = 0;
 
-std::stringstream getLogFileName(const std::string& extra) {
-    std::stringstream ss;
 
-    ss << "log/Radiation." << currentDatetime("%FT%T").rdbuf();
-
-    if (!extra.empty()) {
-        ss << "." << extra;
-    }
-
-    ss << ".log";
-
-    return ss;
-};
 
 std::stringstream currentExperimentTime()
 {
