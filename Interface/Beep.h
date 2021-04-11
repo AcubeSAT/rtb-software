@@ -17,7 +17,17 @@ class Beep {
     std::condition_variable audioPlay;
 
     std::optional<std::thread> thread;
+
+    float getVolume();
 public:
+    enum class BeepType {
+        Soft,
+        Medium,
+        Ominous
+    };
+
+    inline static const float minVolume = -30;
+
     inline static const unsigned int nChannels = 2;
 
     Beep();
@@ -25,7 +35,7 @@ public:
 
     virtual ~Beep();
 
-    void ominousBeep();
+    void beep(BeepType type = BeepType::Ominous);
 
     void streamThread();
 };

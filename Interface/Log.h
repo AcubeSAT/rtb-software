@@ -5,6 +5,7 @@
 #include <boost/circular_buffer.hpp>
 #include <mutex>
 #include <utility>
+#include "imgui.h"
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include <plog/Util.h>

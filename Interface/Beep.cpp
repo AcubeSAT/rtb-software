@@ -1,5 +1,6 @@
 #include "Beep.h"
 #include "Tonic.h"
+#include "main.h"
 #include <plog/Log.h>
 #include <RtAudio.h>
 
@@ -23,28 +24,18 @@ Beep::Beep() {
     rtParams.deviceId = dac.getDefaultOutputDevice();
     rtParams.nChannels = nChannels;
 
-    dac.openStream( &rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, renderCallback, NULL, NULL );
+    dac.openStream( &rtParams, nullptr, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, renderCallback, nullptr, nullptr);
 
     thread.emplace(&Beep::streamThread, this);
 }
 
-void Beep::ominousBeep() {
-//    TriangleWave tone1 = TriangleWave();
-//    SineWave tone2 = SineWave();
-//    SineWave vibrato = SineWave().freq(10);
-//    SineWave tremolo = SineWave().freq(1);
-//
-//    //that you can combine using intuitive operators
-//    Generator combinedSignal = (tone1 + tone2) * tremolo;
-//
-//    //and plug in to one another
-//    float baseFreq = 200;
-//    tone1.freq(baseFreq + vibrato * 10);
-//    tone2.freq(baseFreq * 2 + vibrato * 20);
+void Beep::beep(BeepType type) {
+    if (settings.volume <= minVolume + 0.1f) {
+        return;
+    }
 
     ControlMetro metro = ControlMetro().bpm(100);
     ControlGenerator freq = ControlRandom().trigger(metro).min(0).max(1);
-//    ControlGenerator step = ControlStepper().end(NUM_STEPS).trigger(metro);
 
     Generator tone = SquareWaveBL().freq(
             freq * 0.25 + 100
@@ -60,8 +51,8 @@ void Beep::ominousBeep() {
             .trigger(1);
 
 
-    LPF24 filter = LPF24().Q(2).cutoff( 700 );
-    Generator output = (( tone * env ) >> filter) * 0.3;
+    LPF24 filter = LPF24().Q(2).cutoff( 1200 );
+    Generator output = (( tone * env ) >> filter) * 0.5 * getVolume();
 
     synth.setOutputGen(output);
 
@@ -91,4 +82,8 @@ void Beep::streamThread() {
     }
 }
 
+float Beep::getVolume() {
+    double dB = settings.volume;
+    return std::pow(10, dB / 20.0);
+}
 

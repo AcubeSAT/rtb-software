@@ -33,6 +33,7 @@
 #include "Measurement.h"
 #include "CAN.h"
 #include "Beep.h"
+#include "Settings.h"
 
 const char* glsl_version = "#version 130";
 
@@ -192,15 +193,18 @@ int main(int argc, char *argv[]) {
 
             ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_Always);
             ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_Always);
-            ImGui::Begin("SpaceDot CubeSAT");
+            ImGui::Begin("Radiation Configuration");
 
             ImGui::Checkbox("Test", &show_test_window);
             ImGui::SameLine();
             ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
             ImGui::SameLine();
             if (ImGui::Button("aaaa")) {
-                beep->ominousBeep();
+                beep->beep();
             }
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);
+            ImGui::SliderFloat("volume", &(settings.volume), -30.0f, 10.0f, settings.volume <= Beep::minVolume + 0.1f ? "Off" : "%.1f dB");
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_FirstUseEver);

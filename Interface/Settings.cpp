@@ -13,14 +13,19 @@ Settings::Settings() {
         LOG_WARNING << "Creating new Settings file";
     }
 
-    output = std::ofstream(filename, std::ios::app);
+    output = std::ofstream(filename);
+    flush(); // Write the data once so that we don't have any issues with flushing
+}
+
+void Settings::save() {
+    cereal::JSONOutputArchive archive(output);
+    archive(cereal::make_nvp("settings", *this));
 }
 
 void Settings::flush() {
-    output.flush();
     output.seekp(0, std::ios::beg);
-    cereal::JSONOutputArchive archive(output);
-    archive(cereal::make_nvp("settings", *this));
+    save();
+    output.flush();
 }
 
 Settings::~Settings() {
