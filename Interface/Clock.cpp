@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include "Clock.h"
 #include "main.h"
+#include "Experiment.h"
 
 std::atomic<std::uint32_t> microcontrollerClock = 0;
 
@@ -21,6 +22,11 @@ std::stringstream getLogFileName(const std::string& extra) {
 
     return ss;
 };
+
+std::stringstream currentExperimentTime()
+{
+    return formatDuration(Experiment::getCurrentExperimentDuration());
+}
 
 std::stringstream currentDatetime(const std::string& format)
 {

@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
 
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
     largeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f);
-    veryLargeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 64.0f);
+    veryLargeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 96.0f);
     logFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 15.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -198,8 +198,14 @@ int main(int argc, char *argv[]) {
             ImGui::Checkbox("Test", &show_test_window);
             ImGui::SameLine();
             ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
+            ImGui::SameLine();
             if (ImGui::Button(" ")) {
                 beep->beep(Beep::BeepType::Soft);
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::TextUnformatted("Sound test beep");
+                ImGui::EndTooltip();
             }
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);

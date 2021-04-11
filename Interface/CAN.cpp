@@ -28,7 +28,8 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
         tx,
         std::move(info),
         currentDatetimeMilliseconds().str(),
-        formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str()
+        formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str(),
+        currentExperimentTime().str()
     };
 
     timeLog.push_back(event);
@@ -105,7 +106,7 @@ void CAN::window() {
     if (ImGui::BeginTable("table_can_timelog", 5, flags)) {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
-        ImGui::TableSetupColumn("MCU Time", ImGuiTableColumnFlags_WidthFixed, 100);
+        ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 50);
         ImGui::TableSetupColumn("#flips", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableSetupColumn("Error Code", ImGuiTableColumnFlags_WidthStretch, 100);
@@ -121,7 +122,7 @@ void CAN::window() {
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Selectable(std::to_string(index + 1).c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text("%s", timeLog[index].mcuTime.c_str());
+                ImGui::Text("%s", timeLog[index].experimentTime.c_str());
 
                 if (timeLog[index].measuredType == Event::BitFlip) {
                     ImGui::TableSetColumnIndex(2);

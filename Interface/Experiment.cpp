@@ -117,6 +117,9 @@ void Experiment::window() {
 
     static float flux = 1.e10f;
     ImGui::Text("Flux:");
+    ImGui::SameLine();
+    HelpMarker("Set the flux to quickly calculate the total fluence for the duration of this experiment");
+    ImGui::SameLine();
     ImGui::InputFloat("/cm²/s", &flux, 0.0f, 0.0f, "%.3e");
 
     ImGui::Spacing();

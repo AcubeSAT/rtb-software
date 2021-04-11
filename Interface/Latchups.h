@@ -16,6 +16,7 @@ public:
     struct LatchupEvent {
         std::string computerTime;
         std::string mcuTime;
+        std::string experimentTime;
     };
 
     std::mutex timeLogMutex;

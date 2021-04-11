@@ -36,6 +36,14 @@ public:
     static void window();
     static void resetPopup();
 
+    static Experiment getCurrentExperiment() {
+        return currentExperiment;
+    }
+
+    static Duration getCurrentExperimentDuration() {
+        return currentExperiment.get().duration();
+    }
+
     Duration duration() {
         if (status == Started) {
             auto now = std::chrono::steady_clock::now();

@@ -46,6 +46,7 @@ public:
 
         std::string computerTime;
         std::string mcuTime;
+        std::string experimentTime;
     };
 private:
     std::mutex timeLogMutex;
