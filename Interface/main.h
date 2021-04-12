@@ -7,6 +7,7 @@
 #include "CAN.h"
 #include "Settings.h"
 #include "Beep.h"
+#include "CSV.h"
 
 const uint8_t UART_CONTROL = '\x11';
 
@@ -15,6 +16,7 @@ extern Latchups latchups;
 extern Measurement measurements;
 extern CAN can;
 extern std::optional<Beep> beep;
+extern std::optional<CSV> csv;
 
 extern ImFont* largeFont;
 extern ImFont* veryLargeFont;

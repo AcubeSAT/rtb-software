@@ -35,6 +35,7 @@
 #include "Beep.h"
 #include "Settings.h"
 #include "FontAwesome.h"
+#include "CSV.h"
 
 const char* glsl_version = "#version 130";
 
@@ -57,6 +58,7 @@ Measurement measurements;
 CAN can;
 Settings settings;
 std::optional<Beep> beep;
+std::optional<CSV> csv;
 ImFont * largeFont;
 ImFont * veryLargeFont;
 ImFont * logFont;
