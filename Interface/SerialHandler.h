@@ -32,12 +32,17 @@ private:
 public:
     explicit SerialHandler(Log &log) : log(log) {
         file.emplace();
-        file->open(Log::getLogFileName("device").str(), std::ios::out | std::ios::app | std::ios::binary);
+        openLogFile();
     };
 
     std::unique_ptr<boost::asio::io_service> io;
     std::unique_ptr<boost::asio::serial_port> serial;
     std::string port;
+
+    /**
+     * Opens the log file with the default filename
+     */
+    void openLogFile();
 
     /**
      * Sends a message to the serial device

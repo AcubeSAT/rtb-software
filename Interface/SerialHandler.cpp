@@ -128,8 +128,13 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                 }
 
                 if (file.has_value()) {
-                    file.value() << time().str() << receivedRaw << std::endl;
-                    file->flush();
+                    try {
+                        file.value() << time().str() << receivedRaw << std::endl;
+                        file->flush();
+                    } catch (const std::exception &e) {
+                        LOG_FATAL << "Could not write to device log file: " << e.what();
+                        file.reset();
+                    }
                 }
             }
         }
@@ -239,4 +244,19 @@ void SerialHandler::window() {
     // Reset indicators so that they light up just for one frame
     dataReceived = dataSent = false;
     dataError = false;
+}
+
+void SerialHandler::openLogFile() {
+    if (!file) file.emplace();
+
+    if (file->is_open()) file->close();
+
+    file->exceptions(std::ofstream::failbit | std::ofstream::badbit);
+
+    try {
+        file->open(LogControl::getLogFileName("device"), std::ios::out | std::ios::app | std::ios::binary);
+    } catch (const std::exception & e) {
+        LOG_FATAL << "Could not open log file for writing: " << e.what();
+        file.reset();
+    }
 }

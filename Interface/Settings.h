@@ -18,6 +18,7 @@ public:
 
     std::array<std::string, 6> logShortcuts{"A", "B", "C", "D", "E", "F"};
     float volume = 0.0f;
+    std::string logTitle = "Vanilla";
 
     void flush();
 
@@ -25,7 +26,8 @@ public:
     void serialize(Archive &archive) {
         archive(
             CEREAL_NVP(logShortcuts),
-            CEREAL_NVP(volume)
+            CEREAL_NVP(volume),
+            CEREAL_NVP(logTitle)
         );
     }
 };

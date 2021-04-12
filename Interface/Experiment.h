@@ -6,6 +6,7 @@
 #include <chrono>
 #include <plog/Log.h>
 #include "Clock.h"
+#include "Log.h"
 
 using namespace std::chrono_literals;
 
@@ -13,6 +14,12 @@ class Experiment {
 public:
     typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
     typedef std::chrono::steady_clock::duration Duration;
+
+    enum Status {
+        Idle,
+        Started,
+        Paused
+    };
 private:
     Duration previousDuration = 0s;
     std::optional<TimePoint> startTime;
@@ -21,11 +28,7 @@ private:
     static int currentExperimentId;
     static std::reference_wrapper<Experiment> currentExperiment;
 
-    enum {
-        Idle,
-        Started,
-        Paused
-    } status = Idle;
+    Status status = Idle;
 public:
     std::string name;
     std::string description;
@@ -57,6 +60,10 @@ public:
         if (status == Started) {
             LOG_ERROR << "The experiment has already started? It cannot be started again.";
             return;
+        }
+
+        if (status == Idle) {
+            LogControl::saveNewLogTitle();
         }
 
         status = Started;

@@ -18,6 +18,7 @@ include_directories (
         "${PROJECT_SOURCE_DIR}/lib/imgui"
         "${PROJECT_SOURCE_DIR}/lib/imgui/backends"
         "${PROJECT_SOURCE_DIR}/lib/imgui/examples/libs/gl3w"
+        "${PROJECT_SOURCE_DIR}/lib/imgui/misc/cpp"
         "${PROJECT_SOURCE_DIR}/lib/plog/include"
         "${PROJECT_SOURCE_DIR}/lib/magic_enum/include"
         "${PROJECT_SOURCE_DIR}/lib/cereal/include"

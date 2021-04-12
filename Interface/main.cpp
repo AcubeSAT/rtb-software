@@ -34,6 +34,7 @@
 #include "CAN.h"
 #include "Beep.h"
 #include "Settings.h"
+#include "FontAwesome.h"
 
 const char* glsl_version = "#version 130";
 
@@ -59,11 +60,19 @@ std::optional<Beep> beep;
 ImFont * largeFont;
 ImFont * veryLargeFont;
 ImFont * logFont;
+ImFont * iconFont;
+std::optional<plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>>> logFileAppender;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
 
-#pragma clang diagnostic pop
+const ImWchar* GetGlyphRangesFontAwesome()
+{
+    static const ImWchar ranges[] =
+        {
+            0xF000, 0xFFFF,
+            0,
+        };
+    return &ranges[0];
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -89,14 +98,16 @@ int main(int argc, char *argv[]) {
         Log::LogLevel{"FATAL", 5},
     });
 
-    std::filesystem::create_directory("log");
+    LogControl::createLogDirectory();
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> fileAppender(Log::getLogFileName("host").str().c_str());
+    logFileAppender.emplace(LogControl::getLogFileName("host").c_str());
     static Log::LogAppender windowAppender(hostLog);
-    plog::init(plog::verbose, &consoleAppender)
-        .addAppender(&fileAppender)
-        .addAppender(&windowAppender);
+    auto& log = plog::init(plog::verbose, &consoleAppender)
+            .addAppender(&logFileAppender.value())
+            .addAppender(&windowAppender);
     LOG_INFO << "RadiationInterface started";
+    LOG_INFO << "Log output:" << LogControl::getLogFileName("***");
+    LogControl::reset();
 
     beep.emplace();
 
@@ -148,7 +159,8 @@ int main(int argc, char *argv[]) {
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
     largeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f);
     veryLargeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 96.0f);
-    logFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/ShareTechMono-Regular.ttf").c_str(), 15.0f);
+    logFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/ShareTechMono-Regular.ttf").c_str(), 15.0f);
+    iconFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/Font Awesome 5 Free-Solid-900.otf").c_str(), 16.0f, nullptr, GetGlyphRangesFontAwesome());
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyClean.ttf", 13.0f);
 //    io.Fonts->AddFontFromFileTTF("../lib/imgui/misc/fonts/ProggyTiny.ttf", 10.0f);
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
@@ -199,17 +211,24 @@ int main(int argc, char *argv[]) {
             ImGui::SameLine();
             ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
             ImGui::SameLine();
-            if (ImGui::Button(" ")) {
+            ImGui::PushFont(iconFont);
+            if (ImGui::Button(FontAwesome::VolumeUp)) {
                 beep->beep(Beep::BeepType::Soft);
             }
-            if (ImGui::IsItemHovered()) {
-                ImGui::BeginTooltip();
-                ImGui::TextUnformatted("Sound test beep");
-                ImGui::EndTooltip();
+            ImGui::PopFont();
+            HelpTooltip("Sound test beep");
+            ImGui::SameLine();
+            ImGui::PushFont(iconFont);
+            if (ImGui::Button(FontAwesome::Save)) {
+                settings.flush();
             }
+            ImGui::PopFont();
+            HelpTooltip("Save configuration");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            ImGui::SliderFloat("volume", &(settings.volume), -30.0f, 10.0f, settings.volume <= Beep::minVolume + 0.1f ? "Off" : "%.1f dB");
+            if (ImGui::SliderFloat("volume", &(settings.volume), Beep::minVolume, 10.0f, settings.volume <= Beep::minVolume + 0.1f ? "Off" : "%.1f dB")) {
+                if (std::fabs(settings.volume) < 0.8f) settings.volume = 0.0f; // snap to 0
+            }
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_FirstUseEver);
@@ -219,19 +238,25 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(20, 200), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(400, 535), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Parameters");
-            parameterWindow();
-            ImGui::End();
-
-            ImGui::SetNextWindowPos(ImVec2(450, 20), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_FirstUseEver);
             ImGui::Begin("Serial Connection");
             serialHandler->window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(450, 90), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(400, 545), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(20, 270), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 465), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Parameters");
+            parameterWindow();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(450, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 85), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Log Title");
+            LogControl::logTitleWindow();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(450, 105), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 530), ImGuiCond_FirstUseEver);
             ImGui::Begin("Experiments");
             Experiment::window();
             ImGui::End();
@@ -239,7 +264,7 @@ int main(int argc, char *argv[]) {
             ImGui::SetNextWindowPos(ImVec2(450, 635), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowSize(ImVec2(400, 100), ImGuiCond_FirstUseEver);
             ImGui::Begin("Custom Log Entry");
-            Log::customEntryWindow();
+            LogControl::customEntryWindow();
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(870, 20), ImGuiCond_FirstUseEver);
@@ -319,6 +344,10 @@ int main(int argc, char *argv[]) {
 
 void HelpMarker(const std::string &text)  {
     ImGui::TextDisabled("(?)");
+    HelpTooltip(text);
+}
+
+void HelpTooltip(const std::string &text)  {
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);

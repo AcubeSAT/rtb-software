@@ -9,6 +9,8 @@
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include <plog/Util.h>
+#include <plog/Appenders/RollingFileAppender.h>
+#include <plog/Converters/NativeEOLConverter.h>
 
 class Log {
 public:
@@ -57,14 +59,31 @@ public:
         std::string getColor(plog::Severity severity);
     };
 
-    static void customEntryWindow();
-
-    static std::stringstream getLogFileName(const std::string& type, const std::string& extension = "log");
 };
 
 class LogControl {
+    static plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>> logAppender;
+    static std::string getLogFileDirectory(bool updateDate = false);
 public:
-    void getCustomEntries(ImGuiContext & context);
+    enum class LogStatus {
+        manual,
+        automatic
+    };
+
+    inline static LogStatus status = LogStatus::automatic;
+    inline static bool dryRun = false;
+    inline static std::string temporaryLogTitle;
+    inline static std::string extra = "";
+
+    static void logTitleWindow();
+    static void customEntryWindow();
+
+    static void saveNewLogTitle();
+    static void reset();
+    static std::string getAutomaticLogTitle();
+
+    static void createLogDirectory();
+    static std::string getLogFileName(const std::string& type, const std::string& extension = "log");
 };
 
 

@@ -4,6 +4,14 @@
 #include "Log.h"
 #include "main.h"
 #include "imgui_coloured.h"
+#include "imgui_stdlib.h"
+#include "FontAwesome.h"
+#include "Experiment.h"
+#include <filesystem>
+#include "plog/Init.h"
+#include <plog/Appenders/RollingFileAppender.h>
+#include <plog/Appenders/ColorConsoleAppender.h>
+#include <plog/Formatters/TxtFormatter.h>
 
 void Log::window() {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
@@ -74,50 +82,6 @@ void Log::addLogEntry(const std::string & entry, int severity) {
     items.push_back(std::make_pair(severity, entry));
 }
 
-void Log::customEntryWindow() {
-    static char entry[256] = "";
-
-    ImGuiIO& imguiIo = ImGui::GetIO();
-
-    bool pressed = ImGui::InputText("", entry, 256, ImGuiInputTextFlags_EnterReturnsTrue);
-
-    ImGui::SameLine();
-    if (ImGui::Button("Log", ImVec2(-1.0f, 0.0f)) || pressed) {
-        LOG_WARNING << entry;
-        settings.logShortcuts.back() = entry; // Last button is always the last entry
-        strcpy(entry, "");
-        settings.flush();
-    };
-
-    for (auto& it: settings.logShortcuts) {
-        bool button = it.empty() ? ImGui::Button(" ") : ImGui::Button(it.c_str());
-        if (button) {
-            if (imguiIo.KeyCtrl) {
-                it = entry;
-                settings.flush();
-            } else {
-                LOG_WARNING << it;
-            }
-        }
-        ImGui::SameLine();
-    }
-    HelpMarker("Press Ctrl+Click to set button content");
-}
-
-std::stringstream Log::getLogFileName(const std::string& type, const std::string& extension) {
-    std::stringstream ss;
-
-    ss << "log/Radiation." << currentDatetime("%FT%T").rdbuf();
-
-    if (!type.empty()) {
-        ss << "." << type;
-    }
-
-    ss << "." << extension;
-
-    return ss;
-}
-
 
 void Log::LogAppender::write(const plog::Record &record) {
     tm t;
@@ -153,4 +117,159 @@ std::string Log::LogAppender::getColor(plog::Severity severity) {
         default:
             return "";
     }
+}
+
+void LogControl::customEntryWindow() {
+    static char entry[256] = "";
+
+    ImGuiIO& imguiIo = ImGui::GetIO();
+
+    bool pressed = ImGui::InputText("", entry, 256, ImGuiInputTextFlags_EnterReturnsTrue);
+
+    ImGui::SameLine();
+    if (ImGui::Button("Log", ImVec2(-1.0f, 0.0f)) || pressed) {
+        LOG_WARNING << entry;
+        settings.logShortcuts.back() = entry; // Last button is always the last entry
+        strcpy(entry, "");
+        settings.flush();
+    };
+
+    for (auto& it: settings.logShortcuts) {
+        bool button = it.empty() ? ImGui::Button(" ") : ImGui::Button(it.c_str());
+        if (button) {
+            if (imguiIo.KeyCtrl) {
+                it = entry;
+                settings.flush();
+            } else {
+                LOG_WARNING << it;
+            }
+        }
+        ImGui::SameLine();
+    }
+    HelpMarker("Press Ctrl+Click to set button content");
+}
+
+void LogControl::logTitleWindow() {
+    bool checkbox = status == LogStatus::manual;
+    if (ImGui::Checkbox("manual", &checkbox)) {
+        status = checkbox ? LogStatus::manual : LogStatus::automatic;
+        reset();
+    }
+    ImGui::SameLine();
+
+    if (status == LogStatus::manual) {
+        ImGui::SameLine(0, 40);
+        ImGui::Text("Log Title:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(150);
+        ImGui::InputText("", &temporaryLogTitle);
+    } else {
+        ImGui::SameLine();
+        if (ImGui::Checkbox("dry run?", &dryRun)) {
+            temporaryLogTitle = getAutomaticLogTitle();
+        }
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(50);
+        if (ImGui::InputTextWithHint("", "extra", &extra)) {
+            temporaryLogTitle = getAutomaticLogTitle();
+        }
+    }
+
+    if (temporaryLogTitle != settings.logTitle) {
+        if (status == LogStatus::manual) {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4) ImColor::HSV(2.5f / 7.0f, 0.6f, 0.6f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4) ImColor::HSV(2.5f / 7.0f, 0.7f, 0.7f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4) ImColor::HSV(2.5f / 7.0f, 0.8f, 0.8f));
+
+            ImGui::SameLine();
+            ImGui::PushFont(iconFont);
+
+            if (ImGui::Button(FontAwesome::Undo)) {
+                reset();
+            }
+
+            ImGui::PopFont();
+            HelpTooltip("Reset to current title");
+            ImGui::PopStyleColor(3);
+        }
+    }
+
+    if (status == LogStatus::manual || temporaryLogTitle != settings.logTitle) {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5f / 7.0f, 0.6f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.5f / 7.0f, 0.7f, 0.7f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.5f / 7.0f, 0.8f, 0.8f));
+
+        ImGui::SameLine();
+        ImGui::PushFont(iconFont);
+        if (ImGui::Button(FontAwesome::Save)) {
+            saveNewLogTitle();
+        }
+        ImGui::PopFont();
+        HelpTooltip("Save new log title");
+
+        ImGui::PopStyleColor(3);
+    }
+
+    if (status == LogStatus::automatic) {
+        ImGui::PushFont(logFont);
+        ImGui::TextUnformatted(getAutomaticLogTitle().c_str());
+        ImGui::PopFont();
+    }
+}
+
+std::string LogControl::getLogFileDirectory(bool updateDate) {
+    static std::string cached;
+    if (cached.empty() || updateDate) {
+        stringstream ss;
+        ss << currentDatetime("%FT%T").rdbuf() << "." << settings.logTitle;
+        cached = ss.str();
+    }
+
+    return cached;
+}
+
+std::string LogControl::getLogFileName(const string& type, const string& extension) {
+    stringstream ss;
+
+    ss << "log/" << getLogFileDirectory();
+
+    if (!type.empty()) {
+        ss << "/" << settings.logTitle << "." << type;
+    }
+
+    ss << "." << extension;
+
+    return ss.str();
+}
+
+void LogControl::createLogDirectory() {
+    std::filesystem::create_directory("log");
+    std::filesystem::create_directory("log/" + getLogFileDirectory());
+}
+
+
+void LogControl::reset() {
+    if (status == LogStatus::manual) {
+        temporaryLogTitle = settings.logTitle;
+    } else {
+        temporaryLogTitle = getAutomaticLogTitle();
+    }
+}
+
+std::string LogControl::getAutomaticLogTitle() {
+    Experiment experiment = Experiment::getCurrentExperiment();
+    return experiment.name + (dryRun ? ".Dry" : "") + (extra.empty() ? "" : ("." + extra));
+}
+
+void LogControl::saveNewLogTitle() {
+    settings.logTitle = temporaryLogTitle;
+    settings.flush();
+    getLogFileDirectory(true);
+
+    LOG_WARNING << "Moving to new log file " << getLogFileName("***");
+
+    createLogDirectory();
+
+    logFileAppender->setFileName(LogControl::getLogFileName("host").c_str());
+    serialHandler->openLogFile();
 }

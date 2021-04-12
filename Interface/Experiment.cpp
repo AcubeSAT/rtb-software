@@ -8,6 +8,7 @@
 std::string loremIpsum = "Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here...";
 
 std::vector<Experiment> Experiment::experiments = {
+        Experiment("Clear", "No experiment selected. No actions taken"),
         Experiment("CAN transceiver", "CAN RX + TX. Comparison of received messages."),
         Experiment("CAN transceiver silent", loremIpsum),
         Experiment("MRAM static", loremIpsum),
@@ -82,6 +83,9 @@ void Experiment::window() {
             if (ImGui::Selectable(experiments[n].name.c_str(), is_selected, flags)) {
                 currentExperimentId = n;
                 currentExperiment = std::ref(experiments[n]);
+                if (LogControl::status == LogControl::LogStatus::automatic) {
+                    LogControl::reset();
+                }
             }
 
             ImGui::SameLine();

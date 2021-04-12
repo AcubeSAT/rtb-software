@@ -1,4 +1,4 @@
-add_library(ImGui imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_tables.cpp imgui/imgui_widgets.cpp imgui_coloured.cpp)
+add_library(ImGui imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_tables.cpp imgui/imgui_widgets.cpp imgui_coloured.cpp imgui/misc/cpp/imgui_stdlib.cpp)
 add_library(ImGuiBackend imgui/backends/imgui_impl_glfw.cpp imgui/backends/imgui_impl_opengl3.cpp)
 add_library(ImGuiDemo imgui/imgui_demo.cpp)
 add_library(ImPlot implot/implot.cpp implot/implot_demo.cpp implot/implot_items.cpp)
