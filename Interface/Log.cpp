@@ -272,4 +272,5 @@ void LogControl::saveNewLogTitle() {
 
     logFileAppender->setFileName(LogControl::getLogFileName("host").c_str());
     serialHandler->openLogFile();
+    csv->refreshAllFilenames();
 }

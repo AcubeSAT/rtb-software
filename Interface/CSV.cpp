@@ -23,9 +23,10 @@ CSV::CSV()  {
     });
 }
 
-void CSV::createFile(const std::string & filename, const std::vector<std::string> & columns) {
-    if (files.find(filename) == files.end()) {
-        files[filename] = std::make_pair(std::ofstream(LogControl::getLogFileName(filename, "csv"), std::ios::app), std::chrono::steady_clock::now());
+void CSV::createFile(const std::string &filename, bool force) {
+    if (files.find(filename) == files.end() || force) {
+        files[filename] = std::make_pair(std::ofstream(LogControl::getLogFileName(filename, "csv"), std::ios::app),
+                                         std::chrono::steady_clock::now());
 
         if (!files[filename].first.good()) {
             LOG_FATAL << "Could not open file " << filename << " for writing";
@@ -36,9 +37,15 @@ void CSV::createFile(const std::string & filename, const std::vector<std::string
             LOG_VERBOSE << "Created new log file " << filename;
         }
 
-        files[filename].first << "time,mcuTime,experimentTime," << boost::algorithm::join(columns, ", ") << std::endl;
+        files[filename].first << "time,mcuTime,experimentTime,"
+                              << boost::algorithm::join(fileSignatures[filename], ", ") << std::endl;
         files[filename].second = std::chrono::steady_clock::now();
     }
+}
+
+void CSV::createFile(const std::string & filename, const std::vector<std::string> & columns, bool force) {
+    fileSignatures[filename] = columns;
+    createFile(filename, force);
 }
 
 void CSV::addCSVentry(const std::string &filename, const std::vector<std::string> &data) {
@@ -59,5 +66,15 @@ void CSV::addCSVentry(const std::string &filename, const std::vector<std::string
     files[filename].first << timeString << "," << boost::algorithm::join(data, ", ") << '\n';
     if (std::chrono::steady_clock::now() > files[filename].second + flushInterval) {
         files[filename].first.flush();
+    }
+}
+
+void CSV::refreshAllFilenames() {
+    for (auto& it : files) {
+        if (it.second.first.is_open()) {
+            it.second.first.close();
+        }
+
+        createFile(it.first, true);
     }
 }
