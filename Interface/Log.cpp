@@ -129,17 +129,17 @@ void LogControl::customEntryWindow() {
     ImGui::SameLine();
     if (ImGui::Button("Log", ImVec2(-1.0f, 0.0f)) || pressed) {
         LOG_WARNING << entry;
-        settings.logShortcuts.back() = entry; // Last button is always the last entry
+        settings->logShortcuts.back() = entry; // Last button is always the last entry
         strcpy(entry, "");
-        settings.flush();
+        settings->flush();
     };
 
-    for (auto& it: settings.logShortcuts) {
+    for (auto& it: settings->logShortcuts) {
         bool button = it.empty() ? ImGui::Button(" ") : ImGui::Button(it.c_str());
         if (button) {
             if (imguiIo.KeyCtrl) {
                 it = entry;
-                settings.flush();
+                settings->flush();
             } else {
                 LOG_WARNING << it;
             }
@@ -175,7 +175,7 @@ void LogControl::logTitleWindow() {
         }
     }
 
-    if (temporaryLogTitle != settings.logTitle) {
+    if (temporaryLogTitle != settings->logTitle) {
         if (status == LogStatus::manual) {
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4) ImColor::HSV(2.5f / 7.0f, 0.6f, 0.6f));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4) ImColor::HSV(2.5f / 7.0f, 0.7f, 0.7f));
@@ -194,7 +194,7 @@ void LogControl::logTitleWindow() {
         }
     }
 
-    if (status == LogStatus::manual || temporaryLogTitle != settings.logTitle) {
+    if (status == LogStatus::manual || temporaryLogTitle != settings->logTitle) {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5f / 7.0f, 0.6f, 0.6f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.5f / 7.0f, 0.7f, 0.7f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.5f / 7.0f, 0.8f, 0.8f));
@@ -221,7 +221,7 @@ std::string LogControl::getLogFileDirectory(bool updateDate) {
     static std::string cached;
     if (cached.empty() || updateDate) {
         stringstream ss;
-        ss << currentDatetime("%FT%T").rdbuf() << "." << settings.logTitle;
+        ss << currentDatetime("%FT%T").rdbuf() << "." << settings->logTitle;
         cached = ss.str();
     }
 
@@ -234,7 +234,7 @@ std::string LogControl::getLogFileName(const string& type, const string& extensi
     ss << "log/" << getLogFileDirectory();
 
     if (!type.empty()) {
-        ss << "/" << settings.logTitle << "." << type;
+        ss << "/" << settings->logTitle << "." << type;
     }
 
     ss << "." << extension;
@@ -250,7 +250,7 @@ void LogControl::createLogDirectory() {
 
 void LogControl::reset() {
     if (status == LogStatus::manual) {
-        temporaryLogTitle = settings.logTitle;
+        temporaryLogTitle = settings->logTitle;
     } else {
         temporaryLogTitle = getAutomaticLogTitle();
     }
@@ -262,8 +262,8 @@ std::string LogControl::getAutomaticLogTitle() {
 }
 
 void LogControl::saveNewLogTitle() {
-    settings.logTitle = temporaryLogTitle;
-    settings.flush();
+    settings->logTitle = temporaryLogTitle;
+    settings->flush();
     getLogFileDirectory(true);
 
     LOG_WARNING << "Moving to new log file " << getLogFileName("***");

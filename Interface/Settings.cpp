@@ -10,7 +10,7 @@ Settings::Settings() {
 
         archive(*this);
     } catch (const std::exception & e) {
-        LOG_WARNING << "Creating new Settings file";
+        LOG_WARNING << "Creating new Settings file (" << e.what() << ")";
     }
 
     output = std::ofstream(filename);

@@ -56,7 +56,7 @@ std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
 Measurement measurements;
 CAN can;
-Settings settings;
+std::optional<Settings> settings;
 std::optional<Beep> beep;
 std::optional<CSV> csv;
 ImFont * largeFont;
@@ -100,15 +100,17 @@ int main(int argc, char *argv[]) {
         Log::LogLevel{"FATAL", 5},
     });
 
-    LogControl::createLogDirectory();
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    logFileAppender.emplace(LogControl::getLogFileName("host").c_str());
     static Log::LogAppender windowAppender(hostLog);
     auto& log = plog::init(plog::verbose, &consoleAppender)
-            .addAppender(&logFileAppender.value())
             .addAppender(&windowAppender);
     LOG_INFO << "RadiationInterface started";
     LOG_INFO << "Log output:" << LogControl::getLogFileName("***");
+
+    settings.emplace();
+    logFileAppender.emplace(LogControl::getLogFileName("host").c_str());
+    log.addAppender(&logFileAppender.value());
+    LogControl::createLogDirectory();
     LogControl::reset();
 
     beep.emplace();
@@ -223,14 +225,14 @@ int main(int argc, char *argv[]) {
             ImGui::SameLine();
             ImGui::PushFont(iconFont);
             if (ImGui::Button(FontAwesome::Save)) {
-                settings.flush();
+                settings->flush();
             }
             ImGui::PopFont();
             HelpTooltip("Save configuration");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);
-            if (ImGui::SliderFloat("volume", &(settings.volume), Beep::minVolume, 10.0f, settings.volume <= Beep::minVolume + 0.1f ? "Off" : "%.1f dB")) {
-                if (std::fabs(settings.volume) < 0.8f) settings.volume = 0.0f; // snap to 0
+            if (ImGui::SliderFloat("volume", &(settings->volume), Beep::minVolume, 10.0f, settings->volume <= Beep::minVolume + 0.1f ? "Off" : "%.1f dB")) {
+                if (std::fabs(settings->volume) < 0.8f) settings->volume = 0.0f; // snap to 0
             }
             ImGui::End();
 

@@ -30,7 +30,7 @@ Beep::Beep() {
 }
 
 void Beep::beep(BeepType type) {
-    if (settings.volume <= minVolume + 0.1f) {
+    if (settings->volume <= minVolume + 0.1f) {
         return;
     }
 
@@ -85,7 +85,7 @@ void Beep::streamThread() {
 }
 
 float Beep::getVolume() {
-    double dB = settings.volume;
+    double dB = settings->volume;
     return std::pow(10, dB / 20.0);
 }
 
