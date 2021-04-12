@@ -51,9 +51,6 @@ void Measurement::acquire(int index, float value) {
         measurements[index].second.push_back(value);
 
         csv->addCSVentry("measurements", {
-            currentDatetimeMilliseconds().str(),
-            std::to_string(microcontrollerClock),
-            currentExperimentTime().str(),
             std::to_string(value),
             "0"
         });

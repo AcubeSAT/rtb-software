@@ -87,9 +87,6 @@ void Latchups::logLatchup() {
     beep->beep(Beep::BeepType::Ominous);
 
     csv->addCSVentry("latchup", {
-            currentDatetimeMilliseconds().str(),
-            std::to_string(microcontrollerClock),
-            currentExperimentTime().str(),
     });
 }
 

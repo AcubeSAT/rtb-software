@@ -1,21 +1,16 @@
 #include "CSV.h"
 #include "Log.h"
+#include "Clock.h"
 #include <plog/Log.h>
 #include <boost/algorithm/string/join.hpp>
 
 CSV::CSV()  {
     createFile("measurements", {
-        "time",
-        "mcuTime",
-        "experimentTime",
         "value0",
         "value1"
     });
 
     createFile("can", {
-        "time",
-        "mcuTime",
-        "experimentTime",
         "measuredType",
         "guessedType",
         "flips",
@@ -25,9 +20,6 @@ CSV::CSV()  {
     });
 
     createFile("latchup", {
-        "time",
-        "mcuTime",
-        "experimentTime",
     });
 }
 
@@ -44,12 +36,18 @@ void CSV::createFile(const std::string & filename, const std::vector<std::string
             LOG_VERBOSE << "Created new log file " << filename;
         }
 
-        files[filename].first << boost::algorithm::join(columns, ", ") << std::endl;
+        files[filename].first << "time,mcuTime,experimentTime," << boost::algorithm::join(columns, ", ") << std::endl;
         files[filename].second = std::chrono::steady_clock::now();
     }
 }
 
 void CSV::addCSVentry(const std::string &filename, const std::vector<std::string> &data) {
+    std::string timeString = boost::algorithm::join(std::array<std::string,3>{
+                                                            currentDatetimeMilliseconds().str(),
+                                                            std::to_string(microcontrollerClock),
+                                                            currentExperimentTime().str(),
+    }, ",");
+
     if (files.find(filename) == files.end()) {
         LOG_ERROR << "Measurement output to unprepared file " << filename;
         createFile(filename, {});
@@ -58,7 +56,7 @@ void CSV::addCSVentry(const std::string &filename, const std::vector<std::string
     // Depending on the implementation, writing files might flush automatically or not. Having '\n' here instead of
     // std::endl prevents forced fllushing. However, we still add a predefined flushInterval to make sure that the data
     // is stored to the disc no matter what.
-    files[filename].first << boost::algorithm::join(data, ", ") << '\n';
+    files[filename].first << timeString << "," << boost::algorithm::join(data, ", ") << '\n';
     if (std::chrono::steady_clock::now() > files[filename].second + flushInterval) {
         files[filename].first.flush();
     }
