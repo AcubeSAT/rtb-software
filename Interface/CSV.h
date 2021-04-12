@@ -10,6 +10,8 @@
 
 class CSV {
 private:
+    inline static const auto flushInterval = std::chrono::milliseconds(2000);
+
     typedef std::chrono::steady_clock::time_point Timepoint;
 
     std::map<std::string, std::pair<std::ofstream, Timepoint>> files;
@@ -18,11 +20,7 @@ private:
 public:
     CSV();
 
-    void addCSVentry(const std::string& filename, const std::vector<std::any> & data) {
-        for (auto it: data) {
-
-        }
-    }
+    void addCSVentry(const std::string& filename, const std::vector<std::string> &data);
 };
 
 

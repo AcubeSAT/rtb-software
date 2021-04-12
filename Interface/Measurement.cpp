@@ -1,5 +1,6 @@
 #include "Measurement.h"
 #include "Clock.h"
+#include "main.h"
 #include <plog/Log.h>
 #include <implot/implot.h>
 #include <cmath>
@@ -48,6 +49,14 @@ void Measurement::acquire(int index, float value) {
 
         measurements[index].first.push_back(ms.count());
         measurements[index].second.push_back(value);
+
+        csv->addCSVentry("measurements", {
+            currentDatetimeMilliseconds().str(),
+            std::to_string(microcontrollerClock),
+            currentExperimentTime().str(),
+            std::to_string(value),
+            "0"
+        });
     }
 }
 

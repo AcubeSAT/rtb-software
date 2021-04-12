@@ -77,7 +77,7 @@ public:
 
     void window();
 
-    void logEvent(Event::Data rx, Event::Data tx, Event::MeasuredType = Event::BitFlip, std::string info = "");
+    void logEvent(Event::Data rx, Event::Data tx, Event::MeasuredType = Event::BitFlip, const std::string& info = "");
 };
 
 

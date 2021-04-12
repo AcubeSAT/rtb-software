@@ -5,7 +5,7 @@
 #include <bitset>
 #include "magic_enum.hpp"
 
-void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::MeasuredType type, std::string info) {
+void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::MeasuredType type, const std::string& info) {
     const std::lock_guard lock(timeLogMutex);
 
     Event::Data diff = rx ^ tx;
@@ -26,7 +26,7 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
         static_cast<uint32_t>(flips),
         rx,
         tx,
-        std::move(info),
+        info,
         currentDatetimeMilliseconds().str(),
         formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str(),
         currentExperimentTime().str()
@@ -35,6 +35,18 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
     timeLog.push_back(event);
 
     beep->beep(Beep::BeepType::Soft);
+
+    csv->addCSVentry("can", {
+            currentDatetimeMilliseconds().str(),
+            std::to_string(microcontrollerClock),
+            currentExperimentTime().str(),
+            std::string(magic_enum::enum_name(type)),
+            std::string(magic_enum::enum_name(guessedType)),
+            std::to_string(flips),
+            std::to_string(rx),
+            std::to_string(tx),
+            info
+    });
 }
 
 void CAN::window() {

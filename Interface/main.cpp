@@ -112,6 +112,7 @@ int main(int argc, char *argv[]) {
     LogControl::reset();
 
     beep.emplace();
+    csv.emplace();
 
     serialHandler = std::make_unique<SerialHandler>(deviceLog);
     serialHandler->port = argv[1];
