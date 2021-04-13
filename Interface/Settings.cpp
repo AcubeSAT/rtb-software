@@ -13,7 +13,6 @@ Settings::Settings() {
         LOG_WARNING << "Creating new Settings file (" << e.what() << ")";
     }
 
-    output = std::ofstream(filename);
     flush(); // Write the data once so that we don't have any issues with flushing
 }
 
@@ -23,9 +22,9 @@ void Settings::save() {
 }
 
 void Settings::flush() {
-    output.seekp(0, std::ios::beg);
+    output.open(filename);
     save();
-    output.flush();
+    output.close();
 }
 
 Settings::~Settings() {
