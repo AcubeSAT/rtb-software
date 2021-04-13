@@ -161,6 +161,9 @@ void SerialHandler::thread() {
 
         LOG_INFO << "Serial connection successful";
 
+        // First action should be to disable the output on restart
+        write("p0\n");
+
         boost::asio::async_read_until(*serial, receivedData, '\n', [this](const boost::system::error_code& error, std::size_t size) { receiveHandler(error, size); });
         io->run();
     } catch (boost::system::system_error &e) {
@@ -212,7 +215,7 @@ std::ostringstream SerialHandler::time() {
 
 void SerialHandler::window() {
     if (ImGui::Button("!!")) {
-        write("what");
+        write("what\n");
     }
 
     if (ImGui::IsItemHovered()) {

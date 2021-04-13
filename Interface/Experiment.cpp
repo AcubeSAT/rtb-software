@@ -158,3 +158,52 @@ void Experiment::resetPopup() {
         ImGui::EndPopup();
     }
 }
+
+void Experiment::start() {
+    if (status == Started) {
+        LOG_ERROR << "The experiment has already started? It cannot be started again.";
+        return;
+    }
+
+    if (status == Idle) {
+        LogControl::saveNewLogTitle();
+    }
+
+    status = Started;
+    startTime = std::chrono::steady_clock::now();
+
+    serialHandler->write("p1\n");
+
+    LOG_INFO << "Started experiment " << name;
+}
+
+void Experiment::stop() {
+    if (status != Started) {
+        LOG_ERROR << "You can't stop an experiment if it's already stopped.";
+        return;
+    }
+
+    serialHandler->write("p0\n");
+
+    status = Paused;
+    stopTime = std::chrono::steady_clock::now();
+
+    auto duration = stopTime.value() - startTime.value();
+    previousDuration += duration;
+
+    LOG_INFO << "Ended experiment " << name << " at " << formatDuration(duration).str();
+}
+
+void Experiment::reset() {
+    if (status == Started) {
+        LOG_ERROR << "Please stop this experiment before resetting it";
+        return;
+    }
+
+    LOG_INFO << "Reset experiment " << name << " at total " << formatDuration(previousDuration).str();
+
+    status = Idle;
+    previousDuration = 0s;
+    startTime.reset();
+    stopTime.reset();
+}

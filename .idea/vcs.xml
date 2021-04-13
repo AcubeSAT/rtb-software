@@ -2,8 +2,11 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Interface/lib/Tonic" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Interface/lib/cereal" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Interface/lib/imgui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Interface/lib/implot" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Interface/lib/magic_enum" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Interface/lib/plog" vcs="Git" />
   </component>
 </project>

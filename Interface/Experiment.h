@@ -56,50 +56,11 @@ public:
         }
     }
 
-    void start() {
-        if (status == Started) {
-            LOG_ERROR << "The experiment has already started? It cannot be started again.";
-            return;
-        }
+    void start();
 
-        if (status == Idle) {
-            LogControl::saveNewLogTitle();
-        }
+    void stop();
 
-        status = Started;
-        startTime = std::chrono::steady_clock::now();
-
-        LOG_INFO << "Started experiment " << name;
-    }
-
-    void stop() {
-        if (status != Started) {
-            LOG_ERROR << "You can't stop an experiment if it's already stopped.";
-            return;
-        }
-
-        status = Paused;
-        stopTime = std::chrono::steady_clock::now();
-
-        auto duration = stopTime.value() - startTime.value();
-        previousDuration += duration;
-
-        LOG_INFO << "Ended experiment " << name << " at " << formatDuration(duration).str();
-    }
-
-    void reset() {
-        if (status == Started) {
-            LOG_ERROR << "Please stop this experiment before resetting it";
-            return;
-        }
-
-        LOG_INFO << "Reset experiment " << name << " at total " << formatDuration(previousDuration).str();
-
-        status = Idle;
-        previousDuration = 0s;
-        startTime.reset();
-        stopTime.reset();
-    }
+    void reset();
 
     auto getStatus() {
         return status;
