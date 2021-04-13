@@ -39,6 +39,8 @@ public:
     void addCSVentry(const std::string& filename, const std::vector<std::string> &data);
 
     void refreshAllFilenames();
+
+    virtual ~CSV();
 };
 
 

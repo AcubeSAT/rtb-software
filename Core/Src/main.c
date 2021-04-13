@@ -193,8 +193,6 @@ int main(void)
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
 
-  Experiment_CAN_Start();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -206,7 +204,9 @@ int main(void)
 //      log_trace("Hello %s", "world");
       HAL_Delay(100);
 
-    Experiment_CAN_Loop();
+    if (currentExperiment == 1) {
+        Experiment_CAN_Loop();
+    }
 
     /* USER CODE END WHILE */
 

@@ -173,6 +173,7 @@ void Experiment::start() {
     startTime = std::chrono::steady_clock::now();
 
     serialHandler->write("p1\n");
+    serialHandler->write(std::string("et") + std::to_string(currentExperimentId) + "\n");
 
     LOG_INFO << "Started experiment " << name;
 }
@@ -184,6 +185,7 @@ void Experiment::stop() {
     }
 
     serialHandler->write("p0\n");
+    serialHandler->write("ep\n");
 
     status = Paused;
     stopTime = std::chrono::steady_clock::now();

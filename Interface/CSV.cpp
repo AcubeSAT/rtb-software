@@ -103,3 +103,9 @@ void CSV::thread() {
         }
     }
 }
+
+CSV::~CSV() {
+    stop = true;
+    queueNotification.notify_all();
+    fileWriterThread.join();
+}
