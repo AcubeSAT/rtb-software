@@ -105,13 +105,13 @@ int main(int argc, char *argv[]) {
     auto& log = plog::init(plog::verbose, &consoleAppender)
             .addAppender(&windowAppender);
     LOG_INFO << "RadiationInterface started";
-    LOG_INFO << "Log output:" << LogControl::getLogFileName("***");
 
     settings.emplace();
     logFileAppender.emplace(LogControl::getLogFileName("host").c_str());
     log.addAppender(&logFileAppender.value());
     LogControl::createLogDirectory();
     LogControl::reset();
+    LOG_INFO << "Log output:" << LogControl::getLogFileName("***");
 
     beep.emplace();
     csv.emplace();

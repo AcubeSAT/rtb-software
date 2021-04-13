@@ -4,7 +4,7 @@
 #include <plog/Log.h>
 #include <boost/algorithm/string/join.hpp>
 
-CSV::CSV()  {
+CSV::CSV() : fileWriterThread(&CSV::thread, this) {
     createFile("measurements", {
         "value0",
         "value1"
@@ -24,6 +24,8 @@ CSV::CSV()  {
 }
 
 void CSV::createFile(const std::string &filename, bool force) {
+    const std::lock_guard<std::mutex> lock(fileMutex);
+
     if (files.find(filename) == files.end() || force) {
         files[filename] = std::make_pair(std::ofstream(LogControl::getLogFileName(filename, "csv"), std::ios::app),
                                          std::chrono::steady_clock::now());
@@ -49,23 +51,16 @@ void CSV::createFile(const std::string & filename, const std::vector<std::string
 }
 
 void CSV::addCSVentry(const std::string &filename, const std::vector<std::string> &data) {
-    std::string timeString = boost::algorithm::join(std::array<std::string,3>{
+    std::string fileOutput = boost::algorithm::join(std::array<std::string,3>{
                                                             currentDatetimeMilliseconds().str(),
                                                             std::to_string(microcontrollerClock),
                                                             currentExperimentTime().str(),
-    }, ",");
+    }, ",") + boost::algorithm::join(data, ",");
 
-    if (files.find(filename) == files.end()) {
-        LOG_ERROR << "Measurement output to unprepared file " << filename;
-        createFile(filename, {});
-    }
-
-    // Depending on the implementation, writing files might flush automatically or not. Having '\n' here instead of
-    // std::endl prevents forced fllushing. However, we still add a predefined flushInterval to make sure that the data
-    // is stored to the disc no matter what.
-    files[filename].first << timeString << "," << boost::algorithm::join(data, ", ") << '\n';
-    if (std::chrono::steady_clock::now() > files[filename].second + flushInterval) {
-        files[filename].first.flush();
+    if (!queue.push(std::make_pair(filename, fileOutput))) {
+        LOG_FATAL << "CSV queue has too many data to store! Consider getting a faster hard drive :)";
+    } else {
+        queueNotification.notify_all();
     }
 }
 
@@ -76,5 +71,35 @@ void CSV::refreshAllFilenames() {
         }
 
         createFile(it.first, true);
+    }
+}
+
+void CSV::thread() {
+    std::unique_lock<std::mutex> lock(queueMutex);
+
+    while (!stop) {
+        queueNotification.wait(lock);
+
+        std::pair<std::string, std::string> fileData;
+        if (queue.pop(fileData)) {
+            const std::lock_guard<std::mutex> lock(fileMutex);
+
+            std::string filename = std::move(fileData.first);
+            std::string data = std::move(fileData.second);
+
+            if (files.find(filename) == files.end()) {
+                LOG_ERROR << "Measurement output to unprepared file " << filename;
+                createFile(filename, {});
+            }
+
+            // Depending on the implementation, writing files might flush automatically or not. Having '\n' here instead of
+            // std::endl prevents forced fllushing. However, we still add a predefined flushInterval to make sure that the data
+            // is stored to the disc no matter what.
+            files[filename].first << data << '\n';
+            if (std::chrono::steady_clock::now() > files[filename].second + flushInterval) {
+                files[filename].first.flush();
+                files[filename].second = std::chrono::steady_clock::now();
+            }
+        }
     }
 }

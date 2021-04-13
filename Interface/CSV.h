@@ -7,6 +7,10 @@
 #include <vector>
 #include <chrono>
 #include <any>
+#include <thread>
+#include <boost/lockfree/spsc_queue.hpp>
+#include <mutex>
+#include <condition_variable>
 
 class CSV {
 private:
@@ -20,6 +24,15 @@ private:
 
     void createFile(const std::string & filename, bool force = false);
     void createFile(const std::string & filename, const std::vector<std::string> & columns, bool force = false);
+
+    boost::lockfree::spsc_queue<std::pair<std::string,std::string>, boost::lockfree::capacity<128>> queue;
+    std::condition_variable queueNotification;
+    std::mutex queueMutex;
+    std::mutex fileMutex;
+    std::atomic_bool stop = false;
+
+    std::thread fileWriterThread;
+    void thread();
 public:
     CSV();
 
