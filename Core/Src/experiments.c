@@ -2,6 +2,7 @@
 #include <main.h>
 #include <stdlib.h>
 #include <can.h>
+#include <lcl.h>
 #include "experiments.h"
 #include "stm32h7xx_hal.h"
 
@@ -17,11 +18,9 @@ bool uart_experiment(char *command, uint16_t len) {
         // Power on/off
 
         if (command[1] == '1') {
-            HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_RESET);
-            log_info("Output set ON");
+            Outputs_ON();
         } else if (command[1] == '0') {
-            HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
-            log_info("Output set OFF");
+            Outputs_OFF();
         } else {
             return false;
         }

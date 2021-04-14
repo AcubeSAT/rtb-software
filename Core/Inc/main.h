@@ -90,6 +90,13 @@ void uart_command_received(const uint8_t* command, uint32_t len);
 #define A0_GPIO_Port GPIOA
 #define LD3_Pin GPIO_PIN_14
 #define LD3_GPIO_Port GPIOB
+#define LCL_SET_Pin GPIO_PIN_8
+#define LCL_SET_GPIO_Port GPIOC
+#define LCL_RESET_Pin GPIO_PIN_9
+#define LCL_RESET_GPIO_Port GPIOC
+#define LCL_OUT_Pin GPIO_PIN_10
+#define LCL_OUT_GPIO_Port GPIOC
+#define LCL_OUT_EXTI_IRQn EXTI15_10_IRQn
 #define RELAY_Pin GPIO_PIN_7
 #define RELAY_GPIO_Port GPIOD
 #define LD2_Pin GPIO_PIN_7

@@ -28,6 +28,7 @@
 #include "stm32h7xx_ll_usart.h"
 #include <memory.h>
 #include <can.h>
+#include <lcl.h>
 
 /* USER CODE END Includes */
 
@@ -135,9 +136,12 @@ void uart_command_received(const uint8_t* command, uint32_t len) {
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     // Send clock update + LCL report on event
-    printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
-    puts(UART_CONTROL UART_C_LATCHUP "\r\n");
-    log_warn("SEL triggered!");
+    if (output_status) {
+        LCL_ON_Force();
+        printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
+        puts(UART_CONTROL UART_C_LATCHUP "\r\n");
+        log_warn("SEL triggered!");
+    }
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
@@ -206,6 +210,8 @@ int main(void)
 
     if (currentExperiment == 1) {
         Experiment_CAN_Loop();
+    } else {
+        log_trace("%d", HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin));
     }
 
     /* USER CODE END WHILE */
@@ -234,6 +240,9 @@ void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+  /** Macro to configure the PLL clock source
+  */
+  __HAL_RCC_PLL_PLLSOURCE_CONFIG(RCC_PLLSOURCE_HSI);
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -273,6 +282,14 @@ void SystemClock_Config(void)
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3|RCC_PERIPHCLK_FDCAN
                               |RCC_PERIPHCLK_ADC;
+  PeriphClkInitStruct.PLL2.PLL2M = 32;
+  PeriphClkInitStruct.PLL2.PLL2N = 129;
+  PeriphClkInitStruct.PLL2.PLL2P = 2;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 2;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_1;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
   PeriphClkInitStruct.FdcanClockSelection = RCC_FDCANCLKSOURCE_PLL;
   PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1;
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
@@ -654,6 +671,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, LCL_SET_Pin|LCL_RESET_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : PC13 */
@@ -668,6 +688,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LCL_SET_Pin LCL_RESET_Pin */
+  GPIO_InitStruct.Pin = LCL_SET_Pin|LCL_RESET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LCL_OUT_Pin */
+  GPIO_InitStruct.Pin = LCL_OUT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(LCL_OUT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : RELAY_Pin */
   GPIO_InitStruct.Pin = RELAY_Pin;
