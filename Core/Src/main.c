@@ -151,12 +151,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     } else if (htim == &htim16) { // ADC measurement timer
         // Acquire an ADC measurement
         HAL_ADC_Start_IT(&hadc1);
-
     }
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-    printf(UART_CONTROL UART_C_MEASUREMENT "%ld\r\n", HAL_ADC_GetValue(&hadc1));
+    printf(
+        UART_CONTROL UART_C_MEASUREMENT "%ld %ld %d\r\n",
+        HAL_ADC_GetValue(&hadc1),
+        HAL_ADC_GetValue(&hadc1),
+        HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
+    );
 }
 /* USER CODE END 0 */
 
@@ -668,7 +672,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, LCL_SET_Pin|LCL_RESET_Pin, GPIO_PIN_SET);
@@ -682,8 +686,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD3_Pin LD2_Pin */
-  GPIO_InitStruct.Pin = LD3_Pin|LD2_Pin;
+  /*Configure GPIO pins : LD1_Pin LD3_Pin LD2_Pin */
+  GPIO_InitStruct.Pin = LD1_Pin|LD3_Pin|LD2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

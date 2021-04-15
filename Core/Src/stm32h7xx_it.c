@@ -332,7 +332,7 @@ void USART3_IRQHandler(void)
             current_point = 0;
 
             // Close indicator LED when reception is complete
-            HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
         } else {
             if (current_point >= sizeof(buffer)) {
                 log_error("Input buffer is full, forgetting everything");
@@ -343,7 +343,7 @@ void USART3_IRQHandler(void)
             buffer[current_point++] = data;
 
             // Enable indicator LED to show that there is pending reception
-            HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
         }
     }
     if (LL_USART_IsActiveFlag_ORE(USART3)) {

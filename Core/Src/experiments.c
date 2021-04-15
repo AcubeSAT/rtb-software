@@ -40,6 +40,7 @@ bool uart_experiment(char *command, uint16_t len) {
                 case 1:
                     log_info("Starting experiment %ld", currentExperiment);
                     Experiment_CAN_Start();
+                    break;
                 default:
                     log_info("No associated experimental procedure");
             }
