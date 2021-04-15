@@ -31,11 +31,13 @@ void Measurement::window() {
     if (ImPlot::BeginPlot("Measurements", "t (ms)", nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
         const std::lock_guard lock(measurementMutex);
         ImPlot::PlotLine("Data 1", measurements[0].first.data(), measurements[0].second.data(), measurements[0].first.size());
+        ImPlot::PlotLine("Data 2", measurements[1].first.data(), measurements[1].second.data(), measurements[1].first.size());
+        ImPlot::PlotLine("Data 3", measurements[2].first.data(), measurements[2].second.data(), measurements[2].first.size());
         ImPlot::EndPlot();
     }
 }
 
-void Measurement::acquire(int index, float value) {
+void Measurement::acquire(const std::array<float, SIZE>& values) {
     using namespace std::chrono;
 
     static auto startTime = system_clock::now();
@@ -44,16 +46,21 @@ void Measurement::acquire(int index, float value) {
         milliseconds ms = duration_cast< milliseconds >(
                 system_clock::now() - startTime
         );
+        auto numberMilliseconds = ms.count();
 
         const std::lock_guard lock(measurementMutex);
 
-        measurements[index].first.push_back(ms.count());
-        measurements[index].second.push_back(value);
+        for (int i = 0; i < SIZE; i++) {
+            measurements[i].first.push_back(numberMilliseconds);
+            measurements[i].second.push_back(values[i]);
+        }
 
-        csv->addCSVentry("measurements", {
-            std::to_string(value),
-            "0"
-        });
+        std::vector<std::string> csvMeasurements(values.size());
+        for (int i = 0; i < values.size(); i++) {
+            csvMeasurements[i] = std::to_string(values[i]);
+        }
+
+        csv->addCSVentry("measurements", csvMeasurements);
     }
 }
 

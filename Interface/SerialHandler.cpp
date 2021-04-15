@@ -50,7 +50,16 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                     } else if (receivedRaw[1] == 't') {
                         microcontrollerClock = std::stoi(receivedRaw.substr(2));
                     } else if (receivedRaw[1] == 'm') {
-                        measurements.acquire(0, std::stof(receivedRaw.substr(2)));
+                        std::array<float, Measurement::SIZE> values;
+
+                        int position = 2;
+                        size_t bytesRead = 0;
+                        for (auto &it: values) {
+                            it = std::stof(receivedRaw.substr(position), &bytesRead);
+                            position += bytesRead;
+                        }
+
+                        measurements.acquire(values);
                     } else if (receivedRaw[1] == 'b') {
                         // CAN bus bit flip
                         std::stringstream ss(receivedRaw.substr(2));
@@ -241,6 +250,10 @@ void SerialHandler::window() {
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.9f, 0.4f, 0.05f, 1.0f}));
     ImGui::RadioButton("Error", dataError);
+    ImGui::PopStyleColor();
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4({0.2f, 0.7f, 0.4f, 1.0f}));
+    ImGui::RadioButton("Output", measurements.getLCLStatus());
     ImGui::PopStyleColor();
 
 

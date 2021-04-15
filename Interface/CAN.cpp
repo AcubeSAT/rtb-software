@@ -36,7 +36,7 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
 
     beep->beep(Beep::BeepType::Soft);
 
-    csv->addCSVentry("can", {
+    csv->addCSVentry("can", std::vector<std::string>{
             std::string(magic_enum::enum_name(type)),
             std::string(magic_enum::enum_name(guessedType)),
             std::to_string(flips),

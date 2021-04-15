@@ -142,7 +142,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
         puts(UART_CONTROL UART_C_LATCHUP "\r\n");
         log_warn("SEL triggered!");
-    } else {
+    } else if (GPIO_Pin == GPIO_PIN_13) {
         // Button pressed
         Outputs_OFF(); // Emergency scram
         HAL_Delay(100); // Debouncing (?)
@@ -221,7 +221,6 @@ int main(void)
     if (currentExperiment == 1) {
         Experiment_CAN_Loop();
     } else {
-        log_trace("%d", HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin));
     }
 
     /* USER CODE END WHILE */

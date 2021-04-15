@@ -86,8 +86,7 @@ void Latchups::logLatchup() {
 
     beep->beep(Beep::BeepType::Ominous);
 
-    csv->addCSVentry("latchup", {
-    });
+    csv->addCSVentry("latchup", std::vector<std::string>{});
 }
 
 void Latchups::setPopup() {

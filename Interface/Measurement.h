@@ -6,10 +6,14 @@
 #include <mutex>
 
 class Measurement {
+public:
+    static constexpr size_t SIZE = 3;
+private:
+
     typedef float TimePoint;
     typedef float Value;
 
-    std::vector<std::pair<std::vector<TimePoint>,std::vector<Value>>> measurements {
+    std::array<std::pair<std::vector<TimePoint>,std::vector<Value>>, SIZE> measurements {
         std::make_pair(std::vector<TimePoint>(), std::vector<Value>())
     };
 
@@ -19,8 +23,15 @@ class Measurement {
 public:
     void window();
 
-    void acquire(const std::vector<float>& values);
-    void acquire(int index, float value);
+    void acquire(const std::array<float, SIZE>& value);
+
+    bool getLCLStatus() {
+        const auto& measurement = measurements[2];
+        if (measurement.second.empty()) {
+            return false;
+        }
+        return measurement.second.back();
+    }
 };
 
 
