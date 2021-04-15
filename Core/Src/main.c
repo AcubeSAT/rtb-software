@@ -136,11 +136,17 @@ void uart_command_received(const uint8_t* command, uint32_t len) {
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     // Send clock update + LCL report on event
-    if (output_status) {
-        LCL_ON_Force();
+    if (GPIO_Pin == LCL_OUT_Pin && output_status) {
+        // Latchup occurred
+        LCL_ON_Force(); // Restart the component as fast as possible
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
         puts(UART_CONTROL UART_C_LATCHUP "\r\n");
         log_warn("SEL triggered!");
+    } else {
+        // Button pressed
+        Outputs_OFF(); // Emergency scram
+        HAL_Delay(100); // Debouncing (?)
+        log_warn("SCRAM triggered. Output is off.");
     }
 }
 
