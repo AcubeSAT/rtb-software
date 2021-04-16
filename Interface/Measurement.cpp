@@ -26,7 +26,7 @@ void Measurement::window() {
 
     if (!measurements[0].first.empty()) {
         ImPlot::SetNextPlotLimitsX(measurements[0].first.front(), measurements[0].first.back(), ImGuiCond_Always);
-        ImPlot::SetNextPlotLimitsY(0, 4096, ImGuiCond_Always);
+        ImPlot::SetNextPlotLimitsY(0, 4, ImGuiCond_Always);
     }
     if (ImPlot::BeginPlot("Measurements", "t (ms)", nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
         const std::lock_guard lock(measurementMutex);

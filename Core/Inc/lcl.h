@@ -56,4 +56,10 @@ inline void Outputs_OFF() {
     Relay_OFF();
 }
 
+inline void LCL_Test_Trigger() {
+    // The timer is busy whenever the base starts and I don't want to bother with interrupts, so we do this the hard way
+    __HAL_TIM_ENABLE(&htim3);
+    TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
+}
+
 #endif //RTB_SOFTWARE_LCL_H

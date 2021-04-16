@@ -70,19 +70,18 @@ void Experiment_CAN_Loop() {
     if (fill_level != 1) {
         log_error("CAN Timeout");
         printf(UART_CONTROL UART_C_CANERROR "%s %ldms\r\n", "Timeout", HAL_GetTick() - time_start);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER0);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER1);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER2);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER3);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER4);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER5);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER6);
-        HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER7);
+        for (uint32_t i = FDCAN_TX_BUFFER0; i <= FDCAN_TX_BUFFER31 && i != 0; i = i << 1) {
+            HAL_FDCAN_AbortTxRequest(&hfdcan1, i);
+        }
+        HAL_FDCAN_Stop(&hfdcan1);
+        HAL_FDCAN_Stop(&hfdcan2);
+        HAL_FDCAN_Start(&hfdcan1);
+        HAL_FDCAN_Start(&hfdcan2);
     } else {
         uint32_t duration = HAL_GetTick() - time_start;
         if (HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
             // Very representative bit randomizer
-            if (rand() % 17 == 0) {
+            if (rand() % 517 == 0) {
                 *((uint64_t *) RxData) = flipRandomBit(*((uint64_t *) RxData), (rand() % 4) + 1);
             }
 

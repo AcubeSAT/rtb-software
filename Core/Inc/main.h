@@ -52,6 +52,7 @@ extern "C" {
 extern DAC_HandleTypeDef hdac1;
 extern FDCAN_HandleTypeDef hfdcan1;
 extern FDCAN_HandleTypeDef hfdcan2;
+extern TIM_HandleTypeDef htim3;
 
 #define UART_BUFFER_MAX 2048
 extern uint8_t uart_buffer[UART_BUFFER_MAX];
@@ -76,6 +77,8 @@ extern bool uart_mutex;
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -88,6 +91,8 @@ void uart_command_received(const uint8_t* command, uint32_t len);
 #define A1_GPIO_Port GPIOC
 #define A0_Pin GPIO_PIN_3
 #define A0_GPIO_Port GPIOA
+#define LCL_TEST_Pin GPIO_PIN_7
+#define LCL_TEST_GPIO_Port GPIOA
 #define LD1_Pin GPIO_PIN_0
 #define LD1_GPIO_Port GPIOB
 #define LD3_Pin GPIO_PIN_14

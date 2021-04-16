@@ -26,8 +26,9 @@ std::array<Parameter<int>, 1> integerParameters = {
         Parameter<int>{"nil", 0, 0, 0},
 };
 
-std::array<std::shared_ptr<EnumParameterBase>, 1> enumParameters = {
-    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::CANSpeed>>(std::string("CAN baudrate"), parameters::CANSpeed::baud250kbps))
+std::array<std::shared_ptr<EnumParameterBase>, 2> enumParameters = {
+    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::CANSpeed>>(std::string("CAN baudrate"), parameters::CANSpeed::baud250kbps)),
+    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::Latchupinator>>(std::string("Latchup simulation"), parameters::Latchupinator::disabled))
 };
 
 namespace cereal {

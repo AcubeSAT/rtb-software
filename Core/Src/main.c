@@ -54,6 +54,8 @@ DAC_HandleTypeDef hdac1;
 FDCAN_HandleTypeDef hfdcan1;
 FDCAN_HandleTypeDef hfdcan2;
 
+TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim15;
 TIM_HandleTypeDef htim16;
 TIM_HandleTypeDef htim17;
 
@@ -74,6 +76,8 @@ static void MX_FDCAN2_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_TIM17_Init(void);
+static void MX_TIM3_Init(void);
+static void MX_TIM15_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -141,7 +145,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         LCL_ON_Force(); // Restart the component as fast as possible
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
         puts(UART_CONTROL UART_C_LATCHUP "\r\n");
-        log_warn("SEL triggered!");
+        log_warn("SEL detected!");
     } else if (GPIO_Pin == GPIO_PIN_13) {
         // Button pressed
         Outputs_OFF(); // Emergency scram
@@ -157,14 +161,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     } else if (htim == &htim16) { // ADC measurement timer
         // Acquire an ADC measurement
         HAL_ADC_Start_IT(&hadc1);
+    } else if (htim == &htim15) { // Latchup simulation timer
+        LCL_Test_Trigger();
+        log_info("LCL test trigger");
+
+        // Create a random simulation for the next time
+        __HAL_TIM_DISABLE(&htim15);
+        __HAL_TIM_SET_COUNTER(&htim15, 0); // Make sure to start from the start
+        __HAL_TIM_SET_AUTORELOAD(&htim15, (rand() % 5000 + 1)); // Max milliseconds
+        __HAL_TIM_ENABLE(&htim15);
     }
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
     printf(
-        UART_CONTROL UART_C_MEASUREMENT "%ld %ld %d\r\n",
-        HAL_ADC_GetValue(&hadc1),
-        HAL_ADC_GetValue(&hadc1),
+        UART_CONTROL UART_C_MEASUREMENT "%f %f %d\r\n",
+        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
+        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
         HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
     );
 }
@@ -205,6 +218,8 @@ int main(void)
   MX_USART3_UART_Init();
   MX_TIM16_Init();
   MX_TIM17_Init();
+  MX_TIM3_Init();
+  MX_TIM15_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -216,11 +231,10 @@ int main(void)
   while (1)
   {
 //      log_trace("Hello %s", "world");
-      HAL_Delay(100);
+      HAL_Delay(1);
 
     if (currentExperiment == 1) {
         Experiment_CAN_Loop();
-    } else {
     }
 
     /* USER CODE END WHILE */
@@ -329,8 +343,8 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV32;
+  hadc1.Init.Resolution = ADC_RESOLUTION_16B;
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
@@ -525,6 +539,106 @@ static void MX_FDCAN2_Init(void)
   /* USER CODE BEGIN FDCAN2_Init 2 */
 
   /* USER CODE END FDCAN2_Init 2 */
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 640;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 100;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OnePulse_Init(&htim3, TIM_OPMODE_SINGLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 1;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+    HAL_TIM_Base_Start(&htim3);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  /* USER CODE END TIM3_Init 2 */
+  HAL_TIM_MspPostInit(&htim3);
+
+}
+
+/**
+  * @brief TIM15 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM15_Init(void)
+{
+
+  /* USER CODE BEGIN TIM15_Init 0 */
+
+  /* USER CODE END TIM15_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM15_Init 1 */
+
+  /* USER CODE END TIM15_Init 1 */
+  htim15.Instance = TIM15;
+  htim15.Init.Prescaler = 64000;
+  htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim15.Init.Period = 3000;
+  htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim15.Init.RepetitionCounter = 0;
+  htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim15) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim15, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim15, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM15_Init 2 */
+  HAL_TIM_Base_Start_IT(&htim15);
+  /* USER CODE END TIM15_Init 2 */
 
 }
 

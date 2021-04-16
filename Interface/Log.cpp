@@ -243,8 +243,12 @@ std::string LogControl::getLogFileName(const string& type, const string& extensi
 }
 
 void LogControl::createLogDirectory() {
-    std::filesystem::create_directory("log");
-    std::filesystem::create_directory("log/" + getLogFileDirectory());
+    try {
+        std::filesystem::create_directory("log");
+        std::filesystem::create_directory("log/" + getLogFileDirectory());
+    } catch (const std::exception& e) {
+        LOG_FATAL << "Could not create log directory: " << e.what();
+    }
 }
 
 

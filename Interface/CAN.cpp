@@ -12,7 +12,9 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::Measure
     int flips = __builtin_popcount(diff);
 
     Event::GuessedType guessedType = Event::SEFI;
-    if (flips == 1) {
+    if (type == Event::Timeout) {
+        guessedType = Event::SEFI;
+    } else if (flips == 1) {
         guessedType = Event::SET;
     } else if (flips < 4) {
         guessedType = Event::MBU;

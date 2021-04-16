@@ -13,6 +13,11 @@ enum CANSpeed {
     baud1000kbps,
 };
 
+enum Latchupinator {
+    disabled = 0,
+    enabled = 1,
+};
+
 #ifdef __cplusplus
 }
 #endif

@@ -64,6 +64,7 @@ uint32_t command_queue_write;
 extern ADC_HandleTypeDef hadc1;
 extern FDCAN_HandleTypeDef hfdcan1;
 extern FDCAN_HandleTypeDef hfdcan2;
+extern TIM_HandleTypeDef htim15;
 extern TIM_HandleTypeDef htim16;
 extern TIM_HandleTypeDef htim17;
 /* USER CODE BEGIN EV */
@@ -384,6 +385,20 @@ void FDCAN_CAL_IRQHandler(void)
   /* USER CODE BEGIN FDCAN_CAL_IRQn 1 */
 
   /* USER CODE END FDCAN_CAL_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM15 global interrupt.
+  */
+void TIM15_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM15_IRQn 0 */
+
+  /* USER CODE END TIM15_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim15);
+  /* USER CODE BEGIN TIM15_IRQn 1 */
+
+  /* USER CODE END TIM15_IRQn 1 */
 }
 
 /**
