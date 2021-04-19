@@ -26,7 +26,4 @@ extern ImFont* iconFont;
 extern std::optional<plog::RollingFileAppender<plog::TxtFormatter, plog::NativeEOLConverter<>>> logFileAppender;
 extern std::optional<Settings> settings;
 
-void HelpTooltip(const std::string& text);
-void HelpMarker(const std::string& text);
-
 #endif //RADIATIONINTERFACE_MAIN_H

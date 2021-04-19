@@ -9,6 +9,7 @@
 #include "Experiment.h"
 #include <filesystem>
 #include "plog/Init.h"
+#include "Utilities.h"
 #include <plog/Appenders/RollingFileAppender.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
 #include <plog/Formatters/TxtFormatter.h>
@@ -23,6 +24,16 @@ void Log::window() {
         ImGui::SameLine();
     }
 
+    if (FontAwesomeButton(FontAwesome::Trash)) {
+        ImGui::OpenPopup((std::string("Reset Log ") + name).c_str());
+    }
+    HelpTooltip("Clear all log outputs");
+
+    if (PopupModal(std::string("Reset Log ") + name, "Do you want to clear all log entries?\nLog outputs will still remain on the files.")) {
+        this->reset();
+    }
+
+    ImGui::SameLine();
     ImGui::Checkbox("autoscroll", &scrollToBottom);
 
     if (ImGui::GetContentRegionAvail().x > 800) {
@@ -82,6 +93,9 @@ void Log::addLogEntry(const std::string & entry, int severity) {
     items.push_back(std::make_pair(severity, entry));
 }
 
+void Log::reset() {
+    items.clear();
+}
 
 void Log::LogAppender::write(const plog::Record &record) {
     tm t;

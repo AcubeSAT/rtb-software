@@ -21,6 +21,8 @@ public:
 private:
     const int MaxLogEntries = 1000000;
 
+    std::string name;
+
     bool scrollToBottom = true;
     ImGuiTextFilter filter;
 
@@ -32,7 +34,7 @@ private:
 
     int minSeverity = std::numeric_limits<int>::min();
 public:
-    explicit Log(std::vector<LogLevel> logLevels) : items(MaxLogEntries), logLevels(std::move(logLevels)) {
+    Log(std::string name, std::vector<LogLevel> logLevels) : items(MaxLogEntries), logLevels(std::move(logLevels)), name(std::move(name)) {
         minSeverity = this->logLevels.front().severity;
     }
 
@@ -42,6 +44,8 @@ public:
     void window();
 
     void addLogEntry(const std::string & entry, int severity);
+
+    void reset();
 
     const std::vector<LogLevel>& getLogLevels() const {
         return logLevels;

@@ -36,6 +36,7 @@
 #include "Settings.h"
 #include "FontAwesome.h"
 #include "CSV.h"
+#include "Utilities.h"
 
 const char* glsl_version = "#version 130";
 
@@ -83,7 +84,7 @@ int main(int argc, char *argv[]) {
         return 5;
     }
 
-    Log hostLog({
+    Log hostLog("Host", {
         Log::LogLevel{"verbose", -6},
         Log::LogLevel{"debug", -5,},
         Log::LogLevel{"info", -4,},
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
         Log::LogLevel{"error", -2,},
         Log::LogLevel{"fatal", -1,},
     });
-    Log deviceLog({
+    Log deviceLog("Device", {
         Log::LogLevel{"TRACE", 0},
         Log::LogLevel{"DEBUG", 1},
         Log::LogLevel{"INFO", 2},
@@ -345,19 +346,4 @@ int main(int argc, char *argv[]) {
     }
 
     return 0;
-}
-
-void HelpMarker(const std::string &text)  {
-    ImGui::TextDisabled("(?)");
-    HelpTooltip(text);
-}
-
-void HelpTooltip(const std::string &text)  {
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(text.c_str());
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
 }

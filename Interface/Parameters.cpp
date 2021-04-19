@@ -12,6 +12,7 @@
 #include "Parameters.h"
 #include "main.h"
 #include "CommonEnums.h"
+#include "Utilities.h"
 
 std::array<Parameter<float>, 3> floatingParameters = {
         Parameter<float>{"Board Voltage", 3.3, 1, 4, [](float voltage) {

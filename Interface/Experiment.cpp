@@ -3,6 +3,7 @@
 #include "Experiment.h"
 #include "Clock.h"
 #include "main.h"
+#include "Utilities.h"
 #include <ratio>
 
 std::string loremIpsum = "Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here...";
