@@ -194,7 +194,7 @@ void SerialHandler::stop() {
 
 void SerialHandler::write(std::string message) {
     if (!serial || !serial->is_open()) {
-        LOG_ERROR << "There is an error with the serial port. Cannot write data.";
+        LOG_FATAL << "There serial port is closed. Cannot write data.";
         return;
     }
 

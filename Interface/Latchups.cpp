@@ -111,9 +111,7 @@ void Latchups::resetPopup() {
         ImGui::Separator();
 
         if (ImGui::Button("OK", ImVec2(120, 0))) {
-            const std::lock_guard lock(timeLogMutex);
-            resetCounter();
-            timeLog.clear();
+            reset();
             ImGui::CloseCurrentPopup();
         }
         ImGui::SetItemDefaultFocus();

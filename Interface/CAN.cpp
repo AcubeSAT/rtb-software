@@ -159,6 +159,12 @@ void CAN::window() {
     }
 }
 
+void CAN::reset() {
+    const std::lock_guard lock(timeLogMutex);
+    stats.store(Stats());
+    timeLog.clear();
+}
+
 std::string CAN::Event::toBits(CAN::Event::Data number) const {
     int byteLocation = __builtin_ctz(rx ^ tx) / 8;
     if (byteLocation >= sizeof(number) * 8) {

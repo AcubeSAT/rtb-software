@@ -209,4 +209,7 @@ void Experiment::reset() {
     previousDuration = 0s;
     startTime.reset();
     stopTime.reset();
+
+    can.reset();
+    latchups.reset();
 }

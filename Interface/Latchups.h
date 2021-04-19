@@ -30,6 +30,12 @@ public:
         latchupCounter = 0;
     }
 
+    void reset() {
+        const std::lock_guard lock(timeLogMutex);
+        resetCounter();
+        timeLog.clear();
+    }
+
     void setCounter(int value) {
         latchupCounter = value;
     }
