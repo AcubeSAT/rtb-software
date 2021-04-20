@@ -54,13 +54,31 @@ bool uart_experiment(char *command, uint16_t len) {
                     case 1:
                         log_info("Stopping experiment %ld", currentExperiment);
                         Experiment_CAN_Stop();
+                        break;
                     default:
                         log_info("Stopped no associated experimental procedure");
                 }
 
                 currentExperiment = -1;
             }
-        } else {
+        } else if (command[1] == 'r') {
+            if (len < 3) {
+                log_error("The command is too small to parse");
+                return true;
+            }
+
+            // Reset experiment
+            switch (strtol(command + 2, NULL, 10)) {
+                case 1:
+                    log_info("Resetting experiment %ld", currentExperiment);
+                    Experiment_CAN_Reset();
+                    break;
+                default:
+                    log_info("Reset no associated experimental procedure");
+            }
+
+            currentExperiment = -1;
+        }  else {
             return false;
         }
 

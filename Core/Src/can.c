@@ -18,7 +18,7 @@ struct Stats {
     uint64_t packetsTX;
     uint64_t bytesRX;
     uint64_t packetsRX;
-} stats;
+} stats = { 0, 0, 0, 0};
 
 const uint32_t can_timeout = 100;
 
@@ -46,11 +46,15 @@ void Experiment_CAN_Start() {
     HAL_FDCAN_Start(&hfdcan1);
     HAL_FDCAN_Start(&hfdcan2);
     HAL_Delay(50);
+}
 
-    stats.bytesTX = 0;
-    stats.bytesRX = 0;
-    stats.packetsRX = 0;
-    stats.packetsTX = 0;
+static void Experiment_CAN_Statistics() {
+    static uint32_t lastStats = 0;
+
+    if (HAL_GetTick() - lastStats > 100) {
+        lastStats = HAL_GetTick();
+        printf(UART_CONTROL UART_C_STATISTICS "CAN %lld %lld %lld %lld\r\n", stats.bytesTX, stats.packetsTX, stats.bytesRX, stats.packetsRX);
+    }
 }
 
 void Experiment_CAN_Loop() {
@@ -108,10 +112,17 @@ void Experiment_CAN_Loop() {
         memset(TxData, 0xFF, 8);
     }
 
-    printf(UART_CONTROL UART_C_STATISTICS "CAN %lld %lld %lld %lld\r\n", stats.bytesTX, stats.packetsTX, stats.bytesRX, stats.packetsRX);
+    Experiment_CAN_Statistics();
 }
 
 void Experiment_CAN_Stop() {
     HAL_FDCAN_Stop(&hfdcan1);
     HAL_FDCAN_Stop(&hfdcan2);
+}
+
+void Experiment_CAN_Reset() {
+    stats.bytesTX = 0;
+    stats.bytesRX = 0;
+    stats.packetsRX = 0;
+    stats.packetsTX = 0;
 }

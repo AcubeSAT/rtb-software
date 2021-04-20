@@ -194,7 +194,7 @@ void Experiment::stop() {
     auto duration = stopTime.value() - startTime.value();
     previousDuration += duration;
 
-    LOG_INFO << "Ended experiment " << name << " at " << formatDuration(duration).str();
+    LOG_INFO << "Paused experiment " << name << " at " << formatDuration(duration).str();
 }
 
 void Experiment::reset() {
@@ -202,6 +202,8 @@ void Experiment::reset() {
         LOG_ERROR << "Please stop this experiment before resetting it";
         return;
     }
+
+    serialHandler->write(std::string("er") + std::to_string(currentExperimentId) + "\n");
 
     LOG_INFO << "Reset experiment " << name << " at total " << formatDuration(previousDuration).str();
 
