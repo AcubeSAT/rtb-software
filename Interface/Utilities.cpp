@@ -27,6 +27,12 @@ bool FontAwesomeButton(const char *text) {
     return result;
 }
 
+void FontAwesomeText(const char *text) {
+    ImGui::PushFont(iconFont);
+    ImGui::TextUnformatted(text);
+    ImGui::PopFont();
+}
+
 bool PopupModal(const std::string & name, const std::string & prompt) {
     bool output = false;
 

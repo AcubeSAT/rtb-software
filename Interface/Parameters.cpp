@@ -8,11 +8,15 @@
 #include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/polymorphic.hpp>
+#include <boost/algorithm/string.hpp>
 #include <variant>
 #include "Parameters.h"
 #include "main.h"
 #include "CommonEnums.h"
 #include "Utilities.h"
+#include "FontAwesome.h"
+
+static bool unsavedParameters = false;
 
 std::array<Parameter<float>, 3> floatingParameters = {
         Parameter<float>{"Board Voltage", 3.3, 1, 4, [](float voltage) {
@@ -64,6 +68,7 @@ void parameterWindow() {
 //        ImGui::SliderScalar(parameter.name.c_str(), ImGuiDataType_Double, &parameter.value, &parameter.min, &parameter.max, "%f");
         if (ImGui::SliderFloat(parameter.name.c_str(), &parameter.value, parameter.min, parameter.max)) {
             parameter.callCallback();
+            unsavedParameters = true;
         }
     }
 
@@ -73,6 +78,7 @@ void parameterWindow() {
     for (auto& parameter : integerParameters) {
         if (ImGui::SliderInt(parameter.name.c_str(), &parameter.value, parameter.min, parameter.max)) {
             parameter.callCallback();
+            unsavedParameters = true;
         }
     }
 
@@ -86,6 +92,7 @@ void parameterWindow() {
             if (ImGui::SliderInt(parameter->name().c_str(), &formValue, 0, parameter->count() - 1,
                              parameter->valueText().c_str())) {
                 parameter->setValue(formValue);
+                unsavedParameters = true;
             }
         } catch (const std::exception & e) {
             LOG_FATAL << e.what();
@@ -96,6 +103,14 @@ void parameterWindow() {
     if (ImGui::Button("Update all", ImVec2(-FLT_MIN, 0.0f))) {
         updateParameters();
     };
+
+    if (unsavedParameters) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.15, 0.6f, 0.8f));
+        FontAwesomeText(FontAwesome::ExclamationTriangle);
+        ImGui::SameLine();
+        ImGui::Text("You have unsaved parameters!");
+        ImGui::PopStyleColor();
+    }
 }
 
 std::string dumpParameters() {
@@ -121,7 +136,7 @@ std::string dumpParameters() {
 
 void updateParameters() {
     LOG_DEBUG << "Updating parameters...";
-    LOG_VERBOSE << "Parameter dump: \n" << dumpParameters();
+    LOG_VERBOSE << "Parameter dump: " << boost::replace_all_copy(dumpParameters(), "\n", " ");
 
     std::ostringstream ss;
 
@@ -140,4 +155,6 @@ void updateParameters() {
 
     std::string serialCommand = ss.str();
     serialHandler->write(serialCommand);
+
+    unsavedParameters = false;
 }
