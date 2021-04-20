@@ -1,5 +1,6 @@
 #include <memory.h>
 #include <stdlib.h>
+#include <experiments.h>
 #include "can.h"
 #include "main.h"
 #include "log.h"
@@ -13,14 +14,26 @@ FDCAN_TxHeaderTypeDef TxHeader;
 uint64_t * RxInt = (uint64_t*) RxData;
 uint64_t * TxInt = (uint64_t*) TxData;
 
-struct Stats {
+static struct Stats {
     uint64_t bytesTX;
     uint64_t packetsTX;
     uint64_t bytesRX;
     uint64_t packetsRX;
 } stats = { 0, 0, 0, 0};
 
-const uint32_t can_timeout = 100;
+static enum State {
+    stateRX = 0,
+    stateTX = 1,
+    stateIdle
+} state = stateRX;
+
+static FDCAN_HandleTypeDef* testedCAN ;
+static FDCAN_HandleTypeDef* ambientCAN;
+
+static FDCAN_HandleTypeDef* rxCAN;
+static FDCAN_HandleTypeDef* txCAN;
+
+const uint32_t can_timeout = 50; // Timeout in milliseconds
 
 uint64_t flipRandomBit(uint64_t input, uint32_t bits) {
     for (int i = 0; i < bits; i++) {
@@ -45,7 +58,28 @@ void Experiment_CAN_Start() {
 
     HAL_FDCAN_Start(&hfdcan1);
     HAL_FDCAN_Start(&hfdcan2);
-    HAL_Delay(50);
+    HAL_Delay(2);
+
+    testedCAN = &hfdcan1;
+    ambientCAN = &hfdcan2;
+
+    state = stateRX;
+    rxCAN = testedCAN;
+    txCAN = ambientCAN;
+}
+
+static void state_to_string(enum State state, char * string) {
+    switch (state) {
+        case stateRX:
+            strcpy(string, "RX");
+            break;
+        case stateTX:
+            strcpy(string, "TX");
+            break;
+        default:
+            strcpy(string, "Idle");
+            break;
+    }
 }
 
 static void Experiment_CAN_Statistics() {
@@ -58,49 +92,59 @@ static void Experiment_CAN_Statistics() {
 }
 
 void Experiment_CAN_Loop() {
-    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, &TxData[0]) != HAL_OK) {
-        log_error("CAN TX error %#010lx", hfdcan1.ErrorCode);
-        printf(UART_CONTROL UART_C_CANERROR "%s %#010lx\r\n", "TXError", hfdcan1.ErrorCode);
+    if (state == stateRX) {
+        rxCAN = testedCAN;
+        txCAN = ambientCAN;
+    } else if (state == stateTX) {
+        rxCAN = ambientCAN;
+        txCAN = testedCAN;
     }
-    stats.bytesTX += 8;
-    stats.packetsTX++;
+
+    static char state_string[10];
+    state_to_string(state, state_string);
+
+    if (HAL_FDCAN_AddMessageToTxFifoQ(txCAN, &TxHeader, &TxData[0]) != HAL_OK) {
+        log_error("CAN TX error %#010lx", txCAN->ErrorCode);
+        printf(UART_CONTROL UART_C_CANERROR "%s %s %#010lx\r\n", "TXError", state_string, txCAN->ErrorCode);
+    }
 
     uint32_t fill_level;
     volatile uint32_t time_start = HAL_GetTick();
     do {
-        fill_level = HAL_FDCAN_GetRxFifoFillLevel(&hfdcan2, FDCAN_RX_FIFO0);
+        fill_level = HAL_FDCAN_GetRxFifoFillLevel(rxCAN, FDCAN_RX_FIFO0);
     } while (fill_level != 1 && HAL_GetTick() - time_start < can_timeout);
 
-    if (fill_level != 1) {
+    if (fill_level != 1 && currentExperiment != -1) {
         log_error("CAN Timeout");
-        printf(UART_CONTROL UART_C_CANERROR "%s %ldms\r\n", "Timeout", HAL_GetTick() - time_start);
+        printf(UART_CONTROL UART_C_CANERROR "%s %s %ldms\r\n", "Timeout", state_string, HAL_GetTick() - time_start);
         for (uint32_t i = FDCAN_TX_BUFFER0; i <= FDCAN_TX_BUFFER31 && i != 0; i = i << 1) {
-            HAL_FDCAN_AbortTxRequest(&hfdcan1, i);
+            // Maybe this is not needed since we stop the CANs
+            HAL_FDCAN_AbortTxRequest(txCAN, i);
         }
-        HAL_FDCAN_Stop(&hfdcan1);
-        HAL_FDCAN_Stop(&hfdcan2);
-        HAL_FDCAN_Start(&hfdcan1);
-        HAL_FDCAN_Start(&hfdcan2);
+        HAL_FDCAN_Stop(txCAN);
+        HAL_FDCAN_Stop(rxCAN);
+        HAL_FDCAN_Start(txCAN);
+        HAL_FDCAN_Start(rxCAN);
     } else {
         uint32_t duration = HAL_GetTick() - time_start;
-        if (HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
+        if (HAL_FDCAN_GetRxMessage(rxCAN, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
             // Very representative bit randomizer
-            if (rand() % 517 == 0) {
+            if (rand() % 51 == 0) {
                 *((uint64_t *) RxData) = flipRandomBit(*((uint64_t *) RxData), (rand() % 4) + 1);
             }
 
-            log_trace("CAN TXRX %#018llx %#018llx [%5d]", *TxInt, *RxInt, duration);
+//            log_trace("CAN TXRX %#018llx %#018llx [%5d]", *TxInt, *RxInt, duration);
 
             if (*RxInt != *TxInt) {
                 uint64_t diff = *RxInt ^ *TxInt;
                 uint32_t flips = __builtin_popcount(diff);
 
-                printf(UART_CONTROL UART_C_CANBITERROR "%llx %llx\r\n", *TxInt, *RxInt);
+                printf(UART_CONTROL UART_C_CANBITERROR "%s %llx %llx\r\n", state_string, *TxInt, *RxInt);
                 log_error("CAN data error [%db] %#018llx %#018llx", flips, *TxInt, *RxInt);
             }
         } else {
-            printf(UART_CONTROL UART_C_CANERROR "%s %#010lx\r\n", "RXError", hfdcan2.ErrorCode);
-            log_error("CAN RX error %#010lx", hfdcan2.ErrorCode);
+            printf(UART_CONTROL UART_C_CANERROR "%s %s %#010lx\r\n", "RXError", state_string, rxCAN->ErrorCode);
+            log_error("CAN RX error %#010lx", rxCAN->ErrorCode);
         }
     }
 
@@ -110,6 +154,16 @@ void Experiment_CAN_Loop() {
         memset(TxData, 0x00, 8);
     } else {
         memset(TxData, 0xFF, 8);
+    }
+
+    if (state == stateRX) {
+        stats.bytesRX += 8;
+        stats.packetsRX++;
+        state = stateTX;
+    } else {
+        stats.bytesTX += 8;
+        stats.packetsTX++;
+        state = stateRX;
     }
 
     Experiment_CAN_Statistics();

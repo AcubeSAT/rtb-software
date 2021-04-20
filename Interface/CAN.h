@@ -45,8 +45,15 @@ public:
             MBU
         };
 
+        enum State {
+            RX,
+            TX,
+            Idle
+        };
+
         MeasuredType measuredType;
         GuessedType guessedType;
+        State state;
         uint32_t flips;
         Data rx;
         Data tx;
@@ -90,7 +97,7 @@ public:
 
     void reset();
 
-    void logEvent(Event::Data rx, Event::Data tx, Event::MeasuredType = Event::BitFlip, const std::string& info = "");
+    void logEvent(Event::Data rx, Event::Data tx, Event::State state, Event::MeasuredType = Event::BitFlip, const std::string& info = "");
 };
 
 

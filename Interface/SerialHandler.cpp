@@ -65,15 +65,17 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         std::stringstream ss(receivedRaw.substr(2));
                         CAN::Event::Data tx;
                         CAN::Event::Data rx;
-                        ss >> std::hex >> tx >> rx;
+                        std::string state;
+                        ss >> std::hex >> state >> tx >> rx;
 
-                        can.logEvent(rx, tx);
+                        can.logEvent(rx, tx, magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle));
                     } else if (receivedRaw[1] == 'c') {
                         // CAN bus generic error
                         std::stringstream ss(receivedRaw.substr(2));
                         std::string type;
+                        std::string state;
                         std::string extraInfo;
-                        ss >> type >> extraInfo;
+                        ss >> type >> state >> extraInfo;
 
                         auto enumType = magic_enum::enum_cast<CAN::Event::MeasuredType>(type);
                         if (!enumType.has_value()) {
@@ -81,7 +83,7 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                             extraInfo = type + " " + extraInfo;
                         }
 
-                        can.logEvent(0, 0, enumType.value(), extraInfo);
+                        can.logEvent(0, 0, magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle), enumType.value(), extraInfo);
                     } else if (receivedRaw[1] == 's') {
                         // Statistics
                         std::stringstream ss(receivedRaw.substr(2));

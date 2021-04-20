@@ -11,6 +11,7 @@ CSV::CSV() : fileWriterThread(&CSV::thread, this) {
     });
 
     createFile("can", {
+        "state",
         "measuredType",
         "guessedType",
         "flips",

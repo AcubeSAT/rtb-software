@@ -50,7 +50,10 @@ bool uart_experiment(char *command, uint16_t len) {
                 log_warn("Experiment is already stopped");
                 return true;
             } else {
-                switch (currentExperiment) {
+                int previousExperiment = currentExperiment;
+                currentExperiment = -1;
+
+                switch (previousExperiment) {
                     case 1:
                         log_info("Stopping experiment %ld", currentExperiment);
                         Experiment_CAN_Stop();
@@ -59,7 +62,6 @@ bool uart_experiment(char *command, uint16_t len) {
                         log_info("Stopped no associated experimental procedure");
                 }
 
-                currentExperiment = -1;
             }
         } else if (command[1] == 'r') {
             if (len < 3) {
