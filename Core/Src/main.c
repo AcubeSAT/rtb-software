@@ -92,6 +92,8 @@ static void MX_TIM15_Init(void);
  */
 int _write(int file, char *ptr, int len)
 {
+    static atomic_bool anyone_writing = false;
+
     if (file == 1 || file == 2) { // stdout, stderr
         for (int i = 0; i < len; i++) {
             // Write data into buffer in a cyclic format
@@ -162,8 +164,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         // Acquire an ADC measurement
         HAL_ADC_Start_IT(&hadc1);
     } else if (htim == &htim15) { // Latchup simulation timer
-        LCL_Test_Trigger();
-        log_info("LCL test trigger");
+        if (output_status) {
+            LCL_Test_Trigger();
+            log_info("LCL test trigger");
+        }
 
         // Create a random simulation for the next time
         __HAL_TIM_DISABLE(&htim15);
@@ -206,7 +210,8 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  char buf[STDOUT_BUFFER_SIZE];
+  volatile int output = setvbuf(stdout, buf, _IOLBF, STDOUT_BUFFER_SIZE);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */

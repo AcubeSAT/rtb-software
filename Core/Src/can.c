@@ -85,7 +85,7 @@ void Experiment_CAN_Loop() {
                 *((uint64_t *) RxData) = flipRandomBit(*((uint64_t *) RxData), (rand() % 4) + 1);
             }
 
-//            log_trace("CAN TXRX %#018llx %#018llx [%5d]", *TxInt, *RxInt, duration);
+            log_trace("CAN TXRX %#018llx %#018llx [%5d]", *TxInt, *RxInt, duration);
 
             if (*RxInt != *TxInt) {
                 uint64_t diff = *RxInt ^ *TxInt;

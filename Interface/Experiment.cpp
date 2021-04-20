@@ -146,7 +146,7 @@ void Experiment::window() {
 
 void Experiment::resetPopup() {
     if (ImGui::BeginPopupModal("Experiment Reset", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Are you sure you want to reset the experiment \"%s\"? All timings will be lost.\n", currentExperiment.get().name.c_str());
+        ImGui::Text("Are you sure you want to reset the experiment \"%s\"? ALL timings and data from other windows will be lost.\n", currentExperiment.get().name.c_str());
         ImGui::Separator();
 
         if (ImGui::Button("OK", ImVec2(120, 0))) {

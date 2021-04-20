@@ -81,7 +81,7 @@ void CSV::thread() {
         queueNotification.wait(lock);
 
         std::pair<std::string, std::string> fileData;
-        if (queue.pop(fileData)) {
+        while (queue.pop(fileData)) {
             const std::lock_guard<std::mutex> lock(fileMutex);
 
             std::string filename = std::move(fileData.first);

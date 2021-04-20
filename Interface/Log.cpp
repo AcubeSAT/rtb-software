@@ -63,23 +63,32 @@ void Log::window() {
     {
         const std::lock_guard<std::mutex> lock(itemMutex);
 
-        for (auto &it : items) {
+        ImGuiListClipper clipper;
+//        clipper.Begin(items.size(), 18.0f);
+//        while (clipper.Step()) {
+//            for (int row_n = clipper.DisplayStart; row_n < clipper.DisplayEnd; row_n++) {
+        int counter = -1;
+        for (auto &it: items) {
+            counter++;
+
             if (it.first < minSeverity) {
                 continue;
             }
-            const char* item = it.second.c_str();
-            if (!filter.PassFilter(item)) {
+
+            const char *text = it.second.c_str();
+            if (!filter.PassFilter(text)) {
                 continue;
             }
-            ImVec4 col = ImVec4(0.5,0.4,0.3,0.5); // wat
+
+            ImVec4 col = ImVec4(0.5, 0.4, 0.3, 0.5); // wat
             ImGui::PushStyleColor(ImGuiCol_Text, col);
-            ImGui::TextAnsiUnformatted(item);
+            ImGui::TextAnsiUnformatted(text);
             ImGui::PopStyleColor();
         }
     }
 
-    if (scrollToBottom) {
-        ImGui::SetScrollY(ImGui::GetScrollMaxY());
+    if (scrollToBottom && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+        ImGui::SetScrollHereY(1.0f);
     }
     ImGui::PopFont();
     ImGui::PopStyleVar();

@@ -20,7 +20,7 @@ void Measurement::window() {
     }
 
 
-    static ImPlotFlags plotFlags = 0;
+    static ImPlotFlags plotFlags = ImPlotFlags_AntiAliased;
     static ImPlotAxisFlags xAxisFlags = ImPlotAxisFlags_None;
     static ImPlotAxisFlags yAxisFlags = xAxisFlags | ImPlotAxisFlags_LockMin;
 
