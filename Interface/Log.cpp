@@ -34,7 +34,7 @@ void Log::window() {
     }
 
     ImGui::SameLine();
-    ImGui::Checkbox("autoscroll", &scrollToBottom);
+    bool scrollPressed = ImGui::Checkbox("autoscroll", &scrollToBottom);
 
     if (ImGui::GetContentRegionAvail().x > 800) {
         ImGui::SameLine(0, 40);
@@ -80,14 +80,20 @@ void Log::window() {
                 continue;
             }
 
-            ImVec4 col = ImVec4(0.5, 0.4, 0.3, 0.5); // wat
-            ImGui::PushStyleColor(ImGuiCol_Text, col);
-            ImGui::TextAnsiUnformatted(text);
-            ImGui::PopStyleColor();
+            // If the next item is not clipped by scrolling
+            // A maximum horizontal dimension is selected to not interfere with horizontal scrolling.
+            if (ImGui::IsRectVisible({INFINITY, 18.0f})) {
+                ImVec4 col = ImVec4(0.5, 0.4, 0.3, 0.5); // wat
+                ImGui::PushStyleColor(ImGuiCol_Text, col);
+                ImGui::TextAnsiUnformatted(text);
+                ImGui::PopStyleColor();
+            } else {
+                ImGui::NewLine();
+            }
         }
     }
 
-    if (scrollToBottom && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+    if (scrollToBottom && (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() || scrollPressed)) {
         ImGui::SetScrollHereY(1.0f);
     }
     ImGui::PopFont();
