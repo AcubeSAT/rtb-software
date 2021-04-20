@@ -64,6 +64,7 @@ uint8_t uart_buffer[UART_BUFFER_MAX];
 atomic_uint uart_write = 0;
 atomic_uint uart_read = 0;
 bool reserved = false;
+enum State state = none;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -146,7 +147,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         // Latchup occurred
         LCL_ON_Force(); // Restart the component as fast as possible
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
-        puts(UART_CONTROL UART_C_LATCHUP "\r\n");
+
+        static char state_string[STATE_STRING_SIZE];
+        state_to_string(state, state_string);
+
+        printf(UART_CONTROL UART_C_LATCHUP "%s\r\n", state_string);
         log_warn("SEL detected!");
     } else if (GPIO_Pin == GPIO_PIN_13) {
         // Button pressed
@@ -184,6 +189,22 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
         HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
         HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
     );
+}
+
+void state_to_string(enum State state, char * string) {
+    switch (state) {
+        case canRX:
+            strcpy(string, "RX");
+            break;
+        case canTX:
+            strcpy(string, "TX");
+            break;
+        case canIdle:
+            strcpy(string, "Idle");
+            break;
+        default:
+            strcpy(string, "");
+    }
 }
 /* USER CODE END 0 */
 

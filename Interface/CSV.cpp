@@ -21,6 +21,7 @@ CSV::CSV() : fileWriterThread(&CSV::thread, this) {
     });
 
     createFile("latchup", {
+        "state"
     });
 }
 
@@ -56,7 +57,7 @@ void CSV::addCSVentry(const std::string &filename, const std::vector<std::string
                                                             currentDatetimeMilliseconds().str(),
                                                             std::to_string(microcontrollerClock),
                                                             currentExperimentTime().str(),
-    }, ",") + boost::algorithm::join(data, ",");
+    }, ",") + "," + boost::algorithm::join(data, ",");
 
     if (!queue.push(std::make_pair(filename, fileOutput))) {
         LOG_FATAL << "CSV queue has too many data to store! Consider getting a faster hard drive :)";

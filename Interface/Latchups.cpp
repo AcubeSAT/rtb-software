@@ -43,11 +43,12 @@ void Latchups::window() {
     ImGui::Text("Latchup time log");
     ImGui::Spacing();
     static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-    if (ImGui::BeginTable("table_latchup_timelog", 3, flags)) {
+    if (ImGui::BeginTable("table_latchup_timelog", 4, flags)) {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 100);
+        ImGui::TableSetupColumn("Sta.", ImGuiTableColumnFlags_WidthFixed, 40);
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
@@ -63,6 +64,8 @@ void Latchups::window() {
                 ImGui::Text("%s", timeLog[index].computerTime.c_str());
                 ImGui::TableSetColumnIndex(2);
                 ImGui::Text("%s", timeLog[index].experimentTime.c_str());
+                ImGui::TableSetColumnIndex(3);
+                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", timeLog[index].state.c_str());
             }
         }
         ImGui::EndTable();
@@ -72,7 +75,7 @@ void Latchups::window() {
     resetPopup();
 }
 
-void Latchups::logLatchup() {
+void Latchups::logLatchup(const std::string & state) {
     latchupCounter++;
 
     {
@@ -80,13 +83,16 @@ void Latchups::logLatchup() {
         timeLog.push_back(LatchupEvent {
             currentDatetimeMilliseconds().str(),
             formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str(),
-            currentExperimentTime().str()
+            currentExperimentTime().str(),
+            state
         });
     }
 
     beep->beep(Beep::BeepType::Ominous);
 
-    csv->addCSVentry("latchup", std::vector<std::string>{});
+    csv->addCSVentry("latchup", std::vector<std::string>{
+        state
+    });
 }
 
 void Latchups::setPopup() {

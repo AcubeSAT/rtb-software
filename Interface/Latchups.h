@@ -17,6 +17,7 @@ public:
         std::string computerTime;
         std::string mcuTime;
         std::string experimentTime;
+        std::string state = "";
     };
 
     std::mutex timeLogMutex;
@@ -24,7 +25,7 @@ public:
 
     void window();
 
-    void logLatchup();
+    void logLatchup(const std::string & state = "");
 
     void resetCounter() {
         latchupCounter = 0;

@@ -21,12 +21,6 @@ static struct Stats {
     uint64_t packetsRX;
 } stats = { 0, 0, 0, 0};
 
-static enum State {
-    stateRX = 0,
-    stateTX = 1,
-    stateIdle
-} state = stateRX;
-
 static FDCAN_HandleTypeDef* testedCAN ;
 static FDCAN_HandleTypeDef* ambientCAN;
 
@@ -63,23 +57,9 @@ void Experiment_CAN_Start() {
     testedCAN = &hfdcan1;
     ambientCAN = &hfdcan2;
 
-    state = stateRX;
+    state = canRX;
     rxCAN = testedCAN;
     txCAN = ambientCAN;
-}
-
-static void state_to_string(enum State state, char * string) {
-    switch (state) {
-        case stateRX:
-            strcpy(string, "RX");
-            break;
-        case stateTX:
-            strcpy(string, "TX");
-            break;
-        default:
-            strcpy(string, "Idle");
-            break;
-    }
 }
 
 static void Experiment_CAN_Statistics() {
@@ -92,15 +72,15 @@ static void Experiment_CAN_Statistics() {
 }
 
 void Experiment_CAN_Loop() {
-    if (state == stateRX) {
+    if (state == canRX) {
         rxCAN = testedCAN;
         txCAN = ambientCAN;
-    } else if (state == stateTX) {
+    } else if (state == canTX) {
         rxCAN = ambientCAN;
         txCAN = testedCAN;
     }
 
-    static char state_string[10];
+    static char state_string[STATE_STRING_SIZE];
     state_to_string(state, state_string);
 
     if (HAL_FDCAN_AddMessageToTxFifoQ(txCAN, &TxHeader, &TxData[0]) != HAL_OK) {
@@ -156,14 +136,14 @@ void Experiment_CAN_Loop() {
         memset(TxData, 0xFF, 8);
     }
 
-    if (state == stateRX) {
+    if (state == canRX) {
         stats.bytesRX += 8;
         stats.packetsRX++;
-        state = stateTX;
+        state = canTX;
     } else {
         stats.bytesTX += 8;
         stats.packetsTX++;
-        state = stateRX;
+        state = canRX;
     }
 
     Experiment_CAN_Statistics();

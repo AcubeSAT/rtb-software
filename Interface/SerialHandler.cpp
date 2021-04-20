@@ -46,7 +46,10 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
 
                 try {
                     if (receivedRaw[1] == 'l') {
-                        latchups.logLatchup();
+                        std::stringstream ss(receivedRaw.substr(2));
+                        std::string state;
+                        ss >> state;
+                        latchups.logLatchup(state);
                     } else if (receivedRaw[1] == 't') {
                         microcontrollerClock = std::stoi(receivedRaw.substr(2));
                     } else if (receivedRaw[1] == 'm') {

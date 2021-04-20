@@ -54,12 +54,22 @@ extern FDCAN_HandleTypeDef hfdcan1;
 extern FDCAN_HandleTypeDef hfdcan2;
 extern TIM_HandleTypeDef htim3;
 
+#define STATE_STRING_SIZE 10
+
 #define STDOUT_BUFFER_SIZE 2048
 #define UART_BUFFER_MAX 2048
 extern uint8_t uart_buffer[UART_BUFFER_MAX];
 extern atomic_uint uart_write;
 extern atomic_uint uart_read;
 extern bool uart_mutex;
+
+extern enum State {
+    none,
+    canRX,
+    canTX,
+    canIdle
+} state;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -85,6 +95,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void uart_command_received(const uint8_t* command, uint32_t len);
+void state_to_string(enum State state, char * string);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
