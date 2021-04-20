@@ -5,6 +5,7 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
+#include "cereal/cereal.hpp"
 
 
 class CAN {
@@ -14,6 +15,16 @@ public:
         uint64_t rxPackets;
         uint64_t txBytes;
         uint64_t txPackets;
+
+        template<class Archive>
+        void serialize(Archive &archive) {
+            archive(
+                CEREAL_NVP(rxBytes),
+                CEREAL_NVP(rxPackets),
+                CEREAL_NVP(txBytes),
+                CEREAL_NVP(txPackets)
+            );
+        }
     };
 
     struct Event {

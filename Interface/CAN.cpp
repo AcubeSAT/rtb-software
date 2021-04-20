@@ -3,7 +3,9 @@
 #include "Clock.h"
 #include "main.h"
 #include <bitset>
+#include <plog/Log.h>
 #include "magic_enum.hpp"
+#include "Utilities.h"
 
 void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::MeasuredType type, const std::string& info) {
     const std::lock_guard lock(timeLogMutex);
@@ -161,6 +163,9 @@ void CAN::window() {
 
 void CAN::reset() {
     const std::lock_guard lock(timeLogMutex);
+
+    LOG_INFO << "CAN Statistics:" << ArchiveDump(stats.load(), "CAN");
+
     stats.store(Stats());
     timeLog.clear();
 }
