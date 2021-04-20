@@ -34,7 +34,7 @@ bool uart_experiment(char *command, uint16_t len) {
             }
 
             // Start experiment
-
+            state = none;
             currentExperiment = strtol(command + 2, NULL, 10);
             switch (currentExperiment) {
                 case 1:
@@ -55,7 +55,7 @@ bool uart_experiment(char *command, uint16_t len) {
 
                 switch (previousExperiment) {
                     case 1:
-                        log_info("Stopping experiment %ld", currentExperiment);
+                        log_info("Stopping experiment %ld", previousExperiment);
                         Experiment_CAN_Stop();
                         break;
                     default:
