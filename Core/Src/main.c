@@ -261,7 +261,7 @@ int main(void)
   while (1)
   {
 //      log_trace("Hello %s", "world");
-      HAL_Delay(100);
+      HAL_Delay(500);
 
 //    if (currentExperiment == 1) {
 //        Experiment_CAN_Loop();
@@ -270,7 +270,42 @@ int main(void)
     log_info("Welcome to the MRAM experiment");
 
     char text[] = "I am a toest test";
-    HAL_SRAM_Write_8b(&hsram1, (uint32_t*)(0x60006000), text, strlen(text) + 1);
+
+    const uint64_t mask = (1 << 15);
+
+    srand(0);
+    for (uint64_t i = 0; i < 2097151; i += 8) {
+        uint64_t valve = i * 3;
+
+//        HAL_SRAM_Write_8b(&hsram1, (uint32_t*)(0x60000000 + i), text, 8);
+        if ((i & mask) == 0) {
+            *((volatile uint64_t *) (0x60000000 + i)) = valve;
+        }
+
+        if (i % 10000 == 0) {
+            log_debug("W Progress: %f", 100.0f * i / 2097152.0f);
+        }
+    }
+    uint32_t errors = 0;
+    srand(0);
+      for (uint64_t i = 0; i < 2097151; i += 8) {
+          uint64_t valve = (i & (~mask)) * 3;
+
+          if (*((volatile uint64_t*)((0x60000000 + i) & (~mask))) != valve) {
+//              log_warn("Error at address %x", i);
+            errors += 1;
+          } else {
+//            log_trace("%lx", valve);
+          }
+
+          if (i % 10000 == 0) {
+              log_debug("R Progress: %f", 100.0f * i / 2097152.0f);
+          }
+      }
+
+      log_warn("There are %ld/%ld errors", errors, 2097152 / 8);
+
+
 //
     log_info("Write: %s", text);
 
