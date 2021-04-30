@@ -37,6 +37,7 @@
 #include "FontAwesome.h"
 #include "CSV.h"
 #include "Utilities.h"
+#include "MRAM.h"
 
 const char* glsl_version = "#version 130";
 
@@ -57,6 +58,7 @@ std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
 Measurement measurements;
 CAN can;
+MRAM mram;
 std::optional<Settings> settings;
 std::optional<Beep> beep;
 std::optional<CSV> csv;
@@ -286,6 +288,13 @@ int main(int argc, char *argv[]) {
             ImGui::End();
 
             ImGui::SetNextWindowPos(ImVec2(1240, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
+            ImGui::Begin("MRAM");
+            mram.window();
+            ImGui::End();
+
+            ImGui::SetNextWindowPos(ImVec2(1240, 45), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
             ImGui::Begin("CAN Bus");

@@ -100,6 +100,22 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                             ss >> stats.txBytes >> stats.txPackets >> stats.rxBytes >> stats.rxPackets;
                             can.setStats(stats);
                         }
+                    } else if (receivedRaw[1] == 'p') {
+                        // Process progress
+                        std::stringstream ss(receivedRaw.substr(2));
+
+                        char type;
+                        int filled;
+                        int max;
+                        ss >> type >> filled >> max;
+
+                        if (type == 'f') {
+                            mram.setProgressFill(filled, max);
+                        } else if (type == 'r') {
+                            mram.setProgressRead(filled, max);
+                        } else {
+                            LOG_WARNING << "Unknown progress report " << type << " received";
+                        }
                     } else {
                         LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
                     }

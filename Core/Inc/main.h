@@ -83,6 +83,8 @@ extern enum State {
 #define UART_C_CANBITERROR "b"
 #define UART_C_CANERROR "c"
 #define UART_C_STATISTICS "s"
+#define UART_C_MEMPROGRESS "p"
+#define UART_C_MEMERROR "r"
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

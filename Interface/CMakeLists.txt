@@ -29,7 +29,7 @@ include_directories (
 add_subdirectory(lib)
 add_subdirectory(lib/plog)
 
-set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp SerialHandler.cpp Clock.cpp Latchups.cpp Settings.cpp Log.cpp Measurement.cpp CAN.cpp Beep.cpp CSV.cpp Utilities.cpp)
+set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp SerialHandler.cpp Clock.cpp Latchups.cpp Settings.cpp Log.cpp Measurement.cpp CAN.cpp Beep.cpp CSV.cpp Utilities.cpp MRAM.cpp)
 set(VARIOUS)
 add_executable(RadiationInterface ${SOURCE_FILES} ${VARIOUS})
 target_link_libraries (RadiationInterface ImGui ImGuiBackend ImGuiDemo ImPlot gl3w GL ${glfw3_LIBRARIES} Tonic RtAudio dl rt atomic)

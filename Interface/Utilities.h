@@ -5,6 +5,7 @@
 #include "cereal/cereal.hpp"
 #include <cereal/archives/json.hpp>
 #include <boost/algorithm/string.hpp>
+#include <imgui.h>
 
 void HelpTooltip(const std::string& text);
 void HelpMarker(const std::string& text);
@@ -19,6 +20,19 @@ std::string ArchiveDump(const Class & archivable, const std::string & name = "va
     archive(cereal::make_nvp(name, archivable));
 
     return boost::replace_all_copy(ss.str(), "\n", " ");
+}
+
+inline static const float pad = 5.0f;
+
+static ImVec2 padMin(ImVec2 in) {
+    in.x -= pad;
+    in.y -= pad;
+    return in;
+}
+static ImVec2 padMax(ImVec2 in) {
+    in.x += pad;
+    in.y += pad;
+    return in;
 }
 
 #endif //RADIATIONINTERFACE_UTILITIES_H

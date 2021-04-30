@@ -8,6 +8,7 @@
 #include "Settings.h"
 #include "Beep.h"
 #include "CSV.h"
+#include "MRAM.h"
 
 const uint8_t UART_CONTROL = '\x11';
 
@@ -15,6 +16,7 @@ extern std::unique_ptr<SerialHandler> serialHandler;
 extern Latchups latchups;
 extern Measurement measurements;
 extern CAN can;
+extern MRAM mram;
 extern std::optional<Beep> beep;
 extern std::optional<CSV> csv;
 
