@@ -243,6 +243,13 @@ void LogControl::logTitleWindow() {
     ImGui::PushFont(logFont);
     ImGui::TextUnformatted(getLogFileDirectory(false).c_str());
     ImGui::PopFont();
+    if (ImGui::IsItemClicked()) {
+        ImGui::LogToClipboard();
+        ImGui::LogText("%s", getLogFileDirectory(false).c_str());
+        ImGui::LogFinish();
+        LOG_VERBOSE << "Copied log name to clipboard";
+    }
+    HelpTooltip("Click to copy to clipboard");
 }
 
 std::string LogControl::getLogFileDirectory(bool updateDate) {
