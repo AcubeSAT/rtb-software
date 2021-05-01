@@ -2,6 +2,7 @@
 #include "MRAM.h"
 #include "main.h"
 #include "Utilities.h"
+#include "FontAwesome.h"
 
 void MRAM::window() {
     auto fillWidth = ImGui::GetContentRegionAvail().x / 4;
@@ -27,47 +28,54 @@ void MRAM::window() {
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             auto lastItem = timeLog.cend() - 1;
 
-            ImGui::Text("TX:");
-            ImGui::SameLine(50.0f, 0.0f);
+            ImGui::Spacing();
+            ImGui::Text("Address:");
+            ImGui::SameLine();
             ImGui::PushFont(logFont);
-            ImGui::Text("%#018lx", 0);
-            ImGui::PopFont();
-            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
-
-            ImGui::SameLine(200.0f, 0.0f);
-            ImGui::PushFont(logFont);
-            ImGui::Text("%s", 0);
+            ImGui::Text("%#08x", (int) lastItem->address);
             ImGui::PopFont();
             draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
 
             float currentPosition = ImGui::GetCursorPosY();
 
             ImGui::PushFont(largeFont);
-            ImGui::SameLine(0.0f, 50.0f);
+            ImGui::SameLine(0.0f, 100.0f);
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.59, 0.2f, 0.4f, 0.5f));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.59, 0.7f, 0.4f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.59, 0.7f, 0.5f, 1.0f));
             ImGui::Button(std::to_string(timeLog.size()).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 50.0f));
             ImGui::PopStyleColor(3);
             ImGui::PopFont();
+            HelpTooltip("MRAM error counter");
             ImGui::SameLine();
             ImGui::Text("errors");
             ImGui::SetCursorPosY(currentPosition);
 
             ImGui::Spacing();
+            ImGui::Spacing();
 
-            ImGui::Text("RX:");
-            ImGui::SameLine(50.0f, 0.0f);
+            ImGui::Text("Data:");
+            ImGui::SameLine();
             ImGui::PushFont(logFont);
-            ImGui::Text("%#018lx", 0);
+            ImGui::Text("%02x", (int) lastItem->write);
             ImGui::PopFont();
-            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
+            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(155, 155, 75, 120));
 
-            ImGui::SameLine(200.0f, 0.0f);
+            ImGui::SameLine();
+            FontAwesomeText(FontAwesome::ChevronRight);
+            ImGui::SameLine();
             ImGui::PushFont(logFont);
-            ImGui::Text("%s", 0);
+            ImGui::Text("%02x", (int) lastItem->read1);
             ImGui::PopFont();
-            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 75, 120));
+            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 155, 120));
+
+            ImGui::SameLine(0, 15.0f);
+            ImGui::PushFont(logFont);
+            ImGui::Text("%02x", (int) lastItem->read2);
+            ImGui::PopFont();
+            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 155, 120));
+
+            ImGui::Spacing();
         }
     }
 

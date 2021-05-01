@@ -239,7 +239,7 @@ void LogControl::logTitleWindow() {
         ImGui::PopStyleColor(3);
     }
 
-    
+
     ImGui::PushFont(logFont);
     ImGui::TextUnformatted(getLogFileDirectory(false).c_str());
     ImGui::PopFont();
