@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <can.h>
 #include <lcl.h>
+#include <mram.h>
 #include "experiments.h"
 #include "stm32h7xx_hal.h"
 
@@ -41,6 +42,10 @@ bool uart_experiment(char *command, uint16_t len) {
                     log_info("Starting experiment %ld", currentExperiment);
                     Experiment_CAN_Start();
                     break;
+                case 3:
+                    log_info("Starting experiment %ld", currentExperiment);
+                    Experiment_MRAM_Start();
+                    break;
                 default:
                     log_info("No associated experimental procedure");
             }
@@ -58,6 +63,10 @@ bool uart_experiment(char *command, uint16_t len) {
                         log_info("Stopping experiment %ld", previousExperiment);
                         Experiment_CAN_Stop();
                         break;
+                    case 3:
+                        log_info("Stopping experiment %ld", previousExperiment);
+                        Experiment_MRAM_Stop();
+                        break;
                     default:
                         log_info("Stopped no associated experimental procedure");
                 }
@@ -74,6 +83,10 @@ bool uart_experiment(char *command, uint16_t len) {
                 case 1:
                     log_info("Resetting experiment %ld", currentExperiment);
                     Experiment_CAN_Reset();
+                    break;
+                case 3:
+                    log_info("Resetting experiment %ld", currentExperiment);
+                    Experiment_MRAM_Reset();
                     break;
                 default:
                     log_info("Reset no associated experimental procedure");

@@ -109,7 +109,7 @@ void Experiment_CAN_Loop() {
         uint32_t duration = HAL_GetTick() - time_start;
         if (HAL_FDCAN_GetRxMessage(rxCAN, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
             // Very representative bit randomizer
-            if (rand() % 51 == 0) {
+            if (RANDOM_ERRORS && rand() % 51 == 0) {
                 *((uint64_t *) RxData) = flipRandomBit(*((uint64_t *) RxData), (rand() % 4) + 1);
             }
 

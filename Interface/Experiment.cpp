@@ -12,12 +12,7 @@ std::vector<Experiment> Experiment::experiments = {
         Experiment("Clear", "No experiment selected. No actions taken"),
         Experiment("CAN transceiver", "CAN RX + TX. Comparison of received messages."),
         Experiment("CAN transceiver silent", loremIpsum),
-        Experiment("MRAM static", loremIpsum),
-        Experiment("MRAM dynamic", loremIpsum),
-        Experiment("MRAM check 0", loremIpsum),
-        Experiment("NAND Flash", loremIpsum),
-        Experiment("N-MOSFET", loremIpsum),
-        Experiment("P-MOSFET", loremIpsum),
+        Experiment("MRAM", "MRAM write and verify loop"),
         Experiment("555 timer", loremIpsum),
         Experiment("NOR gate", loremIpsum),
         Experiment("S-R latch", loremIpsum),
@@ -214,4 +209,5 @@ void Experiment::reset() {
 
     can.reset();
     latchups.reset();
+    mram.reset();
 }

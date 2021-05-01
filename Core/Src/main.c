@@ -260,14 +260,13 @@ int main(void)
   while (1)
   {
 //      log_trace("Hello %s", "world");
-      HAL_Delay(500);
+//      HAL_Delay(500);
 
-//    if (currentExperiment == 1) {
-//        Experiment_CAN_Loop();
-//    }
-
-    Experiment_MRAM_Loop();
-
+    if (currentExperiment == 1) {
+        Experiment_CAN_Loop();
+    } else if (currentExperiment == 3) {
+        Experiment_MRAM_Loop();
+    }
 
 
     /* USER CODE END WHILE */

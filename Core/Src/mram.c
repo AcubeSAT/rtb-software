@@ -116,7 +116,7 @@ static void Experiment_MRAM_Fill() {
         for (uint64_t j = 0; j < 8; j++) {
             uint8_t value_8bit = MRAM_value((i + j) & ~mask);
 
-            if (rand() % 99 == 0) {
+            if (RANDOM_ERRORS && rand() % 99 == 0) {
                 value_8bit |= rand();
             }
 
@@ -171,7 +171,7 @@ void Experiment_MRAM_Loop() {
         uint8_t new_value = ~expected_value;
         MRAM_write(i, new_value);
         uint8_t new_read = MRAM_read(i);
-        if (new_read != new_value || rand() % 999 == 0) {
+        if (new_read != new_value || (RANDOM_ERRORS && rand() % 999 == 0)) {
             errors += 1;
 
             uint8_t read_second = MRAM_read(i);

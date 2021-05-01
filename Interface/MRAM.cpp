@@ -3,6 +3,7 @@
 #include "main.h"
 #include "Utilities.h"
 #include "FontAwesome.h"
+#include <plog/Log.h>
 
 void MRAM::window() {
     Stats loadedStats = this->stats.load();
@@ -182,6 +183,20 @@ MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::E
             std::to_string(read1),
             std::to_string(read2),
     });
+}
+
+void MRAM::reset() {
+    LOG_INFO << "MRAM Statistics:" << ArchiveDump(stats.load(), "MRAM");
+
+    stats.store(Stats());
+
+    {
+        const std::lock_guard lock(timeLogMutex);
+        timeLog.clear();
+    }
+
+    progressFill = make_pair(0, 0);
+    progressRead = make_pair(0, 0);
 }
 
 ImColor MRAM::Event::colour() const {
