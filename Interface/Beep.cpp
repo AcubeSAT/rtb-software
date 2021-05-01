@@ -51,7 +51,7 @@ void Beep::beep(BeepType type) {
             .doesSustain(false)
             .trigger(1);
 
-    float filterFrequency = type == BeepType::Ominous ? 1200 : 800;
+    float filterFrequency = type == BeepType::Ominous ? 1900 : 800;
 
     LPF24 filter = LPF24().Q(2).cutoff(filterFrequency);
     Generator output = (( tone * env ) >> filter) * 0.5 * getVolume();

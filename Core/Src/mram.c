@@ -1,8 +1,13 @@
 #include <stdint.h>
 #include <stm32h7xx_hal.h>
 #include <log.h>
+#include <stdlib.h>
 #include "main.h"
 #include "mram.h"
+
+static bool experimentStarted = false;
+static uint32_t fillAddress = 0;
+static uint32_t verifyAddress = 0;
 
 #define ofast __attribute__((optimize("-Ofast")))
 
@@ -74,7 +79,7 @@ ofast static inline uint8_t powm_u8(uint8_t b, uint8_t e, uint8_t m)
 }
 
 ofast static inline uint8_t MRAM_value(uint32_t address) {
-    return ((((uint8_t) (address * 1163) + 89) % 83) & (1 << 4)) ? 0x00 : 0xff;
+    return ((((uint8_t) (address * 1163) + 89) % 83) & (1 << 4)) ? 0x01 : 0xfe;
 }
 
 static inline volatile uint8_t MRAM_read(uint32_t address) {
@@ -111,10 +116,12 @@ static void Experiment_MRAM_Statistics(bool force) {
 static void Experiment_MRAM_Fill() {
     log_debug("MRAM data fill");
 
-    for (uint64_t i = 0; i <= MRAM_max_address; i += 8) {
+    for (; fillAddress <= MRAM_max_address; fillAddress += 8) {
+        if (!experimentStarted) break;
+
         uint64_t value = 0;
         for (uint64_t j = 0; j < 8; j++) {
-            uint8_t value_8bit = MRAM_value((i + j) & ~mask);
+            uint8_t value_8bit = MRAM_value((fillAddress + j) & ~mask);
 
             if (RANDOM_ERRORS && rand() % 99 == 0) {
                 value_8bit |= rand();
@@ -123,20 +130,41 @@ static void Experiment_MRAM_Fill() {
             value |= ((uint64_t) (value_8bit)) << (8 * j);
         }
 
-        *((volatile uint64_t *) (0x60000000 + i)) = value;
+        *((volatile uint64_t *) (0x60000000 + fillAddress)) = value;
 
-        MRAM_progress_report('f', i, MRAM_max_address);
+        MRAM_progress_report('f', fillAddress, MRAM_max_address);
     }
 
-    MRAM_progress_report('f', MRAM_max_address, MRAM_max_address);
+    MRAM_progress_report('f', fillAddress, MRAM_max_address);
 }
 
 void Experiment_MRAM_Start() {
     HAL_SRAM_MspInit(&hsram1);
+    experimentStarted = true;
 }
 
 void Experiment_MRAM_Stop() {
-    HAL_SRAM_MspDeInit(&hsram1);
+     // Do not deinitialise FMC since it causes crashes in case of memory access.
+     // Instead, we just manually deinitialise the relevant pins
+//    HAL_SRAM_MspDeInit(&hsram1);
+
+    HAL_GPIO_DeInit(GPIOE, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_7|GPIO_PIN_8
+                           |GPIO_PIN_9|GPIO_PIN_10);
+
+    HAL_GPIO_DeInit(GPIOF, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                           |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_12|GPIO_PIN_13
+                           |GPIO_PIN_14|GPIO_PIN_15);
+
+    HAL_GPIO_DeInit(GPIOG, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+                           |GPIO_PIN_4|GPIO_PIN_5);
+
+    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14
+                           |GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4
+                           |GPIO_PIN_5);
+
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_7);
+
+    experimentStarted = false;
 }
 
 void Experiment_MRAM_Loop() {
@@ -149,50 +177,59 @@ void Experiment_MRAM_Loop() {
 
     uint32_t start_time = HAL_GetTick();
     uint32_t stop_time = HAL_GetTick();
-    for (uint32_t i = 0; i <= MRAM_max_address; i += 1) {
-        if ((i & mask) != 0) continue;
+    for (; verifyAddress <= MRAM_max_address; verifyAddress += 1) {
+        if ((verifyAddress & mask) != 0) continue;
+        if (!experimentStarted) break;
 
         stats.bytesWritten++;
 
-        uint8_t expected_value = MRAM_value(i);
-        uint8_t read = MRAM_read(i);
+        uint8_t expected_value = MRAM_value(verifyAddress);
+        uint8_t read = MRAM_read(verifyAddress);
 
         // STEP 1: Read old value
         if (read != expected_value) {
             errors += 1;
 
             // Second read to determine if the event is a transient or not
-            volatile uint8_t read_second = MRAM_read(i);
+            volatile uint8_t read_second = MRAM_read(verifyAddress);
 
-            MRAM_error_report(i, expected_value, read, read_second, "Read");
+            MRAM_error_report(verifyAddress, expected_value, read, read_second, "Read");
         }
 
         // STEP 2: Write + read new value
         uint8_t new_value = ~expected_value;
-        MRAM_write(i, new_value);
-        uint8_t new_read = MRAM_read(i);
+        MRAM_write(verifyAddress, new_value);
+        uint8_t new_read = MRAM_read(verifyAddress);
         if (new_read != new_value || (RANDOM_ERRORS && rand() % 999 == 0)) {
             errors += 1;
 
-            uint8_t read_second = MRAM_read(i);
+            uint8_t read_second = MRAM_read(verifyAddress);
 
-            MRAM_error_report(i, new_value, read, read_second, "Write");
+            MRAM_error_report(verifyAddress, new_value, read, read_second, "Write");
         }
 
-        MRAM_progress_report('r', i, MRAM_max_address);
+        MRAM_progress_report('r', verifyAddress, MRAM_max_address);
         Experiment_MRAM_Statistics(false);
     }
 
-    MRAM_progress_report('r', MRAM_max_address, MRAM_max_address);
+    MRAM_progress_report('r', verifyAddress, MRAM_max_address);
 
     stop_time = HAL_GetTick();
     stats.loops++;
     Experiment_MRAM_Statistics(true);
 
     log_info("MRAM verify loop: stop %ld/%ld errors [%ld]", errors, (2 * (MRAM_max_address + 1)) / (1 << __builtin_popcount(mask)), stop_time - start_time);
+
+    if (verifyAddress >= MRAM_max_address) {
+        fillAddress = 0;
+        verifyAddress = 0;
+    }
 }
 
 void Experiment_MRAM_Reset() {
     stats.bytesWritten = 0;
     stats.loops = 0;
+
+    fillAddress = 0;
+    verifyAddress = 0;
 }

@@ -556,7 +556,7 @@ static uint32_t FMC_Initialized = 0;
 
 static void HAL_FMC_MspInit(void){
   /* USER CODE BEGIN FMC_MspInit 0 */
-
+  FMC_Initialized = 0;
   /* USER CODE END FMC_MspInit 0 */
   GPIO_InitTypeDef GPIO_InitStruct ={0};
   if (FMC_Initialized) {
