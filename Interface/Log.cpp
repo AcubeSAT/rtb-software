@@ -239,11 +239,10 @@ void LogControl::logTitleWindow() {
         ImGui::PopStyleColor(3);
     }
 
-    if (status == LogStatus::automatic) {
-        ImGui::PushFont(logFont);
-        ImGui::TextUnformatted(getAutomaticLogTitle().c_str());
-        ImGui::PopFont();
-    }
+    
+    ImGui::PushFont(logFont);
+    ImGui::TextUnformatted(getLogFileDirectory(false).c_str());
+    ImGui::PopFont();
 }
 
 std::string LogControl::getLogFileDirectory(bool updateDate) {
