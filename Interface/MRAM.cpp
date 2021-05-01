@@ -5,6 +5,8 @@
 #include "FontAwesome.h"
 
 void MRAM::window() {
+    Stats loadedStats = this->stats.load();
+
     auto fillWidth = ImGui::GetContentRegionAvail().x / 4;
 
     ImGui::ProgressBar(progressFill.first / (float) progressFill.second, ImVec2(fillWidth, 0));
@@ -18,7 +20,7 @@ void MRAM::window() {
     ImGui::SameLine();
     ImGui::Text("verify");
     ImGui::SameLine(0, 40);
-    ImGui::Text("Loops completed: %ld", 100);
+    ImGui::Text("Loops completed: %ld", loadedStats.loops);
 
     {
         const std::lock_guard lock(timeLogMutex);
@@ -62,7 +64,7 @@ void MRAM::window() {
             draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(155, 155, 75, 120));
 
             ImGui::SameLine();
-            FontAwesomeText(FontAwesome::ChevronRight);
+            FontAwesomeText(FontAwesome::CaretRight);
             ImGui::SameLine();
             ImGui::PushFont(logFont);
             ImGui::Text("%02x", (int) lastItem->read1);
@@ -82,6 +84,8 @@ void MRAM::window() {
     ImGui::Separator();
     ImGui::Spacing();
     ImGui::Text("MRAM error log");
+    ImGui::SameLine(0.0f, ImGui::GetContentRegionAvail().x - 330.0f);
+    ImGui::Text("%ld bytes processed", loadedStats.bytesWritten);
     ImGui::Spacing();
     static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
     if (ImGui::BeginTable("table_mram_timelog", 6, flags)) {
@@ -163,7 +167,10 @@ MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::E
         currentExperimentTime().str()
     };
 
-    timeLog.push_back(event);
+    {
+        const std::lock_guard lock(timeLogMutex);
+        timeLog.push_back(event);
+    }
 
     beep->beep(Beep::BeepType::Soft);
 

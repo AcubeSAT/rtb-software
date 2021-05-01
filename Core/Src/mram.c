@@ -10,6 +10,11 @@ const uint32_t mask = (1 << 15) | (1 << 0) | (1 << 1) | (1 << 2);
 //const uint32_t mask = (1 << 15);
 const uint32_t MRAM_max_address = 2097151;
 
+static struct Stats {
+    uint64_t bytesWritten;
+    uint64_t loops;
+} stats = { 0, 0};
+
 // Source: https://github.com/csknk/fast-modular-exponentiation
  ofast static inline uint64_t powm_u64(uint64_t b, uint64_t e, uint64_t m)
 {
@@ -94,6 +99,15 @@ ofast static void MRAM_error_report(uint32_t address, uint8_t expected, uint8_t 
     printf(UART_CONTROL UART_C_MEMERROR "%x %x %x %x %s\r\n", (int) address, (int) expected, (int) read1, (int) read2, verification_stage);
  }
 
+static void Experiment_MRAM_Statistics(bool force) {
+    static uint32_t lastStats = 0;
+
+    if (HAL_GetTick() - lastStats > 200 || force) {
+        lastStats = HAL_GetTick();
+        printf(UART_CONTROL UART_C_STATISTICS "MRAM %lld %lld\r\n", stats.bytesWritten, stats.loops);
+    }
+}
+
 static void Experiment_MRAM_Fill() {
     log_debug("MRAM data fill");
 
@@ -138,6 +152,8 @@ void Experiment_MRAM_Loop() {
     for (uint32_t i = 0; i <= MRAM_max_address; i += 1) {
         if ((i & mask) != 0) continue;
 
+        stats.bytesWritten++;
+
         uint8_t expected_value = MRAM_value(i);
         uint8_t read = MRAM_read(i);
 
@@ -164,12 +180,19 @@ void Experiment_MRAM_Loop() {
         }
 
         MRAM_progress_report('r', i, MRAM_max_address);
+        Experiment_MRAM_Statistics(false);
     }
 
     MRAM_progress_report('r', MRAM_max_address, MRAM_max_address);
 
     stop_time = HAL_GetTick();
+    stats.loops++;
+    Experiment_MRAM_Statistics(true);
 
     log_info("MRAM verify loop: stop %ld/%ld errors [%ld]", errors, (2 * (MRAM_max_address + 1)) / (1 << __builtin_popcount(mask)), stop_time - start_time);
 }
 
+void Experiment_MRAM_Reset() {
+    stats.bytesWritten = 0;
+    stats.loops = 0;
+}

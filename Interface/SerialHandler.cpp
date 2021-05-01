@@ -99,6 +99,11 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
 
                             ss >> stats.txBytes >> stats.txPackets >> stats.rxBytes >> stats.rxPackets;
                             can.setStats(stats);
+                        } else if (type == "MRAM") {
+                            MRAM::Stats stats{};
+
+                            ss >> stats.bytesWritten >> stats.loops;
+                            mram.setStats(stats);
                         }
                     } else if (receivedRaw[1] == 'p') {
                         // Process progress

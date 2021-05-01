@@ -6,9 +6,24 @@
 #include <mutex>
 #include <atomic>
 #include <imgui.h>
+#include "cereal/cereal.hpp"
+
 
 class MRAM {
 public:
+    struct Stats {
+        uint64_t bytesWritten;
+        uint64_t loops;
+
+        template<class Archive>
+        void serialize(Archive &archive) {
+            archive(
+                    CEREAL_NVP(bytesWritten),
+                    CEREAL_NVP(loops)
+            );
+        }
+    };
+
     struct Event {
         typedef uint32_t Address;
         typedef uint8_t Data;
@@ -50,7 +65,16 @@ private:
     std::mutex timeLogMutex;
     std::vector<Event> timeLog;
 
+    std::atomic<Stats> stats{};
 public:
+    MRAM() {
+        stats = {0, 0};
+    }
+
+    void setStats(const Stats& stats) {
+        this->stats.store(stats);
+    }
+
     void window();
 
     void reset();

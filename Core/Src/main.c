@@ -112,8 +112,6 @@ int _write(int file, char *ptr, int len)
     return len;
 }
 
-uint8_t uart_rx_raw[1];
-
 /**
  * Handler from any received messages by UART
  */
