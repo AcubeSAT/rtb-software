@@ -69,7 +69,7 @@ ofast static inline uint8_t powm_u8(uint8_t b, uint8_t e, uint8_t m)
 }
 
 ofast static inline uint8_t MRAM_value(uint32_t address) {
-    return ((((uint8_t) (address * 1163) + 89) % 83) & (1 << 4)) ? 0x21 : 0xde;
+    return ((((uint8_t) (address * 1163) + 89) % 83) & (1 << 4)) ? 0x00 : 0xff;
 }
 
 static inline volatile uint8_t MRAM_read(uint32_t address) {
@@ -90,6 +90,10 @@ ofast inline static void MRAM_progress_report(char type, uint32_t fill, uint32_t
     }
 }
 
+ofast static void MRAM_error_report(uint32_t address, uint8_t expected, uint8_t read1, uint8_t read2, const char* verification_stage) {
+    printf(UART_CONTROL UART_C_MEMERROR "%x %x %x %x %s\r\n", (int) address, (int) expected, (int) read1, (int) read2, verification_stage);
+ }
+
 static void Experiment_MRAM_Fill() {
     log_debug("MRAM data fill");
 
@@ -97,6 +101,11 @@ static void Experiment_MRAM_Fill() {
         uint64_t value = 0;
         for (uint64_t j = 0; j < 8; j++) {
             uint8_t value_8bit = MRAM_value((i + j) & ~mask);
+
+            if (rand() % 99 == 0) {
+                value_8bit |= rand();
+            }
+
             value |= ((uint64_t) (value_8bit)) << (8 * j);
         }
 
@@ -120,7 +129,7 @@ void Experiment_MRAM_Loop() {
     MRAM_progress_report('r', 0, MRAM_max_address);
 
     Experiment_MRAM_Fill();
-    log_debug("MRAM read loop: start");
+    log_debug("MRAM verify loop: start");
 
     uint32_t errors = 0;
 
@@ -137,37 +146,21 @@ void Experiment_MRAM_Loop() {
             errors += 1;
 
             // Second read to determine if the event is a transient or not
-            bool isTransient = false;
-
             volatile uint8_t read_second = MRAM_read(i);
-            if (read_second == expected_value) {
-                isTransient = true;
-            }
 
-            log_warn("Error  %c [%07x] %d -> %d %d", isTransient ? 'T' : 'U', i, (int) expected_value,
-                     (int) read,
-                     (int) read_second
-            );
+            MRAM_error_report(i, expected_value, read, read_second, "Read");
         }
 
         // STEP 2: Write + read new value
         uint8_t new_value = ~expected_value;
         MRAM_write(i, new_value);
         uint8_t new_read = MRAM_read(i);
-        if (new_read != new_value) {
+        if (new_read != new_value || rand() % 999 == 0) {
             errors += 1;
 
-            bool isTransient = false;
-//
             uint8_t read_second = MRAM_read(i);
-            if (read_second == new_value) {
-                isTransient = true;
-            }
 
-            log_warn("Error 2%c [%07x] %d -> %d %d", isTransient ? 'T' : 'U', i, (int) expected_value,
-                     (int) read,
-                     (int) read_second
-            );
+            MRAM_error_report(i, new_value, read, read_second, "Write");
         }
 
         MRAM_progress_report('r', i, MRAM_max_address);
@@ -177,6 +170,6 @@ void Experiment_MRAM_Loop() {
 
     stop_time = HAL_GetTick();
 
-    log_info("MRAM read loop: stop %ld/%ld errors [%ld]", errors, (2 * (MRAM_max_address + 1)) / (1 << __builtin_popcount(mask)), stop_time - start_time);
+    log_info("MRAM verify loop: stop %ld/%ld errors [%ld]", errors, (2 * (MRAM_max_address + 1)) / (1 << __builtin_popcount(mask)), stop_time - start_time);
 }
 

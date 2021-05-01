@@ -187,7 +187,7 @@ void LogControl::logTitleWindow() {
     ImGui::SameLine();
 
     if (status == LogStatus::manual) {
-        ImGui::SameLine(0, 40);
+        ImGui::SameLine(0, 20);
         ImGui::Text("Log Title:");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(150);

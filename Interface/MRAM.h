@@ -10,23 +10,27 @@
 class MRAM {
 public:
     struct Event {
+        typedef uint32_t Address;
         typedef uint8_t Data;
 
         enum GuessedType {
             SEFI,
             SEL,
+            SEU,
             SET,
             MBU
         };
 
         enum State {
             Read,
-            Write
+            Write,
+            Idle
         };
 
         GuessedType guessedType;
         State state;
         uint32_t flips;
+        Address address;
         Data write;
         Data read1;
         Data read2;
@@ -51,7 +55,7 @@ public:
 
     void reset();
 
-    void logEvent();
+    void logEvent(Event::Address address, Event::Data expected, Event::Data read1, Event::Data read2, Event::State state);
 
     void setProgressFill(int progress, int max) {
         progressFill = std::make_pair(progress, max);

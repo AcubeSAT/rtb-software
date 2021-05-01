@@ -15,7 +15,7 @@ void MRAM::window() {
     ImGui::ProgressBar(progressRead.first / (float) progressRead.second, ImVec2(fillWidth, 0));
     ImGui::PopStyleColor();
     ImGui::SameLine();
-    ImGui::Text("read");
+    ImGui::Text("verify");
     ImGui::SameLine(0, 40);
     ImGui::Text("Loops completed: %ld", 100);
 
@@ -78,12 +78,12 @@ void MRAM::window() {
     static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
     if (ImGui::BeginTable("table_mram_timelog", 6, flags)) {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
-        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
+        ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 60);
         ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableSetupColumn("State", ImGuiTableColumnFlags_WidthFixed, 40);
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 50);
         ImGui::TableSetupColumn("#flips", ImGuiTableColumnFlags_WidthFixed, 100);
-        ImGui::TableSetupColumn("Error Code", ImGuiTableColumnFlags_WidthStretch, 100);
+        ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_WidthStretch, 100);
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
@@ -100,19 +100,89 @@ void MRAM::window() {
 
                 ImGui::TableSetColumnIndex(2);
                 std::string state(magic_enum::enum_name(timeLog[index].state));
-                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", state.c_str());
+                ImGui::Text( "%s", state.c_str());
 
                 ImGui::TableSetColumnIndex(3);
                 std::string guessedType(magic_enum::enum_name(timeLog[index].guessedType));
-//                ImGui::TextColored(timeLog[index].colour(), "%s", guessedType.c_str());
+                ImGui::TextColored(timeLog[index].colour(), "%s", guessedType.c_str());
 
                 ImGui::TableSetColumnIndex(4);
                 ImGui::Text("%d", timeLog[index].flips);
 
                 ImGui::TableSetColumnIndex(5);
-                ImGui::Text("wat");
+                ImGui::PushFont(logFont);
+                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f),"0x%07x", timeLog[index].address);
+                ImGui::PopFont();
             }
         }
         ImGui::EndTable();
     }
 }
+
+void
+MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::Event::Data read1, MRAM::Event::Data read2, MRAM::Event::State state) {
+    Event::Data diff = expected ^ read1;
+    uint32_t flips = __builtin_popcount(diff);
+
+    Event::GuessedType guessedType = Event::SEFI;
+
+    if (flips == 1) {
+        if (read1 == read2) {
+            guessedType = Event::SEU;
+        } else {
+            guessedType = Event::SET;
+        }
+    } else if (flips < 4) {
+        if (read1 == read2) {
+            guessedType = Event::MBU;
+        } else {
+            guessedType = Event::SET;
+        }
+    } else {
+        guessedType = Event::SEFI;
+    }
+
+    Event event {
+        guessedType,
+        state,
+        flips,
+        address,
+        expected,
+        read1,
+        read2,
+        currentDatetimeMilliseconds().str(),
+        formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str(),
+        currentExperimentTime().str()
+    };
+
+    timeLog.push_back(event);
+
+    beep->beep(Beep::BeepType::Soft);
+
+    csv->addCSVentry("mram", std::vector<std::string>{
+            std::string(magic_enum::enum_name(state)),
+            std::string(magic_enum::enum_name(guessedType)),
+            std::to_string(flips),
+            std::to_string(expected),
+            std::to_string(read1),
+            std::to_string(read2),
+    });
+}
+
+ImColor MRAM::Event::colour() const {
+    switch (guessedType) {
+        case SET:
+            return ImColor::HSV(0.37f, 0.7f, 0.9f);
+        case SEFI:
+            return ImColor::HSV(0.62f, 0.7f, 0.9f);
+        case SEU:
+            return ImColor::HSV(0.15f, 0.8f, 0.87f);
+        case MBU:
+            return ImColor::HSV(0.09f, 0.8f, 0.87f);
+        case SEL:
+            return ImColor::HSV(0.96f, 0.9f, 0.9f);
+        default:
+            return ImColor::HSV(0.0f, 0.0f, 0.5f);
+    }
+}
+

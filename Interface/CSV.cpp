@@ -20,6 +20,15 @@ CSV::CSV() : fileWriterThread(&CSV::thread, this) {
         "info"
     });
 
+    createFile("mram", {
+            "state",
+            "guessedType",
+            "flips",
+            "expected",
+            "read1",
+            "read2"
+    });
+
     createFile("latchup", {
         "state"
     });
