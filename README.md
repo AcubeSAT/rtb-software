@@ -65,6 +65,15 @@ An additional _"flux"_ input allows the user to get a ballpark measurement of th
 #### Single Event Latchups
 This window indicates the number and timestamps of overcurrent conditions that were detected and resolved by the microcontroller.
 
+#### MRAM
+
+The MRAM window includes statistics about the MRAM data written and read from the memory, as well as a log of error timestamp and types. The following information is stored and reported in real time for each error:
+- Memory address
+- Written (expected) value
+- Read value for both read attempts
+- Guessed error type
+- No# of bit flips
+
 #### CAN Bus
 The CAN window includes statistics about the successful CAN packets sent between the transceivers (1 irradiated + 1 ambient), and a log of error timestamp and types. The number of total errors and exact position of the bit flips are also shown and logged.
 
@@ -90,3 +99,33 @@ sudo minicom -c on -D /dev/ttyACM0 -b 1000000
 ```
 
 You can type `Ctrl+A` and then `E` to see your commands as you type them.
+
+**Do not use Minicom along with the Radiation interface**. This section is provided for quick debugging purposes.
+
+## Installation
+This is a typical CMake package. Make sure to add the following change to imgui so that ImPlot doesn't crash:
+```patch
+diff --git a/imconfig.h b/imconfig.h
+index 39de21c6..631de460 100644
+--- a/imconfig.h
++++ b/imconfig.h
+@@ -90,7 +90,7 @@
+ // Your renderer backend will need to support it (most example renderer backends support both 16/32-bit indices).
+ // Another way to allow large meshes while keeping 16-bit indices is to handle ImDrawCmd::VtxOffset in your renderer.
+ // Read about ImGuiBackendFlags_RendererHasVtxOffset for details.
+-//#define ImDrawIdx unsigned int
++#define ImDrawIdx unsigned int
+ 
+ //---- Override ImDrawCallback signature (will need to modify renderer backends accordingly)
+ //struct ImDrawList;
+```
+
+# Frequent issues/problems
+Q: **The Radiation Interface logs and serial output show garbage**  
+A: Make sure to have minicom or other serial readers off while using the Radiation Interface.
+
+Q: **The timezone shows up as `Etc/Space`**  
+A: The Radiation Interface has not been tested on Windows. Linux is suggested for use.
+
+Q: **A lot of libraries (implot, log, imgui) show up as non-existent**
+A: Make sure to clone all git submodules before installing this project!
