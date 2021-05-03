@@ -26,6 +26,7 @@
 #include "experiments.h"
 #include "log.h"
 #include "stm32h7xx_ll_usart.h"
+#include "adc.h"
 #include <memory.h>
 #include <can.h>
 #include <lcl.h>
@@ -178,7 +179,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
     } else if (htim == &htim16) { // ADC measurement timer
         // Acquire an ADC measurement
-        HAL_ADC_Start_IT(&hadc1);
+        ADC_BeginConversion();
     } else if (htim == &htim15) { // Latchup simulation timer
         if (RANDOM_ERRORS && output_status) {
             LCL_Test_Trigger();
@@ -193,16 +194,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-    if (enum_parameters[TakeMeasurements]) {
-        printf(
-                UART_CONTROL UART_C_MEASUREMENT "%f %f %d\r\n",
-                HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
-                HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
-                HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
-        );
-    }
-}
+
 
 void state_to_string(enum State state, char * string) {
     switch (state) {
@@ -271,8 +263,9 @@ int main(void)
 #pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
+
 //      log_trace("Hello %s", "world");
-//      HAL_Delay(500);
+//      log_trace("%ld %ld", HAL_ADC_GetValue(&hadc1), HAL_ADC_GetValue(&hadc1));
 
     loop_experiment(-1);
 
@@ -383,13 +376,13 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV64;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV256;
   hadc1.Init.Resolution = ADC_RESOLUTION_16B;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 2;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -417,6 +410,14 @@ static void MX_ADC1_Init(void)
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   sConfig.OffsetSignedSaturation = DISABLE;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_10;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();

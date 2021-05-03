@@ -31,7 +31,8 @@ CSV::CSV() : fileWriterThread(&CSV::thread, this) {
     });
 
     createFile("latchup", {
-        "state"
+        "state",
+        "" // This may be needed?
     });
 }
 
