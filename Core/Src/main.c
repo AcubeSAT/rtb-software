@@ -147,6 +147,12 @@ void uart_command_received(const uint8_t* command, uint32_t len) {
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     // Send clock update + LCL report on event
     if (GPIO_Pin == LCL_OUT_Pin && output_status) {
+        if (RANDOM_ERRORS) {
+            // If we have a test latchup trigger and we detect it,
+            // we can disable it (simulating actual latchup restoration)
+            LCL_Test_Trigger_OFF();
+        }
+
         // Latchup occurred
         LCL_ON_Force(); // Restart the component as fast as possible
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
@@ -155,6 +161,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         state_to_string(state, state_string);
 
         printf(UART_CONTROL UART_C_LATCHUP "%s\r\n", state_string);
+
         log_warn("SEL detected!");
     } else if (GPIO_Pin == GPIO_PIN_13) {
         // Button pressed

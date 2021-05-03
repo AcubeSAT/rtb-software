@@ -73,4 +73,12 @@ inline void LCL_Test_Trigger() {
     TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
 }
 
+inline void LCL_Test_Trigger_OFF() {
+    __HAL_TIM_SET_COUNTER(&htim3, 60000);
+    __HAL_TIM_DISABLE(&htim3);
+    TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_DISABLE);
+    // Reset counter so that next time starts from 0
+    __HAL_TIM_SET_COUNTER(&htim3, 0);
+}
+
 #endif //RTB_SOFTWARE_LCL_H
