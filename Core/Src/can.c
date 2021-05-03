@@ -4,6 +4,7 @@
 #include "can.h"
 #include "main.h"
 #include "log.h"
+#include "parameters.h"
 
 uint8_t TxData[] = {'w', 'h', 'o', ' ', 'd', 'i', 's', '?'};
 FDCAN_RxHeaderTypeDef RxHeader;

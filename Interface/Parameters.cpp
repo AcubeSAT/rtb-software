@@ -33,7 +33,7 @@ std::array<Parameter<int>, 1> integerParameters = {
 
 std::array<std::shared_ptr<EnumParameterBase>, 2> enumParameters = {
     std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::CANSpeed>>(std::string("CAN baudrate"), parameters::CANSpeed::baud250kbps)),
-    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::Latchupinator>>(std::string("Latchup simulation"), parameters::Latchupinator::disabled))
+    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::Latchupinator>>(std::string("Latchup simulation"), parameters::Latchupinator::RandomErrorsOFF))
 };
 
 namespace cereal {
@@ -149,8 +149,9 @@ void updateParameters() {
     for (auto& parameter : integerParameters) {
         ss << 'd' << " " << (index++) << " " << parameter.value << '\n';
     }
+    index = 0;
     for (auto& parameter : enumParameters) {
-        ss << 'd' << " " << (index++) << " " << parameter->intValue() << '\n';
+        ss << 'n' << " " << (index++) << " " << parameter->intValue() << '\n';
     }
 
     std::string serialCommand = ss.str();

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "main.h"
 #include "mram.h"
+#include "parameters.h"
 
 static bool experimentStarted = false;
 static uint32_t fillAddress = 0;

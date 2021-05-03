@@ -128,6 +128,7 @@ void uart_command_received(const uint8_t* command, uint32_t len) {
     switch (command[0]) {
         case 'd':
         case 'f':
+        case 'n':
             output = uart_set_parameter(command, len);
             break;
         case 'e':

@@ -6,12 +6,8 @@
 #include <stdlib.h>
 #include <stm32h7xx_hal.h>
 #include "main.h"
+#include "../../Interface/CommonEnums.h"
 
-enum floating_parameter_names {
-    MaxVoltage = 0,
-    Dac1 = 1,
-    Dac2,
-};
 
 double floating_parameters[] = {
         3.3f,
@@ -19,13 +15,11 @@ double floating_parameters[] = {
         0.15f,
 };
 uint32_t integer_parameters[] = {
-        0,
         0
 };
-
-enum integer_parameter_names {
-    Test1 = 0,
-    Test2 = 1,
+uint32_t enum_parameters[] = {
+    baud250kbps,
+    RandomErrorsOFF
 };
 
 floating_callback floating_callbacks[] = {
@@ -34,6 +28,9 @@ floating_callback floating_callbacks[] = {
     callback_dac_output
 };
 integer_callback integer_callbacks[] = {
+    NULL
+};
+integer_callback enum_callbacks[] = {
     NULL,
     NULL
 };
@@ -44,6 +41,10 @@ void callback_dac_output(uint32_t parameter, double * value) {
     log_trace("Setting DAC %ld to %d", parameter, parsed_value);
 
     HAL_DAC_SetValue(&hdac1, parameter == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2, DAC_ALIGN_8B_R, parsed_value);
+}
+
+void callback_random_errors(uint32_t parameter, uint32_t * value) {
+
 }
 
 /**
@@ -61,7 +62,7 @@ bool uart_set_parameter(char* command, uint16_t len) {
 
     command[len] = '\0'; // A bit dangerous but that's ok
 
-    if (command[0] == 'd' || command[0] == 'f') {
+    if (command[0] == 'd' || command[0] == 'f' || command[0] == 'n') {
         char * command_value;
         uint32_t parameter_number = strtol(command + 1, &command_value, 10);
 
@@ -84,6 +85,21 @@ bool uart_set_parameter(char* command, uint16_t len) {
             
             if (integer_callbacks[parameter_number] != NULL) {
                 integer_callbacks[parameter_number](parameter_number, &(integer_parameters[parameter_number]));
+            }
+        } else if (command[0] == 'n') {
+            // Enum parameter
+            uint32_t new_value = strtol(command_value + 1, NULL, 10);
+
+            if (parameter_number >= sizeof(enum_parameters) / sizeof(*enum_parameters)) {
+                log_error("This parameter does not exist");
+                return true;
+            }
+
+            enum_parameters[parameter_number] = new_value;
+            log_debug("Set enum parameter %ld to %ld", parameter_number, new_value);
+
+            if (enum_callbacks[parameter_number] != NULL) {
+                enum_callbacks[parameter_number](parameter_number, &(enum_parameters[parameter_number]));
             }
         } else {
             // Floating parameter

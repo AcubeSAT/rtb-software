@@ -14,8 +14,8 @@ enum CANSpeed {
 };
 
 enum Latchupinator {
-    disabled = 0,
-    enabled = 1,
+    RandomErrorsOFF = 0,
+    RandomErrorsON = 1,
 };
 
 #ifdef __cplusplus
