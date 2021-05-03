@@ -7,6 +7,9 @@
 #include <chrono>
 
 void Measurement::window() {
+    // Do not render the window if it is collapsed, to massively improve performance
+    if (ImGui::IsWindowCollapsed()) return;
+
     ImGui::Text("Last values: ");
     for (auto &measurementStack : measurements) {
         if (!measurementStack.second.empty()) {
@@ -18,7 +21,6 @@ void Measurement::window() {
     if (ImGui::SmallButton("Reset")) {
         clear();
     }
-
 
     static ImPlotFlags plotFlags = ImPlotFlags_AntiAliased;
     static ImPlotAxisFlags xAxisFlags = ImPlotAxisFlags_None;

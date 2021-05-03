@@ -258,7 +258,8 @@ int main(void)
   MX_TIM15_Init();
   MX_FMC_Init();
   /* USER CODE BEGIN 2 */
-
+    log_info("Microcontroller boot");
+    printf(UART_CONTROL UART_C_BOOT "\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */

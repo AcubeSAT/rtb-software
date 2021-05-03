@@ -15,8 +15,8 @@ enum floating_parameter_names {
 
 double floating_parameters[] = {
         3.3f,
-        0.0f,
-        0.2f,
+        0.30f,
+        0.15f,
 };
 uint32_t integer_parameters[] = {
         0,

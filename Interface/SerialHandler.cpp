@@ -19,6 +19,8 @@
 #include <magic_enum.hpp>
 #include "main.h"
 #include "Clock.h"
+#include "Parameters.h"
+#include "Experiment.h"
 
 using namespace std::chrono_literals;
 using namespace plog;
@@ -71,7 +73,8 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         std::string state;
                         ss >> std::hex >> state >> tx >> rx;
 
-                        can.logEvent(rx, tx, magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle));
+                        can.logEvent(rx, tx,
+                                     magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle));
                     } else if (receivedRaw[1] == 'c') {
                         // CAN bus generic error
                         std::stringstream ss(receivedRaw.substr(2));
@@ -86,7 +89,9 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                             extraInfo = type + " " + extraInfo;
                         }
 
-                        can.logEvent(0, 0, magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle), enumType.value(), extraInfo);
+                        can.logEvent(0, 0,
+                                     magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle),
+                                     enumType.value(), extraInfo);
                     } else if (receivedRaw[1] == 's') {
                         // Statistics
                         std::stringstream ss(receivedRaw.substr(2));
@@ -129,10 +134,20 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         MRAM::Event::Data read1;
                         MRAM::Event::Data read2;
                         std::string state;
-                        ss >> std::hex >> address >> (int&) expected >> (int&) read1 >> (int&) read2 >> state;
+                        ss >> std::hex >> address >> (int &) expected >> (int &) read1 >> (int &) read2 >> state;
 
-                        mram.logEvent(address, expected, read1, read2, magic_enum::enum_cast<MRAM::Event::State>(state).value_or(MRAM::Event::State::Idle));
-                    }  else {
+                        mram.logEvent(address, expected, read1, read2,
+                                      magic_enum::enum_cast<MRAM::Event::State>(state).value_or(
+                                              MRAM::Event::State::Idle));
+                    } else if (receivedRaw[1] == 'o') {
+                        // Microcontroller boot/reboot
+                        // Send all parameters to let the microcontroller know about stuff lost on reboot
+                        updateParameters();
+                        // Pause the current experiment since the MCU doesn't know it's started
+                        Experiment::sendExperimentCommand(Experiment::ExperimentCommand::Pause);
+                        // Notify the user
+                        beep->beep(Beep::BeepType::Medium);
+                    } else {
                         LOG_WARNING << "Unknown command " << receivedRaw[1] << " received";
                     }
                 } catch (std::exception &e) {

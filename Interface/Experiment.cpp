@@ -137,6 +137,13 @@ void Experiment::window() {
     }
 
     resetPopup();
+
+    // Signal/command handler
+    if (experimentCommand == ExperimentCommand::Pause) {
+        currentExperiment.get().stop();
+
+        experimentCommand = ExperimentCommand::None;
+    }
 }
 
 void Experiment::resetPopup() {

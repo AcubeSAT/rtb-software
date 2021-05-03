@@ -85,6 +85,7 @@ extern enum State {
 #define UART_C_STATISTICS "s"
 #define UART_C_MEMPROGRESS "p"
 #define UART_C_MEMERROR "r"
+#define UART_C_BOOT "o"
 
 #define RANDOM_ERRORS 1
 /* USER CODE END EC */

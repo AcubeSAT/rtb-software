@@ -20,6 +20,11 @@ public:
         Started,
         Paused
     };
+
+    enum class ExperimentCommand {
+        None,
+        Pause
+    };
 private:
     Duration previousDuration = 0s;
     std::optional<TimePoint> startTime;
@@ -29,6 +34,8 @@ private:
     static std::reference_wrapper<Experiment> currentExperiment;
 
     Status status = Idle;
+
+    inline static std::atomic<ExperimentCommand> experimentCommand = ExperimentCommand::None;
 public:
     std::string name;
     std::string description;
@@ -41,6 +48,10 @@ public:
 
     static Experiment getCurrentExperiment() {
         return currentExperiment;
+    }
+
+    static void sendExperimentCommand(ExperimentCommand experimentCommand) {
+        Experiment::experimentCommand = experimentCommand;
     }
 
     static Duration getCurrentExperimentDuration() {

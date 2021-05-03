@@ -23,8 +23,8 @@ std::array<Parameter<float>, 3> floatingParameters = {
             floatingParameters[1].max = voltage;
             floatingParameters[2].max = voltage;
         }},
-        Parameter<float>{"LCL V threshold", 0, 0, 3.3},
-        Parameter<float>{"LCL Offset voltage", 0.2, 0, 3.3},
+        Parameter<float>{"LCL V threshold", 0.3, 0, 3.3},
+        Parameter<float>{"LCL Offset voltage", 0.15, 0, 3.3},
 };
 
 std::array<Parameter<int>, 1> integerParameters = {
