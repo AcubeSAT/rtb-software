@@ -6,8 +6,10 @@
 
 CSV::CSV() : fileWriterThread(&CSV::thread, this) {
     createFile("measurements", {
-        "value0",
-        "value1"
+        "currentSense",
+        "value1",
+        "value2",
+        "output"
     });
 
     createFile("can", {

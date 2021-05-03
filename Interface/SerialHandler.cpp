@@ -216,7 +216,7 @@ void SerialHandler::thread() {
         // Serial interface initialisation
         io = std::make_unique<boost::asio::io_service>();
         serial = std::make_unique<boost::asio::serial_port>(*io, port);
-        serial->set_option(boost::asio::serial_port_base::baud_rate(1000000));
+        serial->set_option(boost::asio::serial_port_base::baud_rate(2000000));
 
         boost::asio::streambuf buf;
 
