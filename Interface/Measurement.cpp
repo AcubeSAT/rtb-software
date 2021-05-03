@@ -22,6 +22,17 @@ void Measurement::window() {
         clear();
     }
 
+    float valuesPerSecond = 1000.0f * lastStatisticsCount / (float) std::chrono::duration_cast<std::chrono::milliseconds>(statisticsPeriod).count();
+
+    std::ostringstream ss;
+    ss << "Total values: " << std::setw(10) << measurements[0].first.size();
+    ss << "\t " << "Frequency: " << std::setw(5) << std::setprecision(2) << valuesPerSecond << " values/sec";
+    std::string statistics = ss.str();
+
+    ImGui::SameLine();
+    ImGui::SameLine(0.0f, ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(statistics.c_str()).x);
+    ImGui::TextUnformatted(statistics.c_str());
+
     static ImPlotFlags plotFlags = ImPlotFlags_AntiAliased;
     static ImPlotAxisFlags xAxisFlags = ImPlotAxisFlags_None;
     static ImPlotAxisFlags yAxisFlags = xAxisFlags | ImPlotAxisFlags_LockMin;
@@ -43,18 +54,19 @@ void Measurement::window() {
 void Measurement::acquire(const std::array<float, SIZE>& values) {
     using namespace std::chrono;
 
-    static auto startTime = system_clock::now();
+    static auto startTime = steady_clock::now();
+    static auto lastFrequencyMeasurement = steady_clock::now();
 
     if (microcontrollerClock != 0) { // Ignore wrong initial values
-        milliseconds ms = duration_cast< milliseconds >(
-                system_clock::now() - startTime
+        milliseconds msStart = duration_cast< milliseconds >(
+                steady_clock::now() - startTime
         );
-        auto numberMilliseconds = ms.count();
+        auto numberMillisecondsStart = msStart.count();
 
         const std::lock_guard lock(measurementMutex);
 
         for (int i = 0; i < SIZE; i++) {
-            measurements[i].first.push_back(numberMilliseconds);
+            measurements[i].first.push_back(numberMillisecondsStart);
             measurements[i].second.push_back(values[i]);
         }
 
@@ -64,6 +76,14 @@ void Measurement::acquire(const std::array<float, SIZE>& values) {
         }
 
         csv->addCSVentry("measurements", csvMeasurements);
+
+        if (steady_clock::now() - lastFrequencyMeasurement > statisticsPeriod) {
+            lastStatisticsCount = currentStatisticsCount;
+            currentStatisticsCount = 0;
+            lastFrequencyMeasurement = steady_clock::now();
+        } else {
+            currentStatisticsCount++;
+        }
     }
 }
 

@@ -13,6 +13,10 @@ private:
     typedef float TimePoint;
     typedef float Value;
 
+    inline static const auto statisticsPeriod = std::chrono::seconds(1);
+    int currentStatisticsCount = 0;
+    int lastStatisticsCount = 0;
+
     std::array<std::pair<std::vector<TimePoint>,std::vector<Value>>, SIZE> measurements {
         std::make_pair(std::vector<TimePoint>(), std::vector<Value>())
     };
