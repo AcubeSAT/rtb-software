@@ -178,6 +178,7 @@ MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::E
     csv->addCSVentry("mram", std::vector<std::string>{
             std::string(magic_enum::enum_name(state)),
             std::string(magic_enum::enum_name(guessedType)),
+            std::to_string(address),
             std::to_string(flips),
             std::to_string(expected),
             std::to_string(read1),

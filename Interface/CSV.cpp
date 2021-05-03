@@ -23,6 +23,7 @@ CSV::CSV() : fileWriterThread(&CSV::thread, this) {
     createFile("mram", {
             "state",
             "guessedType",
+            "address",
             "flips",
             "expected",
             "read1",
