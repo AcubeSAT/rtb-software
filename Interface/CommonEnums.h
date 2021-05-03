@@ -18,6 +18,11 @@ enum Latchupinator {
     RandomErrorsON = 1,
 };
 
+enum TakeMeasurements {
+    MeasurementsOFF = 0,
+    MeasurementsON = 1,
+};
+
 #ifdef __cplusplus
 }
 #endif

@@ -89,7 +89,7 @@ public:
 
 extern std::array<Parameter<float>, 3> floatingParameters;
 extern std::array<Parameter<int>, 1> integerParameters;
-extern std::array<std::shared_ptr<EnumParameterBase>, 2> enumParameters;
+extern std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters;
 
 void parameterWindow();
 

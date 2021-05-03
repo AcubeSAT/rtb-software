@@ -19,7 +19,8 @@ uint32_t integer_parameters[] = {
 };
 uint32_t enum_parameters[] = {
     baud250kbps,
-    RandomErrorsOFF
+    RandomErrorsOFF,
+    MeasurementsON
 };
 
 floating_callback floating_callbacks[] = {
@@ -31,6 +32,7 @@ integer_callback integer_callbacks[] = {
     NULL
 };
 integer_callback enum_callbacks[] = {
+    NULL,
     NULL,
     NULL
 };

@@ -18,11 +18,12 @@ enum integer_parameter_names {
 enum enum_parameter_names {
     CANrate = 0,
     RandomErrors = 1,
+    TakeMeasurements = 2,
 };
 
 extern double floating_parameters[3];
 extern uint32_t integer_parameters[1];
-extern uint32_t enum_parameters[2];
+extern uint32_t enum_parameters[3];
 
 typedef void (*floating_callback)(uint32_t parameter, double * value);
 typedef void (*integer_callback)(uint32_t parameter, uint32_t * value);

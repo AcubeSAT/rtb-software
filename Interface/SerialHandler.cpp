@@ -225,6 +225,12 @@ void SerialHandler::thread() {
         // First action should be to disable the output on restart
         write("p0\n");
 
+        io->post([] {
+            // As soon as the serial connection is completed, send an initial parameter update to the connected MCU, to
+            // ensure running callbacks and synchronisation in case of reconnection
+            updateParameters();
+        });
+
         boost::asio::async_read_until(*serial, receivedData, '\n', [this](const boost::system::error_code& error, std::size_t size) { receiveHandler(error, size); });
         io->run();
     } catch (boost::system::system_error &e) {

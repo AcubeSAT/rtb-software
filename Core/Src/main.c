@@ -194,12 +194,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-    printf(
-        UART_CONTROL UART_C_MEASUREMENT "%f %f %d\r\n",
-        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
-        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
-        HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
-    );
+    if (enum_parameters[TakeMeasurements]) {
+        printf(
+                UART_CONTROL UART_C_MEASUREMENT "%f %f %d\r\n",
+                HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
+                HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
+                HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
+        );
+    }
 }
 
 void state_to_string(enum State state, char * string) {

@@ -16,7 +16,7 @@
 #include "Utilities.h"
 #include "FontAwesome.h"
 
-static bool unsavedParameters = false;
+static bool unsavedParameters = true;
 
 std::array<Parameter<float>, 3> floatingParameters = {
         Parameter<float>{"Board Voltage", 3.3, 1, 4, [](float voltage) {
@@ -31,9 +31,10 @@ std::array<Parameter<int>, 1> integerParameters = {
         Parameter<int>{"nil", 0, 0, 0},
 };
 
-std::array<std::shared_ptr<EnumParameterBase>, 2> enumParameters = {
+std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters = {
     std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::CANSpeed>>(std::string("CAN baudrate"), parameters::CANSpeed::baud250kbps)),
-    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::Latchupinator>>(std::string("Latchup simulation"), parameters::Latchupinator::RandomErrorsOFF))
+    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::Latchupinator>>(std::string("Latchup simulation"), parameters::Latchupinator::RandomErrorsOFF)),
+    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::TakeMeasurements>>(std::string("Measurement sending"), parameters::TakeMeasurements::MeasurementsON))
 };
 
 namespace cereal {
