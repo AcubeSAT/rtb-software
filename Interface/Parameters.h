@@ -13,10 +13,16 @@
 class EnumParameterBase {
 public:
     virtual int intValue() const = 0;
+
     virtual int count() const = 0;
+
     virtual std::string valueText() const = 0;
+
     virtual std::string name() const = 0;
+
     virtual void setValue(int newValue) = 0;
+
+    virtual void reset() = 0;
 
     template<class Archive>
     void serialize(Archive &archive) {
@@ -24,29 +30,36 @@ public:
     }
 };
 
-template <typename T>
+template<typename T>
 class Parameter {
 public:
     std::string name;
+    T defaultValue;
     T value;
 
     T min;
     T max;
 
     std::function<void(T)> callback;
+
     void callCallback() {
         if (callback) callback(value);
     }
 
     Parameter(std::string name, T value, const std::function<void(T)> &callback = {}) : name(std::move(name)),
-                                                                                                      value(value),
-                                                                                                      callback(callback) {}
+                                                                                        defaultValue(value),
+                                                                                        value(value),
+                                                                                        callback(callback) {}
 
-    Parameter(std::string name, T value, T min, T max, const std::function<void(T)> &callback = {}) : name(std::move(name)),
-                                                                                                        value(value),
-                                                                                                        min(min),
-                                                                                                        max(max),
-                                                                                                        callback(callback) {}
+    Parameter(std::string name, T value, T min, T max, const std::function<void(T)> &callback = {}) : name(
+            std::move(name)),
+                                                                                                      defaultValue(
+                                                                                                              value),
+                                                                                                      value(value),
+                                                                                                      min(min),
+                                                                                                      max(max),
+                                                                                                      callback(
+                                                                                                              callback) {}
 
     virtual ~Parameter() = default;
 
@@ -56,7 +69,7 @@ public:
     }
 };
 
-template <typename Enum>
+template<typename Enum>
 class EnumParameter : public Parameter<Enum>, public EnumParameterBase {
     using Parameter<Enum>::Parameter;
 public:
@@ -80,10 +93,13 @@ public:
         Parameter<Enum>::value = static_cast<Enum>(newValue);
     }
 
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar( cereal::base_class<EnumParameterBase>(this) );
+    void reset() override {
+        Parameter<Enum>::value = Parameter<Enum>::defaultValue;
+    }
+
+    template<class Archive>
+    void serialize(Archive &ar) {
+        ar(cereal::base_class<EnumParameterBase>(this));
     }
 };
 
@@ -92,6 +108,8 @@ extern std::array<Parameter<int>, 1> integerParameters;
 extern std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters;
 
 void parameterWindow();
+
+void resetParameters();
 
 void updateParameters();
 

@@ -34,7 +34,7 @@ std::array<Parameter<int>, 1> integerParameters = {
 std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters = {
     std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::CANSpeed>>(std::string("CAN baudrate"), parameters::CANSpeed::baud250kbps)),
     std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::Latchupinator>>(std::string("Latchup simulation"), parameters::Latchupinator::RandomErrorsOFF)),
-    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::TakeMeasurements>>(std::string("Measurement sending"), parameters::TakeMeasurements::MeasurementsON))
+    std::dynamic_pointer_cast<EnumParameterBase>(std::make_shared<EnumParameter<parameters::TakeMeasurements>>(std::string("Measurement sending"), parameters::TakeMeasurements::MeasurementsOFF))
 };
 
 namespace cereal {
@@ -101,9 +101,14 @@ void parameterWindow() {
     }
 
     ImGui::Separator();
+    if (ImGui::Button("Reset")) {
+        resetParameters();
+    }
+    HelpTooltip("Bring all parameters to their original values. This will not immediately update the parameters in the MCU.");
+    ImGui::SameLine();
     if (ImGui::Button("Update all", ImVec2(-FLT_MIN, 0.0f))) {
         updateParameters();
-    };
+    }
 
     if (unsavedParameters) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.15, 0.6f, 0.8f));
@@ -159,4 +164,20 @@ void updateParameters() {
     serialHandler->write(serialCommand);
 
     unsavedParameters = false;
+}
+
+void resetParameters() {
+    for (auto& parameter : floatingParameters) {
+        parameter.value = parameter.defaultValue;
+        parameter.callCallback();
+    }
+    for (auto& parameter : integerParameters) {
+        parameter.value = parameter.defaultValue;
+        parameter.callCallback();
+    }
+    for (auto& parameter : enumParameters) {
+        parameter->reset();
+    }
+
+    unsavedParameters = true;
 }
