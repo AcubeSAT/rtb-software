@@ -9,6 +9,23 @@
 
 std::atomic<std::uint32_t> microcontrollerClock = 0;
 
+static std::string getTimezone()
+{
+    static std::string timezone;
+
+    if (timezone.empty()) {
+        try {
+            std::ifstream timezoneFile ("/etc/timezone");
+            timezoneFile >> timezone;
+        } catch (const std::exception &e) {
+            LOG_WARNING << "Could not get timezone: " << e.what();
+            timezone = "Etc/Space";
+        }
+    }
+
+    return timezone;
+}
+
 std::stringstream currentExperimentTime()
 {
     return formatDuration(Experiment::getCurrentExperimentDuration());
@@ -83,4 +100,7 @@ void clockWindow() {
 
     ImGui::Spacing();
     ImGui::Text("MCU clock: %s", formatDuration(milliseconds(microcontrollerClock.load()), false).str().c_str());
+    std::string timezone = getTimezone();
+    ImGui::SameLine(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(timezone.c_str()).x);
+    ImGui::TextUnformatted(timezone.c_str());
 }

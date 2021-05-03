@@ -16,15 +16,20 @@ inline void Relay_OFF() {
 }
 
 inline void LCL_ON_Force() {
+//    HAL_Delay(1);
+
     HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_RESET);
     log_trace("LCL Setting");
+
     uint32_t timeout_counter = HAL_GetTick();
     while (!HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)) {
-        if (HAL_GetTick() > timeout_counter + 500) {
+        if (HAL_GetTick() > timeout_counter + 1500) {
             log_error("LCL SET timeout");
-            break;
+            HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_SET);
+            return;
         }
     }
+
     HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_SET);
 
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);

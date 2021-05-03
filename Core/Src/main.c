@@ -30,6 +30,7 @@
 #include <can.h>
 #include <lcl.h>
 #include <mram.h>
+#include <stdlib.h>
 
 /* USER CODE END Includes */
 
@@ -171,7 +172,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         // Acquire an ADC measurement
         HAL_ADC_Start_IT(&hadc1);
     } else if (htim == &htim15) { // Latchup simulation timer
-        if (output_status) {
+        if (RANDOM_ERRORS && output_status) {
             LCL_Test_Trigger();
             log_info("LCL test trigger");
         }
@@ -185,12 +186,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-//    printf(
-//        UART_CONTROL UART_C_MEASUREMENT "%f %f %d\r\n",
-//        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
-//        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
-//        HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
-//    );
+    printf(
+        UART_CONTROL UART_C_MEASUREMENT "%f %f %d\r\n",
+        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
+        HAL_ADC_GetValue(&hadc1) * floating_parameters[0] / 65535,
+        HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
+    );
 }
 
 void state_to_string(enum State state, char * string) {
@@ -266,6 +267,43 @@ int main(void)
         Experiment_CAN_Loop();
     } else if (currentExperiment == 3) {
         Experiment_MRAM_Loop();
+    } else {
+//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_RESET);
+//        HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
+//
+//        // WRITE 1 TO ALL
+//        HAL_GPIO_WritePin(SR_SER_GPIO_Port, SR_SER_Pin, GPIO_PIN_SET);
+//
+//        for (int i = 0; i < 9; i++) {
+//            HAL_Delay(1);
+//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_SET);
+//            HAL_Delay(1);
+//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
+//        }
+//
+//        HAL_Delay(1);
+//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_SET);
+//        HAL_Delay(1);
+//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_RESET);
+//
+//        HAL_Delay(500);
+//
+//        // WRITE 0 TO ALL
+//        HAL_GPIO_WritePin(SR_SER_GPIO_Port, SR_SER_Pin, GPIO_PIN_RESET);
+//
+//        for (int i = 0; i < 9; i++) {
+//            HAL_Delay(1);
+//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_SET);
+//            HAL_Delay(1);
+//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
+//        }
+//
+//        HAL_Delay(1);
+//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_SET);
+//        HAL_Delay(1);
+//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_RESET);
+//
+//        HAL_Delay(500);
     }
 
 
@@ -881,6 +919,12 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, SR_SER_Pin|SR_RCLK_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -889,11 +933,25 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
 
+  /*Configure GPIO pins : SR_SER_Pin SR_RCLK_Pin */
+  GPIO_InitStruct.Pin = SR_SER_Pin|SR_RCLK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SR_SRCLK_Pin */
+  GPIO_InitStruct.Pin = SR_SRCLK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SR_SRCLK_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LD1_Pin LD3_Pin LD2_Pin */
   GPIO_InitStruct.Pin = LD1_Pin|LD3_Pin|LD2_Pin;

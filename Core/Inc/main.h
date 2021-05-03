@@ -86,7 +86,7 @@ extern enum State {
 #define UART_C_MEMPROGRESS "p"
 #define UART_C_MEMERROR "r"
 
-#define RANDOM_ERRORS 0
+#define RANDOM_ERRORS 1
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -105,8 +105,12 @@ void state_to_string(enum State state, char * string);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SR_SER_Pin GPIO_PIN_2
+#define SR_SER_GPIO_Port GPIOE
 #define A1_Pin GPIO_PIN_0
 #define A1_GPIO_Port GPIOC
+#define SR_SRCLK_Pin GPIO_PIN_0
+#define SR_SRCLK_GPIO_Port GPIOA
 #define A0_Pin GPIO_PIN_3
 #define A0_GPIO_Port GPIOA
 #define LCL_TEST_Pin GPIO_PIN_7
@@ -126,6 +130,8 @@ void state_to_string(enum State state, char * string);
 #define RELAY_GPIO_Port GPIOD
 #define LD2_Pin GPIO_PIN_7
 #define LD2_GPIO_Port GPIOB
+#define SR_RCLK_Pin GPIO_PIN_0
+#define SR_RCLK_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
