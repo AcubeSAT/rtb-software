@@ -4,10 +4,95 @@
 #include <can.h>
 #include <lcl.h>
 #include <mram.h>
+#include <shift_register.h>
 #include "experiments.h"
 #include "stm32h7xx_hal.h"
 
 int currentExperiment = -1;
+
+void start_experiment(int experiment) {
+    if (experiment < 0) {
+        experiment = currentExperiment;
+    }
+
+    log_info("Starting experiment %ld", experiment);
+
+    switch (experiment) {
+        case 1:
+            Experiment_CAN_Start();
+            break;
+        case 3:
+            Experiment_MRAM_Start();
+            break;
+        case 4:
+            Experiment_REG_Start();
+            break;
+        default:
+            log_info("No associated experimental procedure");
+    }
+}
+
+void stop_experiment(int experiment) {
+    if (experiment < 0) {
+        experiment = currentExperiment;
+    }
+
+    log_info("Pausing experiment %ld", experiment);
+
+    switch (experiment) {
+        case 1:
+            Experiment_CAN_Stop();
+            break;
+        case 3:
+            Experiment_MRAM_Stop();
+            break;
+        case 4:
+            Experiment_REG_Stop();
+            break;
+        default:
+            log_info("No associated experimental procedure");
+    }
+}
+
+void reset_experiment(int experiment) {
+    if (experiment < 0) {
+        experiment = currentExperiment;
+    }
+
+    log_info("Resetting experiment %ld", experiment);
+
+    switch (experiment) {
+        case 1:
+            Experiment_CAN_Reset();
+            break;
+        case 3:
+            Experiment_MRAM_Reset();
+            break;
+        case 4:
+            Experiment_REG_Reset();
+            break;
+        default:
+            log_info("No associated experimental procedure");
+    }
+}
+
+void loop_experiment(int experiment) {
+    if (experiment < 0) {
+        experiment = currentExperiment;
+    }
+
+    switch (experiment) {
+        case 1:
+            Experiment_CAN_Loop();
+            break;
+        case 3:
+            Experiment_MRAM_Loop();
+            break;
+        case 4:
+            Experiment_REG_Loop();
+            break;
+    }
+}
 
 bool uart_experiment(char *command, uint16_t len) {
     if (len < 2) {
@@ -37,18 +122,7 @@ bool uart_experiment(char *command, uint16_t len) {
             // Start experiment
             state = none;
             currentExperiment = strtol(command + 2, NULL, 10);
-            switch (currentExperiment) {
-                case 1:
-                    log_info("Starting experiment %ld", currentExperiment);
-                    Experiment_CAN_Start();
-                    break;
-                case 3:
-                    log_info("Starting experiment %ld", currentExperiment);
-                    Experiment_MRAM_Start();
-                    break;
-                default:
-                    log_info("No associated experimental procedure");
-            }
+            start_experiment(currentExperiment);
         } else if (command[1] == 'p') {
             // Stop experiment
             if (currentExperiment < 0) {
@@ -58,19 +132,7 @@ bool uart_experiment(char *command, uint16_t len) {
                 int previousExperiment = currentExperiment;
                 currentExperiment = -1;
 
-                switch (previousExperiment) {
-                    case 1:
-                        log_info("Stopping experiment %ld", previousExperiment);
-                        Experiment_CAN_Stop();
-                        break;
-                    case 3:
-                        log_info("Stopping experiment %ld", previousExperiment);
-                        Experiment_MRAM_Stop();
-                        break;
-                    default:
-                        log_info("Stopped no associated experimental procedure");
-                }
-
+                stop_experiment(previousExperiment);
             }
         } else if (command[1] == 'r') {
             if (len < 3) {
@@ -78,20 +140,7 @@ bool uart_experiment(char *command, uint16_t len) {
                 return true;
             }
 
-            // Reset experiment
-            switch (strtol(command + 2, NULL, 10)) {
-                case 1:
-                    log_info("Resetting experiment %ld", currentExperiment);
-                    Experiment_CAN_Reset();
-                    break;
-                case 3:
-                    log_info("Resetting experiment %ld", currentExperiment);
-                    Experiment_MRAM_Reset();
-                    break;
-                default:
-                    log_info("Reset no associated experimental procedure");
-            }
-
+            reset_experiment(currentExperiment);
             currentExperiment = -1;
         }  else {
             return false;

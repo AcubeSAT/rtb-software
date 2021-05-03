@@ -263,48 +263,7 @@ int main(void)
 //      log_trace("Hello %s", "world");
 //      HAL_Delay(500);
 
-    if (currentExperiment == 1) {
-        Experiment_CAN_Loop();
-    } else if (currentExperiment == 3) {
-        Experiment_MRAM_Loop();
-    } else {
-//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_RESET);
-//        HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
-//
-//        // WRITE 1 TO ALL
-//        HAL_GPIO_WritePin(SR_SER_GPIO_Port, SR_SER_Pin, GPIO_PIN_SET);
-//
-//        for (int i = 0; i < 9; i++) {
-//            HAL_Delay(1);
-//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_SET);
-//            HAL_Delay(1);
-//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
-//        }
-//
-//        HAL_Delay(1);
-//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_SET);
-//        HAL_Delay(1);
-//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_RESET);
-//
-//        HAL_Delay(500);
-//
-//        // WRITE 0 TO ALL
-//        HAL_GPIO_WritePin(SR_SER_GPIO_Port, SR_SER_Pin, GPIO_PIN_RESET);
-//
-//        for (int i = 0; i < 9; i++) {
-//            HAL_Delay(1);
-//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_SET);
-//            HAL_Delay(1);
-//            HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
-//        }
-//
-//        HAL_Delay(1);
-//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_SET);
-//        HAL_Delay(1);
-//        HAL_GPIO_WritePin(SR_RCLK_GPIO_Port, SR_RCLK_Pin, GPIO_PIN_RESET);
-//
-//        HAL_Delay(500);
-    }
+    loop_experiment(-1);
 
 
     /* USER CODE END WHILE */

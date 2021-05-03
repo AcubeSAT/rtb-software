@@ -13,11 +13,11 @@ std::vector<Experiment> Experiment::experiments = {
         Experiment("CAN transceiver", "CAN RX + TX. Comparison of received messages."),
         Experiment("CAN transceiver silent", loremIpsum),
         Experiment("MRAM", "MRAM write and verify loop"),
+        Experiment("Shift Register", "Sets the shift register to output once"),
+        Experiment("Op-Amp", loremIpsum),
         Experiment("555 timer", loremIpsum),
         Experiment("NOR gate", loremIpsum),
         Experiment("S-R latch", loremIpsum),
-        Experiment("Op-Amp", loremIpsum),
-        Experiment("Shift Register", loremIpsum),
 };
 
 int Experiment::currentExperimentId = 0;
