@@ -7,7 +7,7 @@
 
 class Measurement {
 public:
-    static constexpr size_t SIZE = 3;
+    static constexpr size_t SIZE = 4;
 private:
 
     typedef float TimePoint;

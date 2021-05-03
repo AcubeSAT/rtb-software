@@ -32,9 +32,10 @@ void Measurement::window() {
     }
     if (ImPlot::BeginPlot("Measurements", "t (ms)", nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
         const std::lock_guard lock(measurementMutex);
-        ImPlot::PlotLine("Data 1", measurements[0].first.data(), measurements[0].second.data(), measurements[0].first.size());
-        ImPlot::PlotLine("Data 2", measurements[1].first.data(), measurements[1].second.data(), measurements[1].first.size());
-        ImPlot::PlotLine("Data 3", measurements[2].first.data(), measurements[2].second.data(), measurements[2].first.size());
+        ImPlot::PlotLine("LCL Current Sense", measurements[0].first.data(), measurements[0].second.data(), measurements[0].first.size());
+        ImPlot::PlotLine("ADC 1", measurements[1].first.data(), measurements[1].second.data(), measurements[1].first.size());
+        ImPlot::PlotLine("ADC 2", measurements[2].first.data(), measurements[2].second.data(), measurements[2].first.size());
+        ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data(), measurements[3].second.data(), measurements[3].first.size());
         ImPlot::EndPlot();
     }
 }

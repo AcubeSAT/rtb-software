@@ -13,13 +13,14 @@ uint8_t current_conversion = 0;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
     converted_values[current_conversion++] = HAL_ADC_GetValue(hadc);
 
-    if (current_conversion == 2) {
+    if (current_conversion == 3) {
         // All ADC conversions completed
         if (enum_parameters[TakeMeasurements]) {
             printf(
-                    UART_CONTROL UART_C_MEASUREMENT "%f %f %d\r\n",
+                    UART_CONTROL UART_C_MEASUREMENT "%f %f %f %d\r\n",
                     converted_values[0] * floating_parameters[0] / 65535,
                     converted_values[1] * floating_parameters[0] / 65535,
+                    converted_values[2] * floating_parameters[0] / 65535,
                     HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)
             );
         }
