@@ -48,7 +48,7 @@ void Measurement::window() {
         ImPlot::SetNextPlotLimitsX(measurements[0].first.front(), measurements[0].first.back(), limitFlag);
         ImPlot::SetNextPlotLimitsY(0, 4, limitFlag);
     }
-    if (ImPlot::BeginPlot("Measurements", nullptr, nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
+    if (ImPlot::BeginPlot("Measurements", nullptr, nullptr, ImVec2(-1, ImGui::GetContentRegionAvail().y), plotFlags, xAxisFlags, yAxisFlags)) {
         const std::lock_guard lock(measurementMutex);
 
         auto [firstElement, size, stride] = downsample();
