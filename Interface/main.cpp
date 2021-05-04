@@ -214,8 +214,8 @@ int main(int argc, char *argv[]) {
                 popupOpen = false;
             }
 
-            ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(400, 94), ImGuiCond_Always);
+            ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 94), ImGuiCond_FirstUseEver);
             ImGui::Begin("Radiation Configuration");
 
             ImGui::Checkbox("Test", &show_test_window);
