@@ -26,7 +26,7 @@ void Measurement::window() {
 
     std::ostringstream ss;
     ss << "Total values: " << std::setw(10) << measurements[0].first.size();
-    ss << "\t " << "Frequency: " << std::setw(5) << std::setprecision(2) << valuesPerSecond << " values/sec";
+    ss << "\t " << "Frequency: " << std::setw(6) << std::setprecision(2) << valuesPerSecond << " values/sec";
     std::string statistics = ss.str();
 
     ImGui::SameLine();
@@ -43,10 +43,13 @@ void Measurement::window() {
     }
     if (ImPlot::BeginPlot("Measurements", "t (ms)", nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
         const std::lock_guard lock(measurementMutex);
-        ImPlot::PlotLine("LCL Current Sense", measurements[0].first.data(), measurements[0].second.data(), measurements[0].first.size());
-        ImPlot::PlotLine("ADC 1", measurements[1].first.data(), measurements[1].second.data(), measurements[1].first.size());
-        ImPlot::PlotLine("ADC 2", measurements[2].first.data(), measurements[2].second.data(), measurements[2].first.size());
-        ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data(), measurements[3].second.data(), measurements[3].first.size());
+
+        auto downsampling = downsample();
+
+        ImPlot::PlotLine("LCL Current Sense", measurements[0].first.data(), measurements[0].second.data(), downsampling.first, 0, downsampling.second);
+        ImPlot::PlotLine("ADC 1", measurements[1].first.data(), measurements[1].second.data(), downsampling.first, 0, downsampling.second);
+        ImPlot::PlotLine("ADC 2", measurements[2].first.data(), measurements[2].second.data(), downsampling.first, 0, downsampling.second);
+        ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data(), measurements[3].second.data(), downsampling.first, 0, downsampling.second);
 
         ImVec4 col = ImPlot::GetLastItemColor();
 //        ImPlot::AnnotateClamped(0.75,0.25,ImVec2(-15,15), col, "BL");
@@ -102,5 +105,34 @@ void Measurement::clear() {
     }
 
     LOG_DEBUG << "Cleared measurement display";
+}
+
+std::pair<int, int> Measurement::downsample() {
+    if (measurements[0].first.empty()) {
+        return std::make_pair(0, sizeof(TimePoint));
+    }
+
+    auto dataSize = measurements[0].first.size();
+    auto dataMin = measurements[0].first.front();
+    auto dataMax = measurements[0].first.back();
+
+    Value start = ImPlot::GetPlotLimits().X.Min;
+    Value end = ImPlot::GetPlotLimits().X.Max;
+
+    size_t startPoint = std::lower_bound(measurements[0].first.begin(), measurements[0].first.end(), start) - measurements[0].first.begin();
+    size_t stopPoint = std::upper_bound(measurements[0].first.begin(), measurements[0].first.end(), end) - measurements[0].first.begin();
+
+    if (startPoint >= measurements[0].first.size()) {
+        startPoint = measurements[0].first.size() - 1;
+    }
+    if (stopPoint > measurements[0].first.size()) {
+        stopPoint = measurements[0].first.size();
+    }
+
+    int downsample = (stopPoint - startPoint) / 1000 + 1;
+
+    size_t size = (stopPoint - startPoint) / downsample;
+
+    return std::make_pair(size, sizeof(TimePoint) * downsample);
 }
 

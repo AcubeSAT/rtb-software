@@ -63,6 +63,10 @@ double ConsumptionChecker::cpu() {
         lastSysCPU = timeSample.tms_stime;
         lastUserCPU = timeSample.tms_utime;
 
+        LOG_VERBOSE << "lastCPU " << now;
+        LOG_VERBOSE << "lastCPU sys" << lastSysCPU;
+        LOG_VERBOSE << "lastCPU usr" << lastUserCPU;
+
         return percent;
     }));
 

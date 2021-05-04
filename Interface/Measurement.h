@@ -27,6 +27,8 @@ private:
 public:
     void window();
 
+    std::pair<int, int> downsample();
+
     void acquire(const std::array<float, SIZE>& value);
 
     bool getLCLStatus() {
