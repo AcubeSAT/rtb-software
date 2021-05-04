@@ -31,7 +31,7 @@ void Measurement::window() {
     static int lastSamples = 0;
     ss << "Plot samples: " << std::setw(4) << lastSamples;
     ss << "\t Total values: " << std::setw(10) << measurements[0].first.size();
-    ss << "\t Frequency: " << std::setw(6) << std::setprecision(2) << valuesPerSecond << " values/sec";
+    ss << "\t Frequency: " << std::fixed << std::setw(6) << std::setprecision(2) << valuesPerSecond << " values/sec";
     std::string statistics = ss.str();
 
     ImGui::SameLine();
@@ -54,15 +54,15 @@ void Measurement::window() {
         auto [firstElement, size, stride] = downsample();
 
         ImPlot::PlotLine("LCL Current Sense", measurements[0].first.data() + firstElement, measurements[0].second.data() + firstElement, size, 0, stride);
+        ImVec4 latchupColour = ImPlot::GetLastItemColor();
+
         ImPlot::PlotLine("ADC 1", measurements[1].first.data() + firstElement, measurements[1].second.data() + firstElement, size, 0, stride);
         ImPlot::PlotLine("ADC 2", measurements[2].first.data() + firstElement, measurements[2].second.data() + firstElement, size, 0, stride);
         ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data() + firstElement, measurements[3].second.data() + firstElement, size, 0, stride);
 
-        ImVec4 col = ImPlot::GetLastItemColor();
-//        ImPlot::AnnotateClamped(0.75,0.25,ImVec2(-15,15), col, "BL");
-//        ImPlot::AnnotateClamped(0.25,1,ImVec2(-15,15), col,"BL");
-//        ImPlot::AnnotateClamped(0.5,2,ImVec2(-15,15),col, "aaa");
-
+        for (const auto& latchup: latchups.getAllLatchups()) {
+            ImPlot::AnnotateClamped(latchup.unixTime, latchup.thresholdAtLatchup, ImVec2(15,15), latchupColour, "SEL");
+        }
         lastSamples = size;
 
         ImPlot::EndPlot();

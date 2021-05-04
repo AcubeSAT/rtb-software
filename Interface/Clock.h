@@ -12,7 +12,6 @@ inline std::chrono::milliseconds currentDatetimeMillisecondsUNIX() {
     using namespace std::chrono;
 
     auto now = system_clock::now();
-    auto in_time_t = system_clock::to_time_t(now);
     auto ms = duration_cast<milliseconds>(now.time_since_epoch());
 
     return ms;

@@ -17,7 +17,9 @@ public:
         std::string computerTime;
         std::string mcuTime;
         std::string experimentTime;
+        double unixTime;
         std::string state = "";
+        float thresholdAtLatchup = 0;
     };
 
     std::mutex timeLogMutex;
@@ -39,6 +41,11 @@ public:
 
     void setCounter(int value) {
         latchupCounter = value;
+    }
+
+    const std::vector<LatchupEvent>& getAllLatchups() {
+        const std::lock_guard lock(timeLogMutex);
+        return timeLog;
     }
 };
 

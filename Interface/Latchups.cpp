@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include <plog/Log.h>
 #include "Latchups.h"
+#include "Parameters.h"
 #include "main.h"
 #include "Clock.h"
 
@@ -84,7 +85,9 @@ void Latchups::logLatchup(const std::string & state) {
             currentDatetimeMilliseconds().str(),
             formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str(),
             currentExperimentTime().str(),
-            state
+            currentDatetimeMillisecondsUNIX().count() / 1000.0,
+            state,
+            floatingParameters[1].value
         });
     }
 
