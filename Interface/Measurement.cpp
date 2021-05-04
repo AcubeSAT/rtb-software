@@ -1,6 +1,7 @@
 #include "Measurement.h"
 #include "Clock.h"
 #include "main.h"
+#include "Utilities.h"
 #include <plog/Log.h>
 #include <implot/implot.h>
 #include <cmath>
@@ -21,40 +22,48 @@ void Measurement::window() {
     if (ImGui::SmallButton("Reset")) {
         clear();
     }
+    ImGui::SameLine(0.0f, 40.0f);
+    SmallCheckbox("zoomable", &zoomable);
 
     float valuesPerSecond = 1000.0f * lastStatisticsCount / (float) std::chrono::duration_cast<std::chrono::milliseconds>(statisticsPeriod).count();
 
     std::ostringstream ss;
-    ss << "Total values: " << std::setw(10) << measurements[0].first.size();
-    ss << "\t " << "Frequency: " << std::setw(6) << std::setprecision(2) << valuesPerSecond << " values/sec";
+    static int lastSamples = 0;
+    ss << "Plot samples: " << std::setw(4) << lastSamples;
+    ss << "\t Total values: " << std::setw(10) << measurements[0].first.size();
+    ss << "\t Frequency: " << std::setw(6) << std::setprecision(2) << valuesPerSecond << " values/sec";
     std::string statistics = ss.str();
 
     ImGui::SameLine();
     ImGui::SameLine(0.0f, ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(statistics.c_str()).x);
     ImGui::TextUnformatted(statistics.c_str());
 
-    static ImPlotFlags plotFlags = ImPlotFlags_AntiAliased;
+    static ImPlotFlags plotFlags = ImPlotFlags_AntiAliased | ImPlotFlags_NoTitle;
     static ImPlotAxisFlags xAxisFlags = ImPlotAxisFlags_Time;
     static ImPlotAxisFlags yAxisFlags = ImPlotAxisFlags_LockMin;
 
     if (!measurements[0].first.empty()) {
-        ImPlot::SetNextPlotLimitsX(measurements[0].first.front(), measurements[0].first.back(), ImGuiCond_Always);
-        ImPlot::SetNextPlotLimitsY(0, 4, ImGuiCond_Always);
+        auto limitFlag = zoomable ? ImGuiCond_FirstUseEver : ImGuiCond_Always;
+
+        ImPlot::SetNextPlotLimitsX(measurements[0].first.front(), measurements[0].first.back(), limitFlag);
+        ImPlot::SetNextPlotLimitsY(0, 4, limitFlag);
     }
-    if (ImPlot::BeginPlot("Measurements", "t (ms)", nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
+    if (ImPlot::BeginPlot("Measurements", nullptr, nullptr, ImVec2(-1, -1), plotFlags, xAxisFlags, yAxisFlags)) {
         const std::lock_guard lock(measurementMutex);
 
-        auto downsampling = downsample();
+        auto [firstElement, size, stride] = downsample();
 
-        ImPlot::PlotLine("LCL Current Sense", measurements[0].first.data(), measurements[0].second.data(), downsampling.first, 0, downsampling.second);
-        ImPlot::PlotLine("ADC 1", measurements[1].first.data(), measurements[1].second.data(), downsampling.first, 0, downsampling.second);
-        ImPlot::PlotLine("ADC 2", measurements[2].first.data(), measurements[2].second.data(), downsampling.first, 0, downsampling.second);
-        ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data(), measurements[3].second.data(), downsampling.first, 0, downsampling.second);
+        ImPlot::PlotLine("LCL Current Sense", measurements[0].first.data() + firstElement, measurements[0].second.data() + firstElement, size, 0, stride);
+        ImPlot::PlotLine("ADC 1", measurements[1].first.data() + firstElement, measurements[1].second.data() + firstElement, size, 0, stride);
+        ImPlot::PlotLine("ADC 2", measurements[2].first.data() + firstElement, measurements[2].second.data() + firstElement, size, 0, stride);
+        ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data() + firstElement, measurements[3].second.data() + firstElement, size, 0, stride);
 
         ImVec4 col = ImPlot::GetLastItemColor();
 //        ImPlot::AnnotateClamped(0.75,0.25,ImVec2(-15,15), col, "BL");
 //        ImPlot::AnnotateClamped(0.25,1,ImVec2(-15,15), col,"BL");
 //        ImPlot::AnnotateClamped(0.5,2,ImVec2(-15,15),col, "aaa");
+
+        lastSamples = size;
 
         ImPlot::EndPlot();
     }
@@ -107,9 +116,9 @@ void Measurement::clear() {
     LOG_DEBUG << "Cleared measurement display";
 }
 
-std::pair<int, int> Measurement::downsample() {
+std::tuple<int, int, int> Measurement::downsample() {
     if (measurements[0].first.empty()) {
-        return std::make_pair(0, sizeof(TimePoint));
+        return {0, 0, sizeof(TimePoint)};
     }
 
     auto dataSize = measurements[0].first.size();
@@ -133,6 +142,6 @@ std::pair<int, int> Measurement::downsample() {
 
     size_t size = (stopPoint - startPoint) / downsample;
 
-    return std::make_pair(size, sizeof(TimePoint) * downsample);
+    return {startPoint, size, sizeof(TimePoint) * downsample};
 }
 

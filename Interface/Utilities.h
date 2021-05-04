@@ -35,4 +35,7 @@ static ImVec2 padMax(ImVec2 in) {
     return in;
 }
 
+// Small buttons fits within text without additional vertical spacing.
+bool SmallCheckbox(const char* label = "", bool* v = nullptr);
+
 #endif //RADIATIONINTERFACE_UTILITIES_H

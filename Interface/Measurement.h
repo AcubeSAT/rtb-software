@@ -17,6 +17,8 @@ private:
     int currentStatisticsCount = 0;
     int lastStatisticsCount = 0;
 
+    bool zoomable = false;
+
     std::array<std::pair<std::vector<TimePoint>,std::vector<Value>>, SIZE> measurements {
         std::make_pair(std::vector<TimePoint>(), std::vector<Value>())
     };
@@ -27,7 +29,7 @@ private:
 public:
     void window();
 
-    std::pair<int, int> downsample();
+    std::tuple<int, int, int> downsample();
 
     void acquire(const std::array<float, SIZE>& value);
 

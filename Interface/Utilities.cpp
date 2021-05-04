@@ -3,6 +3,7 @@
 #include "FontAwesome.h"
 #include "main.h"
 #include <string>
+#include "imgui_internal.h"
 
 void HelpMarker(const std::string &text)  {
     ImGui::TextDisabled("(?)");
@@ -51,4 +52,13 @@ bool PopupModal(const std::string & name, const std::string & prompt) {
     }
 
     return output;
+}
+
+bool SmallCheckbox(const char *label, bool *v) {
+    ImGuiContext* g = ImGui::GetCurrentContext();
+    float backup_padding_y = g->Style.FramePadding.y;
+    g->Style.FramePadding.y = 0.0f;
+    bool pressed = ImGui::Checkbox(label, v);
+    g->Style.FramePadding.y = backup_padding_y;
+    return pressed;
 }
