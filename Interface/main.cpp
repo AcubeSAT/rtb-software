@@ -38,6 +38,7 @@
 #include "CSV.h"
 #include "Utilities.h"
 #include "MRAM.h"
+#include "ConsumptionChecker.h"
 
 const char* glsl_version = "#version 130";
 
@@ -164,6 +165,8 @@ int main(int argc, char *argv[]) {
     std::string directory = __FILE__;
     directory.erase(directory.end() - 9, directory.end());
 
+    ConsumptionChecker consumption;
+
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
     largeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f);
     veryLargeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 96.0f);
@@ -212,7 +215,7 @@ int main(int argc, char *argv[]) {
             }
 
             ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(400, 94), ImGuiCond_Always);
             ImGui::Begin("Radiation Configuration");
 
             ImGui::Checkbox("Test", &show_test_window);
@@ -237,22 +240,34 @@ int main(int argc, char *argv[]) {
             if (ImGui::SliderFloat("volume", &(settings->volume), Beep::minVolume, 10.0f, settings->volume <= Beep::minVolume + 0.1f ? "Off" : "%.1f dB")) {
                 if (std::fabs(settings->volume) < 0.8f) settings->volume = 0.0f; // snap to 0
             }
+
+            ImGui::Spacing();
+            ImGui::Text("CPU: ");
+            ImGui::SameLine();
+            auto cursorPos = ImGui::GetCursorPosY();
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, (ImVec4)ImColor::HSV(0.6f, 0.667f, 0.6f, 0.541f));
+            ImGui::ProgressBar(consumption.cpu(), ImVec2(100, 18.0f));
+            ImGui::PopStyleColor();
+            ImGui::SetCursorPosY(cursorPos);
+            ImGui::SameLine(ImGui::GetContentRegionAvail().x / 2.0f);
+            ImGui::Text("Memory: %s", consumption.memory().c_str());
+
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 90), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(20, 114), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowSize(ImVec2(400, 110), ImGuiCond_FirstUseEver);
             ImGui::Begin("Local Time");
             clockWindow();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 200), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(20, 224), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowSize(ImVec2(400, 70), ImGuiCond_FirstUseEver);
             ImGui::Begin("Serial Connection");
             serialHandler->window();
             ImGui::End();
 
-            ImGui::SetNextWindowPos(ImVec2(20, 270), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(400, 465), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(20, 290), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 441), ImGuiCond_FirstUseEver);
             ImGui::Begin("Parameters");
             parameterWindow();
             ImGui::End();

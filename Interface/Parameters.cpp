@@ -85,7 +85,7 @@ void parameterWindow() {
 
     ImGui::Separator();
     ImGui::Spacing();
-//
+
     for (auto& parameter : enumParameters) {
         try {
             int formValue = parameter->intValue();

@@ -8,13 +8,13 @@ set(CMAKE_BUILD_TYPE Debug)
 #find_package(glew REQUIRED)
 #set(OpenGL_GL_PREFERENCE GLVND)
 #find_package(OpenGL REQUIRED)
-find_package(Boost 1.50 COMPONENTS system REQUIRED )
+find_package(Boost 1.50 COMPONENTS system REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(glfw3 glfw3 REQUIRED)
 pkg_check_modules(pulse libpulse-simple REQUIRED)
 
-include_directories (
+include_directories(
         "${PROJECT_SOURCE_DIR}/lib/imgui"
         "${PROJECT_SOURCE_DIR}/lib/imgui/backends"
         "${PROJECT_SOURCE_DIR}/lib/imgui/examples/libs/gl3w"
@@ -29,11 +29,11 @@ include_directories (
 add_subdirectory(lib)
 add_subdirectory(lib/plog)
 
-set(SOURCE_FILES main.cpp Experiment.cpp Parameters.cpp SerialHandler.cpp Clock.cpp Latchups.cpp Settings.cpp Log.cpp Measurement.cpp CAN.cpp Beep.cpp CSV.cpp Utilities.cpp MRAM.cpp)
+file(GLOB SOURCE_FILES *.cpp)
 set(VARIOUS)
 add_executable(RadiationInterface ${SOURCE_FILES} ${VARIOUS})
-target_link_libraries (RadiationInterface ImGui ImGuiBackend ImGuiDemo ImPlot gl3w GL ${glfw3_LIBRARIES} Tonic RtAudio dl rt atomic)
-target_link_libraries (RadiationInterface pthread ${Boost_LIBRARIES} ${pulse_LIBRARIES})
+target_link_libraries(RadiationInterface ImGui ImGuiBackend ImGuiDemo ImPlot gl3w GL ${glfw3_LIBRARIES} Tonic RtAudio dl rt atomic)
+target_link_libraries(RadiationInterface pthread ${Boost_LIBRARIES} ${pulse_LIBRARIES})
 
 add_compile_definitions(__LINUX_PULSE__)
 
