@@ -10,8 +10,8 @@ public:
     static constexpr size_t SIZE = 4;
 private:
 
-    typedef float TimePoint;
-    typedef float Value;
+    typedef double TimePoint;
+    typedef double Value;
 
     inline static const auto statisticsPeriod = std::chrono::seconds(1);
     int currentStatisticsCount = 0;

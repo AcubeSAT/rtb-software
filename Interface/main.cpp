@@ -153,6 +153,11 @@ int main(int argc, char *argv[]) {
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
+    // ImPlot configuration
+    ImPlot::GetStyle().UseLocalTime = true;
+    ImPlot::GetStyle().UseISO8601 = true;
+    ImPlot::GetStyle().Use24HourClock = true;
+
     // Load Fonts
     // (there is a default font, this is only if you want to change it. see extra_fonts/README.txt for more details)
     ImGui::StyleColorsDark();

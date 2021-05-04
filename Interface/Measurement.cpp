@@ -34,8 +34,8 @@ void Measurement::window() {
     ImGui::TextUnformatted(statistics.c_str());
 
     static ImPlotFlags plotFlags = ImPlotFlags_AntiAliased;
-    static ImPlotAxisFlags xAxisFlags = ImPlotAxisFlags_None;
-    static ImPlotAxisFlags yAxisFlags = xAxisFlags | ImPlotAxisFlags_LockMin;
+    static ImPlotAxisFlags xAxisFlags = ImPlotAxisFlags_Time;
+    static ImPlotAxisFlags yAxisFlags = ImPlotAxisFlags_LockMin;
 
     if (!measurements[0].first.empty()) {
         ImPlot::SetNextPlotLimitsX(measurements[0].first.front(), measurements[0].first.back(), ImGuiCond_Always);
@@ -47,6 +47,12 @@ void Measurement::window() {
         ImPlot::PlotLine("ADC 1", measurements[1].first.data(), measurements[1].second.data(), measurements[1].first.size());
         ImPlot::PlotLine("ADC 2", measurements[2].first.data(), measurements[2].second.data(), measurements[2].first.size());
         ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data(), measurements[3].second.data(), measurements[3].first.size());
+
+        ImVec4 col = ImPlot::GetLastItemColor();
+//        ImPlot::AnnotateClamped(0.75,0.25,ImVec2(-15,15), col, "BL");
+//        ImPlot::AnnotateClamped(0.25,1,ImVec2(-15,15), col,"BL");
+//        ImPlot::AnnotateClamped(0.5,2,ImVec2(-15,15),col, "aaa");
+
         ImPlot::EndPlot();
     }
 }
@@ -65,8 +71,10 @@ void Measurement::acquire(const std::array<float, SIZE>& values) {
 
         const std::lock_guard lock(measurementMutex);
 
+        auto timestamp = currentDatetimeMillisecondsUNIX().count() / 1000.0;
+
         for (int i = 0; i < SIZE; i++) {
-            measurements[i].first.push_back(numberMillisecondsStart);
+            measurements[i].first.push_back(static_cast<TimePoint>(timestamp));
             measurements[i].second.push_back(values[i]);
         }
 
