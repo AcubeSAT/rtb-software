@@ -7,51 +7,33 @@ extern bool output_status;
 
 inline void Relay_ON() {
     HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_RESET);
-    log_info("Output relay set ON");
 }
 
 inline void Relay_OFF() {
     HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
-    log_info("Output relay set OFF");
 }
 
 inline void LCL_ON_Force() {
 //    HAL_Delay(1);
+    TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
+    TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_4, TIM_CCx_DISABLE);
+    __HAL_TIM_ENABLE(&htim8);
 
-    HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_RESET);
-    log_trace("LCL Setting");
-
-    uint32_t timeout_counter = HAL_GetTick();
-    while (!HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin)) {
-        if (HAL_GetTick() > timeout_counter + 1500) {
-            log_error("LCL SET timeout");
-            HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_SET);
-            return;
-        }
-    }
-
-    HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_SET);
-
-    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
     log_trace("LCL SET");
     output_status = true;
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
 }
 
 inline void LCL_ON() {
-    HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_RESET);
-    HAL_Delay(10);
-    HAL_GPIO_WritePin(LCL_SET_GPIO_Port, LCL_SET_Pin, GPIO_PIN_SET);
-
-    log_trace("LCL SET");
-    output_status = true;
-    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+    LCL_ON_Force();
 }
 
 inline void LCL_OFF() {
-    HAL_GPIO_WritePin(LCL_RESET_GPIO_Port, LCL_RESET_Pin, GPIO_PIN_RESET);
+    TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_3, TIM_CCx_DISABLE);
+    TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_4, TIM_CCx_ENABLE);
+    __HAL_TIM_ENABLE(&htim8);
+
     log_trace("LCL RESET");
-    HAL_GPIO_WritePin(LCL_RESET_GPIO_Port, LCL_RESET_Pin, GPIO_PIN_SET);
 
     output_status = false;
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
