@@ -38,11 +38,11 @@ integer_callback enum_callbacks[] = {
 };
 
 void callback_dac_output(uint32_t parameter, double * value) {
-    uint8_t parsed_value = *value / floating_parameters[MaxVoltage] * 255;
+    uint16_t parsed_value = *value / floating_parameters[MaxVoltage] * 4095;
 
     log_trace("Setting DAC %ld to %d", parameter, parsed_value);
 
-    HAL_DAC_SetValue(&hdac1, parameter == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2, DAC_ALIGN_8B_R, parsed_value);
+    HAL_DAC_SetValue(&hdac1, parameter == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2, DAC_ALIGN_12B_R, parsed_value);
 }
 
 void callback_random_errors(uint32_t parameter, uint32_t * value) {
