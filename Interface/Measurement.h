@@ -18,6 +18,7 @@ private:
     int lastStatisticsCount = 0;
 
     bool zoomable = false;
+    bool tooltips = true;
 
     std::array<std::pair<std::vector<TimePoint>,std::vector<Value>>, SIZE> measurements {
         std::make_pair(std::vector<TimePoint>(), std::vector<Value>())

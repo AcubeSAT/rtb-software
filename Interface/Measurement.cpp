@@ -19,11 +19,14 @@ void Measurement::window() {
         }
     }
     ImGui::SameLine(0.0f, 40.0f);
+    SmallCheckbox("zoomable", &zoomable);
+    ImGui::SameLine();
+    SmallCheckbox("tooltips", &tooltips);
+    ImGui::SameLine();
     if (ImGui::SmallButton("Reset")) {
         clear();
     }
-    ImGui::SameLine(0.0f, 40.0f);
-    SmallCheckbox("zoomable", &zoomable);
+
 
     float valuesPerSecond = 1000.0f * lastStatisticsCount / (float) std::chrono::duration_cast<std::chrono::milliseconds>(statisticsPeriod).count();
 
@@ -31,7 +34,7 @@ void Measurement::window() {
     static int lastSamples = 0;
     ss << "Plot samples: " << std::setw(4) << lastSamples;
     ss << "\t Total values: " << std::setw(10) << measurements[0].first.size();
-    ss << "\t Frequency: " << std::fixed << std::setw(6) << std::setprecision(2) << valuesPerSecond << " values/sec";
+    ss << "\t Frequency: " << std::fixed << std::setw(6) << std::setprecision(2) << valuesPerSecond << " /s";
     std::string statistics = ss.str();
 
     ImGui::SameLine();
@@ -60,8 +63,11 @@ void Measurement::window() {
         ImPlot::PlotLine("ADC 2", measurements[2].first.data() + firstElement, measurements[2].second.data() + firstElement, size, 0, stride);
         ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data() + firstElement, measurements[3].second.data() + firstElement, size, 0, stride);
 
-        for (const auto& latchup: latchups.getAllLatchups()) {
-            ImPlot::AnnotateClamped(latchup.unixTime, latchup.thresholdAtLatchup, ImVec2(0,-40), latchupColour, "SEL");
+        if (tooltips) {
+            for (const auto &latchup: latchups.getAllLatchups()) {
+                ImPlot::AnnotateClamped(latchup.unixTime, latchup.thresholdAtLatchup, ImVec2(0, -40), latchupColour,
+                                        "SEL");
+            }
         }
         lastSamples = size;
 

@@ -24,7 +24,12 @@ Beep::Beep() {
     rtParams.deviceId = dac.getDefaultOutputDevice();
     rtParams.nChannels = nChannels;
 
-    dac.openStream( &rtParams, nullptr, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, renderCallback, nullptr, nullptr);
+    try {
+        dac.openStream(&rtParams, nullptr, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, renderCallback, nullptr,
+                       nullptr);
+    } catch ( RtAudioError& e ) {
+        LOG_ERROR << "Could not open audio output: " << e.getMessage();
+    }
 
     thread.emplace(&Beep::streamThread, this);
 }
