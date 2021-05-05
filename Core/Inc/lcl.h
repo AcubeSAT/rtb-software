@@ -44,6 +44,11 @@ inline void LCL_OFF() {
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 }
 
+inline void LCL_Power_Cycle() {
+    LCL_OFF();
+    LCL_ON();
+}
+
 inline void Outputs_ON() {
     Relay_ON();
     LCL_ON();

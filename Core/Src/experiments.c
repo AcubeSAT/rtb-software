@@ -107,6 +107,8 @@ bool uart_experiment(char *command, uint16_t len) {
             Outputs_ON();
         } else if (command[1] == '0') {
             Outputs_OFF();
+        } else if (command[1] == '2') {
+            LCL_Power_Cycle();
         } else {
             return false;
         }

@@ -113,7 +113,16 @@ void Experiment::window() {
 
     if (currentExperiment.get().status != Started && ImGui::Button("RESET", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f))) {
         ImGui::OpenPopup("Experiment Reset");
-    };
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.592f, 0.2f, 0.3f, 0.4f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.592f, 0.3f, 0.4f, 0.4f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.592f, 0.4f, 0.5f, 0.4f));
+    if (currentExperiment.get().status == Started && ImGui::Button("POWER CYCLE", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f))) {
+        LOG_INFO << "User triggered power cycle";
+        serialHandler->write("p2\n");
+    }
+    ImGui::PopStyleColor(3);
 
     static float flux = 1.e10f;
     ImGui::Text("Flux:");
