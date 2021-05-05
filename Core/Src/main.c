@@ -159,6 +159,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
             LCL_Test_Trigger_OFF();
         }
 
+        if (!output_status) return;
+
         // Latchup occurred
         LCL_ON(); // Restart the component as fast as possible
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
@@ -737,10 +739,13 @@ static void MX_TIM8_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM8_Init 2 */
-  HAL_TIM_Base_Start(&htim8);
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
-  __HAL_TIM_ENABLE_IT(&htim8, TIM_IT_UPDATE);
+    HAL_TIM_Base_Start(&htim8);
+    HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
+    // Prevent spurious turning on of the outputs
+    __HAL_TIM_SET_COUNTER(&htim8, __HAL_TIM_GET_AUTORELOAD(&htim8));
+    __HAL_TIM_CLEAR_IT(&htim8, TIM_IT_UPDATE);
+    __HAL_TIM_ENABLE_IT(&htim8, TIM_IT_UPDATE);
   /* USER CODE END TIM8_Init 2 */
   HAL_TIM_MspPostInit(&htim8);
 
@@ -776,6 +781,7 @@ static void MX_TIM14_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM14_Init 2 */
+  __HAL_TIM_CLEAR_IT(&htim14, TIM_IT_UPDATE);
   __HAL_TIM_ENABLE_IT(&htim14, TIM_IT_UPDATE);
   /* USER CODE END TIM14_Init 2 */
 
