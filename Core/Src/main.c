@@ -59,6 +59,7 @@ FDCAN_HandleTypeDef hfdcan2;
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim8;
+TIM_HandleTypeDef htim14;
 TIM_HandleTypeDef htim15;
 TIM_HandleTypeDef htim16;
 TIM_HandleTypeDef htim17;
@@ -87,6 +88,7 @@ static void MX_TIM3_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_FMC_Init(void);
 static void MX_TIM8_Init(void);
+static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -158,7 +160,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         }
 
         // Latchup occurred
-        LCL_ON_Force(); // Restart the component as fast as possible
+        LCL_ON(); // Restart the component as fast as possible
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
 
         static char state_string[STATE_STRING_SIZE];
@@ -185,7 +187,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     } else if (htim == &htim15) { // Latchup simulation timer
         if (RANDOM_ERRORS && output_status) {
             LCL_Test_Trigger();
-            log_info("LCL test trigger");
+            log_info("LCL test!");
         }
 
         // Create a random simulation for the next time
@@ -193,6 +195,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         __HAL_TIM_SET_COUNTER(&htim15, 0); // Make sure to start from the start
         __HAL_TIM_SET_AUTORELOAD(&htim15, (rand() % 5000 + 1)); // Max milliseconds
         __HAL_TIM_ENABLE(&htim15);
+    } else if (htim == &htim14) { // Power-cycle delay timer
+        LCL_ON_Force();
     }
 }
 
@@ -255,6 +259,7 @@ int main(void)
   MX_TIM15_Init();
   MX_FMC_Init();
   MX_TIM8_Init();
+  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
     log_info("Microcontroller boot");
     printf(UART_CONTROL UART_C_BOOT "\n");
@@ -671,7 +676,7 @@ static void MX_TIM8_Init(void)
   htim8.Instance = TIM8;
   htim8.Init.Prescaler = 60;
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim8.Init.Period = 200;
+  htim8.Init.Period = 600;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim8.Init.RepetitionCounter = 0;
   htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -735,6 +740,41 @@ static void MX_TIM8_Init(void)
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
   /* USER CODE END TIM8_Init 2 */
   HAL_TIM_MspPostInit(&htim8);
+
+}
+
+/**
+  * @brief TIM14 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM14_Init(void)
+{
+
+  /* USER CODE BEGIN TIM14_Init 0 */
+
+  /* USER CODE END TIM14_Init 0 */
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = 6000;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = 100;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OnePulse_Init(&htim14, TIM_OPMODE_SINGLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+  __HAL_TIM_ENABLE_IT(&htim14, TIM_IT_UPDATE);
+  /* USER CODE END TIM14_Init 2 */
 
 }
 

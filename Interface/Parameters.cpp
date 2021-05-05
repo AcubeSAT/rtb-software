@@ -25,7 +25,7 @@ std::array<Parameter<float>, 4> floatingParameters = {
         }},
         Parameter<float>{"LCL V threshold", 0.3, 0, 3.3},
         Parameter<float>{"LCL Offset voltage", 0.15, 0, 3.3},
-        Parameter<float>{"Power-cycle delay (us)", 10, 0, 10000},
+        Parameter<float>{"Power-cycle delay (ms)", 20, 0, 500},
 };
 
 std::array<Parameter<int>, 1> integerParameters = {

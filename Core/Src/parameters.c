@@ -13,6 +13,7 @@ double floating_parameters[] = {
         3.3f,
         0.30f,
         0.15f,
+        20.0f
 };
 uint32_t integer_parameters[] = {
         0
@@ -26,7 +27,8 @@ uint32_t enum_parameters[] = {
 floating_callback floating_callbacks[] = {
     NULL,
     callback_dac_output,
-    callback_dac_output
+    callback_dac_output,
+    callback_recycle_timer
 };
 integer_callback integer_callbacks[] = {
     NULL
@@ -45,8 +47,10 @@ void callback_dac_output(uint32_t parameter, double * value) {
     HAL_DAC_SetValue(&hdac1, parameter == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2, DAC_ALIGN_12B_R, parsed_value);
 }
 
-void callback_random_errors(uint32_t parameter, uint32_t * value) {
-
+void callback_recycle_timer(uint32_t parameter, double * value) {
+    int autoreload = (int) ((*value) * 10);
+    if (autoreload <= 0) autoreload = 1;
+    __HAL_TIM_SET_AUTORELOAD(&htim14, autoreload); // Max milliseconds
 }
 
 /**

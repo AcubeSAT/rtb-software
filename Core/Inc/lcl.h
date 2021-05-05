@@ -1,6 +1,7 @@
 #ifndef RTB_SOFTWARE_LCL_H
 #define RTB_SOFTWARE_LCL_H
 
+#include <log.h>
 #include "main.h"
 
 extern bool output_status;
@@ -14,7 +15,7 @@ inline void Relay_OFF() {
 }
 
 inline void LCL_ON_Force() {
-//    HAL_Delay(1);
+    __HAL_TIM_DISABLE(&htim8);
     TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
     TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_4, TIM_CCx_DISABLE);
     __HAL_TIM_ENABLE(&htim8);
@@ -25,7 +26,10 @@ inline void LCL_ON_Force() {
 }
 
 inline void LCL_ON() {
-    LCL_ON_Force();
+    // Initialise timer 14, which when completed, will push an interrupt to LCL_ON_FORCE() to actually enable the LCLs
+    __HAL_TIM_DISABLE(&htim14);
+    __HAL_TIM_SET_COUNTER(&htim14, 0); // Make sure to start from the start
+    __HAL_TIM_ENABLE(&htim14);
 }
 
 inline void LCL_OFF() {

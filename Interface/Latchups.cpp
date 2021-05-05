@@ -48,7 +48,7 @@ void Latchups::window() {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 150);
+        ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 120);
         ImGui::TableSetupColumn("Sta.", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableHeadersRow();
 

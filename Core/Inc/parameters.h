@@ -21,7 +21,7 @@ enum enum_parameter_names {
     TakeMeasurements = 2,
 };
 
-extern double floating_parameters[3];
+extern double floating_parameters[4];
 extern uint32_t integer_parameters[1];
 extern uint32_t enum_parameters[3];
 
@@ -29,6 +29,7 @@ typedef void (*floating_callback)(uint32_t parameter, double * value);
 typedef void (*integer_callback)(uint32_t parameter, uint32_t * value);
 
 void callback_dac_output(uint32_t parameter, double * value);
+void callback_recycle_timer(uint32_t parameter, double * value);
 
 bool uart_set_parameter(char* command, uint16_t len);
 

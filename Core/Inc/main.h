@@ -55,6 +55,7 @@ extern FDCAN_HandleTypeDef hfdcan1;
 extern FDCAN_HandleTypeDef hfdcan2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim8;
+extern TIM_HandleTypeDef htim14;
 extern SRAM_HandleTypeDef hsram1;
 extern ADC_HandleTypeDef hadc1;
 
