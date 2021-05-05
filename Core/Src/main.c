@@ -197,6 +197,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         __HAL_TIM_ENABLE(&htim15);
     } else if (htim == &htim14) { // Power-cycle delay timer
         LCL_ON_Force();
+    } else if (htim == &htim8) { // LCL SET/RESET timer
+        LCL_Check();
     }
 }
 
@@ -738,6 +740,7 @@ static void MX_TIM8_Init(void)
   HAL_TIM_Base_Start(&htim8);
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
+  __HAL_TIM_ENABLE_IT(&htim8, TIM_IT_UPDATE);
   /* USER CODE END TIM8_Init 2 */
   HAL_TIM_MspPostInit(&htim8);
 

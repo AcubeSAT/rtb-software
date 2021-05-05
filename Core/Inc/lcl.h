@@ -33,13 +33,14 @@ inline void LCL_ON() {
 }
 
 inline void LCL_OFF() {
+    output_status = false;
+
     TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_3, TIM_CCx_DISABLE);
     TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_4, TIM_CCx_ENABLE);
     __HAL_TIM_ENABLE(&htim8);
 
     log_trace("LCL RESET");
 
-    output_status = false;
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 }
 
@@ -65,6 +66,17 @@ inline void LCL_Test_Trigger_OFF() {
     TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_DISABLE);
     // Reset counter so that next time starts from 0
     __HAL_TIM_SET_COUNTER(&htim3, 0);
+}
+
+inline void LCL_Check() {
+    if (output_status) { // Expecting output to be true
+        bool actual_output = HAL_GPIO_ReadPin(LCL_OUT_GPIO_Port, LCL_OUT_Pin);
+
+        if (!actual_output) {
+            log_error("LCL failure to set. Retrying");
+            LCL_ON();
+        }
+    }
 }
 
 #endif //RTB_SOFTWARE_LCL_H

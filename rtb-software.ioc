@@ -309,6 +309,7 @@ RCC.LPTIM345Freq_Value=60000000
 ProjectManager.ComputerToolchain=false
 Mcu.Pin17=PB0
 Mcu.Pin18=PB1
+NVIC.TIM8_UP_TIM13_IRQn=true\:9\:0\:true\:false\:true\:true\:true
 RCC.LTDCFreq_Value=16125000
 TIM8.OCIdleState_3=TIM_OCIDLESTATE_SET
 NVIC.PriorityGroup=NVIC_PRIORITYGROUP_4
