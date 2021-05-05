@@ -48,7 +48,7 @@ void Latchups::window() {
         ImGui::TableSetupScrollFreeze(0, 1); // Make header row always visible
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 80);
+        ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 150);
         ImGui::TableSetupColumn("Sta.", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableHeadersRow();
 
@@ -62,7 +62,7 @@ void Latchups::window() {
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Selectable(std::to_string(index + 1).c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text("%s", timeLog[index].computerTime.c_str());
+                ImGui::Text("%s", timeLog[index].computerTime.substr(11).c_str());
                 ImGui::TableSetColumnIndex(2);
                 ImGui::Text("%s", timeLog[index].experimentTime.c_str());
                 ImGui::TableSetColumnIndex(3);

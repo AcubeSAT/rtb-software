@@ -2,6 +2,7 @@
 #include <plog/Log.h>
 #include <fstream>
 #include <string>
+#include <thread>
 
 #include "sys/times.h"
 #include "sys/vtimes.h"
@@ -45,6 +46,8 @@ double ConsumptionChecker::cpu() {
     using namespace std::literals::chrono_literals;
 
     static Throttled throttled(3s, std::function([this] () -> double {
+        static const auto processorCount = std::thread::hardware_concurrency();
+
         tms timeSample;
         clock_t now;
         double percent;
@@ -58,6 +61,7 @@ double ConsumptionChecker::cpu() {
         else{
             percent = (timeSample.tms_stime - lastSysCPU) + (timeSample.tms_utime - lastUserCPU);
             percent /= now - lastCPU;
+            percent /= processorCount;
         }
         lastCPU = now;
         lastSysCPU = timeSample.tms_stime;

@@ -61,7 +61,7 @@ void Measurement::window() {
         ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data() + firstElement, measurements[3].second.data() + firstElement, size, 0, stride);
 
         for (const auto& latchup: latchups.getAllLatchups()) {
-            ImPlot::AnnotateClamped(latchup.unixTime, latchup.thresholdAtLatchup, ImVec2(15,15), latchupColour, "SEL");
+            ImPlot::AnnotateClamped(latchup.unixTime, latchup.thresholdAtLatchup, ImVec2(0,-40), latchupColour, "SEL");
         }
         lastSamples = size;
 

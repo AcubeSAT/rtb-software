@@ -18,13 +18,14 @@
 
 static bool unsavedParameters = true;
 
-std::array<Parameter<float>, 3> floatingParameters = {
+std::array<Parameter<float>, 4> floatingParameters = {
         Parameter<float>{"Board Voltage", 3.3, 1, 4, [](float voltage) {
             floatingParameters[1].max = voltage;
             floatingParameters[2].max = voltage;
         }},
         Parameter<float>{"LCL V threshold", 0.3, 0, 3.3},
         Parameter<float>{"LCL Offset voltage", 0.15, 0, 3.3},
+        Parameter<float>{"Power-cycle delay (us)", 10, 0, 10000},
 };
 
 std::array<Parameter<int>, 1> integerParameters = {
