@@ -15,7 +15,7 @@ void start_experiment(int experiment) {
         experiment = currentExperiment;
     }
 
-    log_info("Starting experiment %ld", experiment);
+    log_debug("Starting experiment %ld", experiment);
 
     switch (experiment) {
         case 1:
@@ -37,7 +37,7 @@ void stop_experiment(int experiment) {
         experiment = currentExperiment;
     }
 
-    log_info("Pausing experiment %ld", experiment);
+    log_debug("Pausing experiment %ld", experiment);
 
     switch (experiment) {
         case 1:

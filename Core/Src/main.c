@@ -162,7 +162,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         if (!output_status) return;
 
         // Latchup occurred
-        LCL_ON(); // Restart the component as fast as possible
+        stop_experiment(-1);
+        if (currentExperiment == -1) {
+            LCL_ON(); // Restart the component as fast as possible
+        } else {
+            LCL_ON_Experiment();
+        }
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
 
         static char state_string[STATE_STRING_SIZE];

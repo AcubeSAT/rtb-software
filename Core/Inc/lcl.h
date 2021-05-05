@@ -3,8 +3,11 @@
 
 #include <log.h>
 #include "main.h"
+#include "experiments.h"
 
 extern bool output_status;
+
+extern bool __alsoStartExperiment;
 
 inline void Relay_ON() {
     HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_RESET);
@@ -23,6 +26,11 @@ inline void LCL_ON_Force() {
     log_trace("LCL SET");
     output_status = true;
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+
+    if (__alsoStartExperiment) {
+        __alsoStartExperiment = false;
+        start_experiment(-1);
+    }
 }
 
 inline void LCL_ON() {
@@ -30,6 +38,11 @@ inline void LCL_ON() {
     __HAL_TIM_DISABLE(&htim14);
     __HAL_TIM_SET_COUNTER(&htim14, 0); // Make sure to start from the start
     __HAL_TIM_ENABLE(&htim14);
+}
+
+inline void LCL_ON_Experiment() {
+    __alsoStartExperiment = true;
+    LCL_ON();
 }
 
 inline void LCL_OFF() {
