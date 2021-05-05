@@ -75,11 +75,11 @@ void Beep::streamThread() {
 
             if (dac.isStreamOpen()) {
                 dac.startStream();
-                std::this_thread::sleep_for(500ms);
+                std::this_thread::sleep_for(410ms);
                 dac.stopStream();
             }
         }
-    } catch ( RtError& e ) {
+    } catch ( RtAudioError& e ) {
         LOG_ERROR << e.getMessage();
     }
 }

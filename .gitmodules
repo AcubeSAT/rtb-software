@@ -16,3 +16,6 @@
 [submodule "Interface/lib/Tonic"]
 	path = Interface/lib/Tonic
 	url = https://github.com/TonicAudio/Tonic.git
+[submodule "Interface/lib/rtaudio"]
+	path = Interface/lib/rtaudio
+	url = https://github.com/thestk/rtaudio.git

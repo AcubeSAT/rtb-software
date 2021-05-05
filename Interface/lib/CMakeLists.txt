@@ -6,7 +6,7 @@ add_library(gl3w imgui/examples/libs/gl3w/GL/gl3w.c)
 
 FILE(GLOB TONIC_SRCS Tonic/src/Tonic/*.cpp)
 add_library(Tonic ${TONIC_SRCS})
-add_library(RtAudio Tonic/examples/Standalone/RTAudio/RtAudio.cpp)
+add_library(RtAudio rtaudio/RtAudio.cpp)
 
 add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GL3W)
 add_compile_definitions(__LINUX_PULSE__)

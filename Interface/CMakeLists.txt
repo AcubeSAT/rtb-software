@@ -23,7 +23,7 @@ include_directories(
         "${PROJECT_SOURCE_DIR}/lib/magic_enum/include"
         "${PROJECT_SOURCE_DIR}/lib/cereal/include"
         "${PROJECT_SOURCE_DIR}/lib/Tonic/src"
-        "${PROJECT_SOURCE_DIR}/lib/Tonic/examples/Standalone/RTAudio"
+        "${PROJECT_SOURCE_DIR}/lib/rtaudio"
         "${PROJECT_SOURCE_DIR}/lib"
 )
 add_subdirectory(lib)
