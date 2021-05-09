@@ -80,7 +80,7 @@ ofast static inline uint8_t powm_u8(uint8_t b, uint8_t e, uint8_t m)
 }
 
 ofast static inline uint8_t MRAM_value(uint32_t address) {
-    return ((((uint8_t) (address * 1163) + 89) % 83) & (1 << 4)) ? 0x01 : 0xfe;
+    return (uint8_t) address;
 }
 
 static inline volatile uint8_t MRAM_read(uint32_t address) {
