@@ -64,10 +64,19 @@ void Measurement::window() {
         ImPlot::PlotLine("Output ON/OFF", measurements[3].first.data() + firstElement, measurements[3].second.data() + firstElement, size, 0, stride);
 
         if (tooltips) {
+            static std::vector<double> latchupTimes;
+            static std::vector<double> latchupThresholds;
+
+            latchupTimes.clear();
+            latchupThresholds.clear();
+
             for (const auto &latchup: latchups.getAllLatchups()) {
-                ImPlot::AnnotateClamped(latchup.unixTime, latchup.thresholdAtLatchup, ImVec2(0, -40), latchupColour,
-                                        "SEL");
+                latchupTimes.push_back(latchup.unixTime);
+                latchupThresholds.push_back(latchup.thresholdAtLatchup);
             }
+
+            ImPlot::SetNextMarkerStyle(ImPlotMarker_Cross, 18, IMPLOT_AUTO_COL, 3);
+            ImPlot::PlotScatter("SEL", latchupTimes.data(), latchupThresholds.data(), latchupTimes.size());
         }
         lastSamples = size;
 
