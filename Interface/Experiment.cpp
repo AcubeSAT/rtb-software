@@ -138,8 +138,6 @@ void Experiment::window() {
     if (currentExperiment.get().status != Idle) {
         auto time = currentExperiment.get().duration();
 
-        ImGui::Separator();
-
         if (ImGui::BeginTable("experiment_time", 2, ImGuiTableFlags_Borders)) {
             ImGui::TableSetupColumn("Event", ImGuiTableColumnFlags_WidthFixed, 220);
             ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthStretch);
@@ -231,10 +229,15 @@ void Experiment::stop() {
     status = Paused;
     stopTime = std::chrono::steady_clock::now();
 
-    auto duration = stopTime.value() - startTime.value();
-    previousDuration += duration;
+    if (underDowntime) {
+        modifyCurrentExperimentDowntime(false);
+    } else {
+        auto duration = stopTime.value() - startTime.value();
+        previousDuration += duration;
+    }
 
-    LOG_INFO << "Paused experiment " << name << " at " << formatDuration(duration).str();
+    LOG_INFO << "Paused experiment " << name << " at " << formatDuration(previousDuration).str();
+    dumpTimes();
 }
 
 void Experiment::reset() {
@@ -246,6 +249,7 @@ void Experiment::reset() {
     serialHandler->write(std::string("er") + std::to_string(currentExperimentId) + "\n");
 
     LOG_INFO << "Reset experiment " << name << " at total " << formatDuration(previousDuration).str();
+    dumpTimes();
 
     status = Idle;
     previousDuration = 0s;
@@ -256,4 +260,10 @@ void Experiment::reset() {
     can.reset();
     latchups.reset();
     mram.reset();
+}
+
+void Experiment::dumpTimes() {
+    LOG_INFO << "Total duration: " << formatDuration(previousDuration).str();
+    LOG_INFO << "Downtime duration: " << formatDuration(downtimeDuration).str();
+    LOG_INFO << "Irradiation duration: " << formatDuration(previousDuration - downtimeDuration).str();
 }

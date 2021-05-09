@@ -56,6 +56,8 @@ private:
     Duration onDuration() {
         return duration() - downtime();
     }
+
+    void dumpTimes();
 public:
     std::string name;
     std::string description;
