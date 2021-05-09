@@ -25,7 +25,7 @@ void Experiment_REG_Loop() {
     log_debug("REG loop: start");
 
     // ==== Serial output
-    // WRITE 1 TO ALL
+    // WRITE 0 TO ALL
     HAL_GPIO_WritePin(SR_SER_GPIO_Port, SR_SER_Pin, GPIO_PIN_SET);
 
     // Write all pins to the selected value

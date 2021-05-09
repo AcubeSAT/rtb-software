@@ -6,18 +6,16 @@
 #include "Utilities.h"
 #include <ratio>
 
-std::string loremIpsum = "Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here... Description of the test to be placed here...";
-
 std::vector<Experiment> Experiment::experiments = {
-        Experiment("Clear", "No experiment selected. No actions taken"),
+        Experiment("Clear", "No actions taken, just providing power."),
         Experiment("CAN transceiver", "CAN RX + TX. Comparison of received messages."),
-        Experiment("CAN transceiver silent", loremIpsum),
+        Experiment("CAN transceiver silent", "CAN silent. No output expected."),
         Experiment("MRAM", "MRAM write and verify loop"),
         Experiment("Shift Register", "Sets the shift register to output once"),
-        Experiment("Op-Amp", loremIpsum),
-        Experiment("555 timer", loremIpsum),
-        Experiment("NOR gate", loremIpsum),
-        Experiment("S-R latch", loremIpsum),
+        Experiment("Op-Amp", "Static configuration 0 and 1. Output HIGH"),
+        Experiment("555 timer", "SR latch configuration. Active low. Expected output HIGH"),
+        Experiment("NOR gate", "SR latch configuration. Active high. Expected output LOW/HIGH"),
+        Experiment("S-R latch", "Active low. Expected output HIGH."),
 };
 
 int Experiment::currentExperimentId = 0;
