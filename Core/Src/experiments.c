@@ -142,7 +142,8 @@ bool uart_experiment(char *command, uint16_t len) {
                 return true;
             }
 
-            reset_experiment(currentExperiment);
+            int resetExperiment = strtol(command + 2, NULL, 10);
+            reset_experiment(resetExperiment);
             currentExperiment = -1;
         }  else {
             return false;

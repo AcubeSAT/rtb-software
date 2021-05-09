@@ -24,6 +24,8 @@ static struct Stats {
     uint64_t packetsRX;
 } stats = { 0, 0, 0, 0};
 
+void MX_FDCAN1_Init();
+
 static FDCAN_HandleTypeDef* testedCAN ;
 static FDCAN_HandleTypeDef* ambientCAN;
 
@@ -53,6 +55,8 @@ void Experiment_CAN_Start() {
     TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
     TxHeader.MessageMarker = 0;
 
+    HAL_FDCAN_MspInit(&hfdcan1);
+    HAL_FDCAN_MspInit(&hfdcan2);
     HAL_FDCAN_Start(&hfdcan1);
     HAL_FDCAN_Start(&hfdcan2);
     HAL_Delay(2);
@@ -66,6 +70,7 @@ void Experiment_CAN_Start() {
 
     experimentStatus = true;
 }
+
 
 static void Experiment_CAN_Statistics() {
     static uint32_t lastStats = 0;
@@ -87,6 +92,8 @@ void Experiment_CAN_Loop() {
 
     static char state_string[STATE_STRING_SIZE];
     state_to_string(state, state_string);
+
+    if (!experimentStatus) return;
 
     if (HAL_FDCAN_AddMessageToTxFifoQ(txCAN, &TxHeader, &TxData[0]) != HAL_OK) {
         log_error("CAN TX error %#010lx", txCAN->ErrorCode);
@@ -155,6 +162,9 @@ void Experiment_CAN_Loop() {
 }
 
 void Experiment_CAN_Stop() {
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12|GPIO_PIN_13);
+
     for (uint32_t i = FDCAN_TX_BUFFER0; i <= FDCAN_TX_BUFFER31 && i != 0; i = i << 1) {
         // Maybe this is not needed since we stop the CANs
         HAL_FDCAN_AbortTxRequest(txCAN, i);
