@@ -118,6 +118,16 @@ void parameterWindow() {
         ImGui::Text("You have unsaved parameters!");
         ImGui::PopStyleColor();
     }
+
+    if (std::dynamic_pointer_cast<EnumParameter<parameters::Latchupinator>>(enumParameters[1])->value == parameters::Latchupinator::RandomErrorsON) {
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImVec4)ImColor::HSV(0, 1.0f, 0.835f));
+        ImGui::BeginChild("ErrorWarning");
+        FontAwesomeText(FontAwesome::ExclamationTriangle);
+        ImGui::SameLine();
+        ImGui::Text("Random errors are ON. All results are inaccurate!");
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+    }
 }
 
 std::string dumpParameters() {
