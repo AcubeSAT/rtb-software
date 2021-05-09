@@ -19,13 +19,13 @@
 static bool unsavedParameters = true;
 
 std::array<Parameter<float>, 4> floatingParameters = {
-        Parameter<float>{"Board Voltage", 3.3, 1, 4, [](float voltage) {
+        Parameter<float>{"Board Voltage", 3.3, 1, 4, "V",[](float voltage) {
             floatingParameters[1].max = voltage;
             floatingParameters[2].max = voltage;
         }},
-        Parameter<float>{"LCL V threshold", 0.3, 0, 3.3},
-        Parameter<float>{"LCL Offset voltage", 0.15, 0, 3.3},
-        Parameter<float>{"Power-cycle delay (ms)", 20, 0, 500},
+        Parameter<float>{"LCL V threshold", 0.3, 0, 3.3, "V"},
+        Parameter<float>{"LCL Offset voltage", 0.15, 0, 1, "V"},
+        Parameter<float>{"Power-cycle delay", 20, 0, 500, "ms"},
 };
 
 std::array<Parameter<int>, 1> integerParameters = {
@@ -67,8 +67,9 @@ void parameterWindow() {
     ImGui::Spacing();
 
     for (auto& parameter : floatingParameters) {
-//        ImGui::SliderScalar(parameter.name.c_str(), ImGuiDataType_Double, &parameter.value, &parameter.min, &parameter.max, "%f");
-        if (ImGui::SliderFloat(parameter.name.c_str(), &parameter.value, parameter.min, parameter.max)) {
+        std::string format = parameter.units.empty() ? "%.3f" : "%.3f " + parameter.units;
+
+        if (ImGui::SliderScalar(parameter.name.c_str(), ImGuiDataType_Float, &parameter.value, &parameter.min, &parameter.max, format.c_str(), ImGuiSliderFlags_None)) {
             parameter.callCallback();
             unsavedParameters = true;
         }
@@ -121,7 +122,7 @@ void parameterWindow() {
 
     if (std::dynamic_pointer_cast<EnumParameter<parameters::Latchupinator>>(enumParameters[1])->value == parameters::Latchupinator::RandomErrorsON) {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImVec4)ImColor::HSV(0, 1.0f, 0.835f));
-        ImGui::BeginChild("ErrorWarning");
+        ImGui::BeginChild("ErrorWarning", ImVec2(0, 38), true);
         FontAwesomeText(FontAwesome::ExclamationTriangle);
         ImGui::SameLine();
         ImGui::Text("Random errors are ON. All results are inaccurate!");

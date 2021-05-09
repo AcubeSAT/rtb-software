@@ -34,6 +34,7 @@ template<typename T>
 class Parameter {
 public:
     std::string name;
+    std::string units;
     T defaultValue;
     T value;
 
@@ -46,16 +47,18 @@ public:
         if (callback) callback(value);
     }
 
-    Parameter(std::string name, T value, const std::function<void(T)> &callback = {}) : name(std::move(name)),
+    Parameter(std::string name, T value, std::string units = "", const std::function<void(T)> &callback = {}) : name(std::move(name)),
                                                                                         defaultValue(value),
+                                                                                        units(std::move(units)),
                                                                                         value(value),
                                                                                         callback(callback) {}
 
-    Parameter(std::string name, T value, T min, T max, const std::function<void(T)> &callback = {}) : name(
+    Parameter(std::string name, T value, T min, T max, std::string units = "", const std::function<void(T)> &callback = {}) : name(
             std::move(name)),
                                                                                                       defaultValue(
                                                                                                               value),
                                                                                                       value(value),
+                                                                                                      units(std::move(units)),
                                                                                                       min(min),
                                                                                                       max(max),
                                                                                                       callback(
