@@ -27,8 +27,11 @@ public:
     };
 private:
     Duration previousDuration = 0s;
+    Duration downtimeDuration = 0s;
+
     std::optional<TimePoint> startTime;
     std::optional<TimePoint> stopTime;
+    bool underDowntime = false;
 
     static int currentExperimentId;
     static std::reference_wrapper<Experiment> currentExperiment;
@@ -36,6 +39,23 @@ private:
     Status status = Idle;
 
     inline static std::atomic<ExperimentCommand> experimentCommand = ExperimentCommand::None;
+
+    Duration downtime() {
+        if (status != Idle) {
+            if (underDowntime) {
+                auto now = std::chrono::steady_clock::now();
+                return downtimeDuration + (now - startTime.value());
+            } else {
+                return downtimeDuration;
+            }
+        } else {
+            return 0s;
+        }
+    }
+
+    Duration onDuration() {
+        return duration() - downtime();
+    }
 public:
     std::string name;
     std::string description;
@@ -58,12 +78,42 @@ public:
         return currentExperiment.get().duration();
     }
 
+    static void modifyCurrentExperimentDowntime(bool isDown) {
+        if (isDown) {
+            currentExperiment.get().startDowntime();
+        } else {
+            currentExperiment.get().stopDowntime();
+        }
+    }
+
     Duration duration() {
-        if (status == Started) {
+        if (status == Started && !underDowntime) {
             auto now = std::chrono::steady_clock::now();
             return previousDuration + now - startTime.value();
         } else {
             return previousDuration;
+        }
+    }
+
+    void startDowntime() {
+        if (status == Started) {
+            stopTime = std::chrono::steady_clock::now();
+            auto duration = stopTime.value() - startTime.value();
+            previousDuration += duration;
+
+            underDowntime = true;
+            startTime = std::chrono::steady_clock::now();
+        }
+    }
+
+    void stopDowntime() {
+        if (status == Started) {
+            stopTime = std::chrono::steady_clock::now();
+            auto duration = stopTime.value() - startTime.value();
+            downtimeDuration += duration;
+
+            underDowntime = false;
+            startTime = std::chrono::steady_clock::now();
         }
     }
 

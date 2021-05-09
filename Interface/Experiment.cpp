@@ -124,6 +124,8 @@ void Experiment::window() {
     }
     ImGui::PopStyleColor(3);
 
+    ImGui::Spacing();
+
     static float flux = 1.e10f;
     ImGui::Text("Flux:");
     ImGui::SameLine();
@@ -137,12 +139,39 @@ void Experiment::window() {
         auto time = currentExperiment.get().duration();
 
         ImGui::Separator();
-        ImGui::Text("Elapsed time: %s", formatDuration(time).str().c_str());
 
-        ImGui::Text("Totally Accurate Fluence Calculator:");
-        float fluence = flux * std::chrono::duration_cast<std::chrono::duration<int32_t, std::ratio<1,10>>>(time).count();
-        ImGui::SameLine();
-        ImGui::Text("%.3e /cm²", fluence);
+        if (ImGui::BeginTable("experiment_time", 2, ImGuiTableFlags_Borders)) {
+            ImGui::TableSetupColumn("Event", ImGuiTableColumnFlags_WidthFixed, 220);
+            ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthStretch);
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("Elapsed time");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(formatDuration(time).str().c_str());
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("LCL Downtime");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(formatDuration(currentExperiment.get().downtime()).str().c_str());
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("Functional time");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::TextUnformatted(formatDuration(currentExperiment.get().onDuration()).str().c_str());
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("Totally Accurate Fluence Value");
+            ImGui::TableSetColumnIndex(1);
+            float fluence = flux * std::chrono::duration_cast<std::chrono::duration<int32_t, std::ratio<1,10>>>(currentExperiment.get().onDuration()).count();
+            ImGui::Text("%.3e /cm²", fluence);
+
+            ImGui::EndTable();
+        }
+
     }
 
     resetPopup();
@@ -220,6 +249,7 @@ void Experiment::reset() {
 
     status = Idle;
     previousDuration = 0s;
+    downtimeDuration = 0s;
     startTime.reset();
     stopTime.reset();
 

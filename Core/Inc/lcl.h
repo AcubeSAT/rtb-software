@@ -23,6 +23,7 @@ inline void LCL_ON_Force() {
     TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_4, TIM_CCx_DISABLE);
     __HAL_TIM_ENABLE(&htim8);
 
+    printf(UART_CONTROL UART_C_POWER "1"); // TODO: Actually use ON input to determine this
     log_trace("LCL SET");
     output_status = true;
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);

@@ -65,6 +65,16 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         }
 
                         measurements.acquire(values);
+                    } else if (receivedRaw[1] == 'y') {
+                        auto status = receivedRaw.substr(2);
+
+                        if (status.at(0) == '0') {
+                            Experiment::modifyCurrentExperimentDowntime(true);
+                        } else if (status.at(0) == '1') {
+                            Experiment::modifyCurrentExperimentDowntime(false);
+                        } else {
+                            LOG_WARNING << "Unknown power status " << status;
+                        }
                     } else if (receivedRaw[1] == 'b') {
                         // CAN bus bit flip
                         std::stringstream ss(receivedRaw.substr(2));
@@ -281,7 +291,7 @@ std::ostringstream SerialHandler::time() {
 }
 
 void SerialHandler::window() {
-    if (ImGui::Button("!!")) {
+    if (ImGui::Button("@")) {
         write("what\n");
     }
 

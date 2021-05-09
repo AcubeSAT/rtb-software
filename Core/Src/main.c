@@ -169,6 +169,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
             LCL_ON_Experiment();
         }
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
+        printf(UART_CONTROL UART_C_POWER "0");
 
         static char state_string[STATE_STRING_SIZE];
         state_to_string(state, state_string);
