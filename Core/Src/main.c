@@ -207,7 +207,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         __HAL_TIM_SET_AUTORELOAD(&htim15, (rand() % 5000 + 1)); // Max milliseconds
         __HAL_TIM_ENABLE(&htim15);
     } else if (htim == &htim14) { // Power-cycle delay timer
-        LCL_ON_Force();
+        if (output_status) { // Someone may have turned the output OFF in the meantime
+            LCL_ON_Force();
+        }
     } else if (htim == &htim8) { // LCL SET/RESET timer
         LCL_Check();
     }
