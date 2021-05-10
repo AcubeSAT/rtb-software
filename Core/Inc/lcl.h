@@ -65,7 +65,7 @@ inline void LCL_Power_Cycle() {
 
 inline void Outputs_ON() {
     Relay_ON();
-    LCL_ON();
+    LCL_ON_Force();
 }
 
 inline void Outputs_OFF() {
