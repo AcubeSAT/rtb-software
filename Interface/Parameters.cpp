@@ -23,7 +23,7 @@ std::array<Parameter<float>, 4> floatingParameters = {
             floatingParameters[1].max = voltage;
             floatingParameters[2].max = voltage;
         }},
-        Parameter<float>{"LCL V threshold", 0.3, 0, 3.3, "V"},
+        Parameter<float>{"LCL V threshold", 0.4, 0, 3.3, "V"},
         Parameter<float>{"LCL Offset voltage", 0.15, 0, 1, "V"},
         Parameter<float>{"Power-cycle delay", 20, 0, 500, "ms"},
 };

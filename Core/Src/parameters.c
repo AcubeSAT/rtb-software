@@ -11,7 +11,7 @@
 
 double floating_parameters[] = {
         3.3f,
-        0.30f,
+        0.40f,
         0.15f,
         20.0f
 };
