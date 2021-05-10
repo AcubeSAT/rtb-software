@@ -551,7 +551,7 @@ static void MX_FDCAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
-
+  Experiment_CAN_DeinitPins();
   /* USER CODE END FDCAN1_Init 2 */
 
 }
@@ -604,7 +604,7 @@ static void MX_FDCAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN2_Init 2 */
-
+  Experiment_CAN_DeinitPins();
   /* USER CODE END FDCAN2_Init 2 */
 
 }

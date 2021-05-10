@@ -8,4 +8,6 @@ void Experiment_CAN_Loop();
 void Experiment_CAN_Stop();
 void Experiment_CAN_Reset();
 
+void Experiment_CAN_DeinitPins();
+
 #endif //RTB_SOFTWARE_CAN_H

@@ -161,9 +161,13 @@ void Experiment_CAN_Loop() {
     Experiment_CAN_Statistics();
 }
 
-void Experiment_CAN_Stop() {
+void Experiment_CAN_DeinitPins() {
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12|GPIO_PIN_13);
+}
+
+void Experiment_CAN_Stop() {
+    Experiment_CAN_DeinitPins();
 
     for (uint32_t i = FDCAN_TX_BUFFER0; i <= FDCAN_TX_BUFFER31 && i != 0; i = i << 1) {
         // Maybe this is not needed since we stop the CANs
