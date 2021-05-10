@@ -48,7 +48,6 @@ public:
         Address address;
         Data write;
         Data read1;
-        Data read2;
 
         std::string toBits(Data number) const;
         ImColor colour() const;
@@ -79,7 +78,7 @@ public:
 
     void reset();
 
-    void logEvent(Event::Address address, Event::Data expected, Event::Data read1, Event::Data read2, Event::State state);
+    void logEvent(Event::Address address, Event::Data expected, Event::Data read, Event::State state);
 
     void setProgressFill(int progress, int max) {
         progressFill = std::make_pair(progress, max);

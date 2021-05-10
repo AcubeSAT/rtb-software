@@ -101,8 +101,8 @@ ofast inline static void MRAM_progress_report(char type, uint32_t fill, uint32_t
     }
 }
 
-ofast static void MRAM_error_report(uint32_t address, uint8_t expected, uint8_t read1, uint8_t read2, const char* verification_stage) {
-    printf(UART_CONTROL UART_C_MEMERROR "%x %x %x %x %s\r\n", (int) address, (int) expected, (int) read1, (int) read2, verification_stage);
+ofast static void MRAM_error_report(uint32_t address, uint8_t expected, uint8_t read1, const char* verification_stage) {
+    printf(UART_CONTROL UART_C_MEMERROR "%x %x %x %s\r\n", (int) address, (int) expected, (int) read1, verification_stage);
  }
 
 static void Experiment_MRAM_Statistics(bool force) {
@@ -191,10 +191,7 @@ void Experiment_MRAM_Loop() {
         if (read != expected_value) {
             errors += 1;
 
-            // Second read to determine if the event is a transient or not
-            volatile uint8_t read_second = MRAM_read(verifyAddress);
-
-            MRAM_error_report(verifyAddress, expected_value, read, read_second, "Read");
+            MRAM_error_report(verifyAddress, expected_value, read, "Read");
         }
 
         // STEP 2: Write + read new value
@@ -204,9 +201,7 @@ void Experiment_MRAM_Loop() {
         if (new_read != new_value || (RANDOM_ERRORS && rand() % 999 == 0)) {
             errors += 1;
 
-            uint8_t read_second = MRAM_read(verifyAddress);
-
-            MRAM_error_report(verifyAddress, new_value, read, read_second, "Write");
+            MRAM_error_report(verifyAddress, new_value, read, "Write");
         }
 
         MRAM_progress_report('r', verifyAddress, MRAM_max_address);

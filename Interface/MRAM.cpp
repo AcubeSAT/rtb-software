@@ -72,12 +72,6 @@ void MRAM::window() {
             ImGui::PopFont();
             draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 155, 120));
 
-            ImGui::SameLine(0, 15.0f);
-            ImGui::PushFont(logFont);
-            ImGui::Text("%02x", (int) lastItem->read2);
-            ImGui::PopFont();
-            draw_list->AddRectFilled(padMin(ImGui::GetItemRectMin()), padMax(ImGui::GetItemRectMax()), IM_COL32(75, 75, 155, 120));
-
             ImGui::Spacing();
         }
     }
@@ -133,24 +127,16 @@ void MRAM::window() {
 }
 
 void
-MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::Event::Data read1, MRAM::Event::Data read2, MRAM::Event::State state) {
-    Event::Data diff = expected ^ read1;
+MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::Event::Data read, MRAM::Event::State state) {
+    Event::Data diff = expected ^ read;
     uint32_t flips = __builtin_popcount(diff);
 
     Event::GuessedType guessedType = Event::SEFI;
 
     if (flips == 1) {
-        if (read1 == read2) {
-            guessedType = Event::SEU;
-        } else {
-            guessedType = Event::SET;
-        }
+        guessedType = Event::SEU;
     } else if (flips < 4) {
-        if (read1 == read2) {
-            guessedType = Event::MBU;
-        } else {
-            guessedType = Event::SET;
-        }
+        guessedType = Event::MBU;
     } else {
         guessedType = Event::SEFI;
     }
@@ -161,8 +147,7 @@ MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::E
         flips,
         address,
         expected,
-        read1,
-        read2,
+        read,
         currentDatetimeMilliseconds().str(),
         formatDuration(std::chrono::milliseconds(microcontrollerClock.load())).str(),
         currentExperimentTime().str()
@@ -181,8 +166,7 @@ MRAM::logEvent(MRAM::Event::Address address, MRAM::Event::Data expected, MRAM::E
             std::to_string(address),
             std::to_string(flips),
             std::to_string(expected),
-            std::to_string(read1),
-            std::to_string(read2),
+            std::to_string(read)
     });
 }
 

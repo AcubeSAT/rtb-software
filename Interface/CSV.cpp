@@ -29,7 +29,6 @@ CSV::CSV() : fileWriterThread(&CSV::thread, this) {
             "flips",
             "expected",
             "read1",
-            "read2"
     });
 
     createFile("latchup", {

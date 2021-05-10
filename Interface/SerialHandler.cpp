@@ -142,11 +142,10 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         MRAM::Event::Address address;
                         MRAM::Event::Data expected;
                         MRAM::Event::Data read1;
-                        MRAM::Event::Data read2;
                         std::string state;
-                        ss >> std::hex >> address >> (int &) expected >> (int &) read1 >> (int &) read2 >> state;
+                        ss >> std::hex >> address >> (int &) expected >> (int &) read1 >> state;
 
-                        mram.logEvent(address, expected, read1, read2,
+                        mram.logEvent(address, expected, read1,
                                       magic_enum::enum_cast<MRAM::Event::State>(state).value_or(
                                               MRAM::Event::State::Idle));
                     } else if (receivedRaw[1] == 'o') {
