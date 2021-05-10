@@ -192,19 +192,21 @@ void PendSV_Handler(void)
     // Handle UART TX queue
     while (uart_write - uart_read > 0) {
         volatile uint32_t uart_write_clone = uart_write; // Get value once, explicitly, to ease atomic operations
-        uint32_t bytes_to_read = uart_write_clone - uart_read;
+        uint32_t messages_to_read = uart_write_clone - uart_read;
 
-        for (int i = 0; i < bytes_to_read; i++) {
-            // Wait until the UART can take more data to transmit
-            while (!LL_USART_IsActiveFlag_TXE_TXFNF(USART3)) {}
-            LL_USART_TransmitData8(USART3, uart_buffer[(uart_read + i) % UART_BUFFER_MAX]);
+        for (int i = 0; i < messages_to_read; i++) {
+            char * message = (char*) uart_buffer[(uart_read + i) % UART_BUFFER_SIZE];
+            for (int j = 0; j < strlen(message); j++) {
+                // Wait until the UART can take more data to transmit
+                while (!LL_USART_IsActiveFlag_TXE_TXFNF(USART3)) {}
+                LL_USART_TransmitData8(USART3, message[j]);
+            }
         }
 
         // Wait until all data has been transmitted
         while (!LL_USART_IsActiveFlag_TC(USART3)) {}
 
-
-        uart_read += bytes_to_read;
+        uart_read += messages_to_read;
     }
 
   /* USER CODE END PendSV_IRQn 0 */

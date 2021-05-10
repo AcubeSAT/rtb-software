@@ -67,7 +67,7 @@ TIM_HandleTypeDef htim17;
 SRAM_HandleTypeDef hsram1;
 
 /* USER CODE BEGIN PV */
-uint8_t uart_buffer[UART_BUFFER_MAX];
+uint8_t uart_buffer[UART_BUFFER_SIZE][UART_BUFFER_STRING_SIZE + 1];
 atomic_uint uart_write = 0;
 atomic_uint uart_read = 0;
 bool reserved = false;
@@ -101,16 +101,19 @@ static void MX_TIM14_Init(void);
  * This function overwrites the default printf() and std::cout/cerr outputs,
  * redirecting them to a UART port.
  */
-int _write(int file, char *ptr, int len)
+__attribute__((optimize("O0"))) int _write(int file, char *ptr, int len)
 {
     static atomic_bool anyone_writing = false;
 
     if (file == 1 || file == 2) { // stdout, stderr
-        for (int i = 0; i < len; i++) {
-            // Write data into buffer in a cyclic format
-            uart_buffer[(uart_write + i) % UART_BUFFER_MAX] = ptr[i];
+        if (len > UART_BUFFER_STRING_SIZE) {
+            len = UART_BUFFER_STRING_SIZE;
         }
-        uart_write += len;
+        // Write data into buffer in a cyclic format
+        uint8_t* buffer = uart_buffer[(uart_write) % UART_BUFFER_SIZE];
+        memcpy(buffer, ptr, len);
+        buffer[len] = '\0';
+        uart_write += 1;
 
         // Notify the PendSV interrupt handler that there are new items in the queue
         SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
@@ -169,7 +172,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
             LCL_ON_Experiment();
         }
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
-        printf(UART_CONTROL UART_C_POWER "0");
+        printf(UART_CONTROL UART_C_POWER "0" "\r\n");
 
         static char state_string[STATE_STRING_SIZE];
         state_to_string(state, state_string);

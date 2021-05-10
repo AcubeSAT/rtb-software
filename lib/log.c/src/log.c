@@ -21,6 +21,7 @@
  */
 
 #include <stm32h7xx_hal.h>
+#include <main.h>
 #include "log.h"
 
 #define MAX_CALLBACKS 32
@@ -50,21 +51,33 @@ static const char *level_colors[] = {
 };
 #endif
 
-
 static void stdout_callback(log_Event *ev) {
+  char main_buffer[UART_BUFFER_STRING_SIZE];
+
   char buf[16];
   buf[snprintf(buf, sizeof(buf), "%7ld", ev->time)] = '\0';
+
+  long int stored = 0;
+
+    if (UART_BUFFER_STRING_SIZE - stored > 0 && stored >= 0) {
 #ifdef LOG_USE_COLOR
-  fprintf(
-    ev->udata, "\x1b[90m%s\x1b[0m %s%-5s\x1b[0m ",
-    buf, level_colors[ev->level], level_strings[ev->level]);
+        stored += snprintf(
+                main_buffer, UART_BUFFER_STRING_SIZE, "\x1b[90m%s\x1b[0m %s%-5s\x1b[0m ",
+                buf, level_colors[ev->level], level_strings[ev->level]);
 #else
-  fprintf(
-    ev->udata, "%s %-5s %s:%d: ",
-    buf, level_strings[ev->level], ev->file, ev->line);
+        stored += snprintf(
+          main_buffer, UART_BUFFER_STRING_SIZE, "%s %-5s %s:%d: ",
+          buf, level_strings[ev->level], ev->file, ev->line);
 #endif
-  vfprintf(ev->udata, ev->fmt, ev->ap);
-  fprintf(ev->udata, "\r\n");
+    }
+  if (UART_BUFFER_STRING_SIZE - stored > 0 && stored >= 0) {
+      stored += vsnprintf(main_buffer + stored, UART_BUFFER_STRING_SIZE - stored, ev->fmt, ev->ap) ;
+  }
+    if (UART_BUFFER_STRING_SIZE - stored > 0 && stored >= 0) {
+        stored += snprintf(main_buffer + stored, UART_BUFFER_STRING_SIZE - stored, "\r\n") ;
+    }
+
+  fputs(main_buffer, ev->udata);
   fflush(ev->udata);
 }
 

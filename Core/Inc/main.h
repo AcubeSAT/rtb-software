@@ -62,8 +62,9 @@ extern ADC_HandleTypeDef hadc1;
 #define STATE_STRING_SIZE 10
 
 #define STDOUT_BUFFER_SIZE 2048
-#define UART_BUFFER_MAX 2048
-extern uint8_t uart_buffer[UART_BUFFER_MAX];
+#define UART_BUFFER_SIZE 16
+#define UART_BUFFER_STRING_SIZE 254
+extern uint8_t uart_buffer[UART_BUFFER_SIZE][UART_BUFFER_STRING_SIZE + 1];
 extern atomic_uint uart_write;
 extern atomic_uint uart_read;
 extern bool uart_mutex;
