@@ -101,7 +101,12 @@ public:
         if (status == Started) {
             stopTime = std::chrono::steady_clock::now();
             auto duration = stopTime.value() - startTime.value();
-            previousDuration += duration;
+
+            if (underDowntime) {
+                downtimeDuration += duration;
+            } else {
+                previousDuration += duration;
+            }
 
             underDowntime = true;
             startTime = std::chrono::steady_clock::now();
@@ -110,6 +115,9 @@ public:
 
     void stopDowntime() {
         if (status == Started) {
+            if (!underDowntime) {
+                LOG_WARNING << "Downtime must be stopped but it hasn't ever started?";
+            }
             stopTime = std::chrono::steady_clock::now();
             auto duration = stopTime.value() - startTime.value();
             downtimeDuration += duration;
