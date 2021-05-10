@@ -532,7 +532,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     GPIO_InitStruct.Alternate = GPIO_AF3_TIM8;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-      /* USER CODE BEGIN TIM8_MspPostInit 1 */
+  /* USER CODE BEGIN TIM8_MspPostInit 1 */
 
   /* USER CODE END TIM8_MspPostInit 1 */
   }

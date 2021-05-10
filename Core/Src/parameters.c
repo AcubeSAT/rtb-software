@@ -51,6 +51,7 @@ void callback_recycle_timer(uint32_t parameter, double * value) {
     int autoreload = (int) ((*value) * 10);
     if (autoreload <= 0) autoreload = 1;
     __HAL_TIM_SET_AUTORELOAD(&htim14, autoreload); // Max milliseconds
+    __HAL_TIM_SET_COUNTER(&htim14, 0); // Prevent issues with counter exceeding autoreload
 }
 
 /**
