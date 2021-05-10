@@ -72,6 +72,7 @@ atomic_uint uart_write = 0;
 atomic_uint uart_read = 0;
 bool reserved = false;
 enum State state = none;
+uint32_t lastLatchup = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -164,6 +165,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
         if (!output_status) return;
 
+        printf(UART_CONTROL UART_C_POWER "0" "\r\n");
+
         // Latchup occurred
         stop_experiment(-1);
         if (currentExperiment == -1) {
@@ -172,14 +175,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
             LCL_ON_Experiment();
         }
         printf(UART_CONTROL UART_C_TIME "%ld\r\n", HAL_GetTick());
-        printf(UART_CONTROL UART_C_POWER "0" "\r\n");
 
-        static char state_string[STATE_STRING_SIZE];
-        state_to_string(state, state_string);
+        if (HAL_GetTick() - lastLatchup > MINIMUM_LATCHUP_INTERVAL) {
+            static char state_string[STATE_STRING_SIZE];
+            state_to_string(state, state_string);
 
-        printf(UART_CONTROL UART_C_LATCHUP "%s\r\n", state_string);
+            printf(UART_CONTROL UART_C_LATCHUP "%s\r\n", state_string);
+            log_warn("SEL detected!");
 
-        log_warn("SEL detected!");
+            lastLatchup = HAL_GetTick();
+        } else {
+            // Microlatchup
+            log_info("Micro-latchup detected");
+        }
     } else if (GPIO_Pin == GPIO_PIN_13) {
         // Button pressed
         Outputs_OFF(); // Emergency scram

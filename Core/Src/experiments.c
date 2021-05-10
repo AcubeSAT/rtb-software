@@ -28,7 +28,7 @@ void start_experiment(int experiment) {
             Experiment_REG_Start();
             break;
         default:
-            log_debug("No associated experimental procedure");
+            log_trace("No associated experimental procedure");
     }
 }
 
@@ -50,7 +50,7 @@ void stop_experiment(int experiment) {
             Experiment_REG_Stop();
             break;
         default:
-            log_debug("No associated experimental procedure");
+            log_trace("No associated experimental procedure");
     }
 }
 
@@ -72,7 +72,7 @@ void reset_experiment(int experiment) {
             Experiment_REG_Reset();
             break;
         default:
-            log_debug("No associated experimental procedure");
+            log_trace("No associated experimental procedure");
     }
 }
 

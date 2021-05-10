@@ -117,6 +117,7 @@ public:
         if (status == Started) {
             if (!underDowntime) {
                 LOG_WARNING << "Downtime must be stopped but it hasn't ever started?";
+                return;
             }
             stopTime = std::chrono::steady_clock::now();
             auto duration = stopTime.value() - startTime.value();
@@ -124,6 +125,8 @@ public:
 
             underDowntime = false;
             startTime = std::chrono::steady_clock::now();
+
+            LOG_DEBUG << "Downtime of " << std::setprecision(4) << std::chrono::duration_cast<std::chrono::microseconds>(duration).count() / 1000.0f << "ms";
         }
     }
 

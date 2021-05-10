@@ -59,6 +59,8 @@ extern TIM_HandleTypeDef htim14;
 extern SRAM_HandleTypeDef hsram1;
 extern ADC_HandleTypeDef hadc1;
 
+#define MINIMUM_LATCHUP_INTERVAL 500
+
 #define STATE_STRING_SIZE 10
 
 #define STDOUT_BUFFER_SIZE 2048
