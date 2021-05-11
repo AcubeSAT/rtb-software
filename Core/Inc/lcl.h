@@ -5,6 +5,7 @@
 #include "main.h"
 #include "experiments.h"
 
+extern bool output_cycling;
 extern bool output_status;
 
 extern bool __alsoStartExperiment;
@@ -26,6 +27,7 @@ inline void LCL_ON_Force() {
     printf(UART_CONTROL UART_C_POWER "1" "\r\n"); // TODO: Actually use ON input to determine this
     log_trace("LCL SET");
     output_status = true;
+    output_cycling = false;
     HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
 
     if (__alsoStartExperiment) {
@@ -35,6 +37,8 @@ inline void LCL_ON_Force() {
 }
 
 inline void LCL_ON() {
+    output_cycling = true;
+
     // Initialise timer 14, which when completed, will push an interrupt to LCL_ON_FORCE() to actually enable the LCLs
     __HAL_TIM_DISABLE(&htim14);
     __HAL_TIM_SET_COUNTER(&htim14, 0); // Make sure to start from the start

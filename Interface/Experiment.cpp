@@ -16,6 +16,8 @@ std::vector<Experiment> Experiment::experiments = {
         Experiment("555 timer", "SR latch configuration. Active low. Expected output HIGH"),
         Experiment("NOR gate", "SR latch configuration. Active high. Expected output LOW/HIGH"),
         Experiment("S-R latch", "Active low. Expected output HIGH."),
+        Experiment("MRAM static", "MRAM is not selected but is only powered"),
+        Experiment("LCL characterisation", "Connect different loads to the LCL to characterise it"),
 };
 
 int Experiment::currentExperimentId = 0;
