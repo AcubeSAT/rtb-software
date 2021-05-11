@@ -1059,19 +1059,26 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, SR_SER_Pin|SR_RCLK_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, SR_SER_Pin|MEAS_4_Pin|MEAS_3_Pin|MEAS_2_Pin
+                          |SR_RCLK_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SR_SRCLK_GPIO_Port, SR_SRCLK_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LD1_Pin|MEAS_1_Pin|MEAS_0_Pin|LD3_Pin
+                          |LD2_Pin|MEAS_4B8_Pin|MEAS_5_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : SR_SER_Pin SR_RCLK_Pin */
-  GPIO_InitStruct.Pin = SR_SER_Pin|SR_RCLK_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOG, MEAS_6_Pin|MEAS_7_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : SR_SER_Pin MEAS_4_Pin MEAS_3_Pin MEAS_2_Pin
+                           SR_RCLK_Pin */
+  GPIO_InitStruct.Pin = SR_SER_Pin|MEAS_4_Pin|MEAS_3_Pin|MEAS_2_Pin
+                          |SR_RCLK_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -1090,8 +1097,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SR_SRCLK_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD1_Pin LD3_Pin LD2_Pin */
-  GPIO_InitStruct.Pin = LD1_Pin|LD3_Pin|LD2_Pin;
+  /*Configure GPIO pins : LD1_Pin MEAS_1_Pin MEAS_0_Pin LD3_Pin
+                           LD2_Pin MEAS_4B8_Pin MEAS_5_Pin */
+  GPIO_InitStruct.Pin = LD1_Pin|MEAS_1_Pin|MEAS_0_Pin|LD3_Pin
+                          |LD2_Pin|MEAS_4B8_Pin|MEAS_5_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -1109,6 +1118,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RELAY_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MEAS_6_Pin MEAS_7_Pin */
+  GPIO_InitStruct.Pin = MEAS_6_Pin|MEAS_7_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);

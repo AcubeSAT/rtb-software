@@ -5,6 +5,7 @@
 #include <lcl.h>
 #include <mram.h>
 #include <shift_register.h>
+#include <characterisation.h>
 #include "experiments.h"
 #include "stm32h7xx_hal.h"
 
@@ -26,6 +27,9 @@ void start_experiment(int experiment) {
             break;
         case 4:
             Experiment_REG_Start();
+            break;
+        case 10:
+            Experiment_Characterisation_Start();
             break;
         default:
             log_trace("No associated experimental procedure");
@@ -49,6 +53,9 @@ void stop_experiment(int experiment) {
         case 4:
             Experiment_REG_Stop();
             break;
+        case 10:
+            Experiment_Characterisation_Stop();
+            break;
         default:
             log_trace("No associated experimental procedure");
     }
@@ -71,6 +78,9 @@ void reset_experiment(int experiment) {
         case 4:
             Experiment_REG_Reset();
             break;
+        case 10:
+            Experiment_Characterisation_Reset();
+            break;
         default:
             log_trace("No associated experimental procedure");
     }
@@ -90,6 +100,9 @@ void loop_experiment(int experiment) {
             break;
         case 4:
             Experiment_REG_Loop();
+            break;
+        case 10:
+            Experiment_Characterisation_Loop();
             break;
     }
 }

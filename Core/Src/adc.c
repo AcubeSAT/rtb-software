@@ -6,11 +6,13 @@
 #include "adc.h"
 
 // Add some extra values for leeway
+uint32_t last_converted_values[100];
 uint32_t converted_values[100];
 
 uint8_t current_conversion = 0;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
+    last_converted_values[current_conversion] = converted_values[current_conversion];
     converted_values[current_conversion++] = HAL_ADC_GetValue(hadc);
 
     if (current_conversion == 3) {

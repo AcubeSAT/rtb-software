@@ -124,6 +124,16 @@ void state_to_string(enum State state, char * string);
 #define LCL_TEST_GPIO_Port GPIOA
 #define LD1_Pin GPIO_PIN_0
 #define LD1_GPIO_Port GPIOB
+#define MEAS_4_Pin GPIO_PIN_12
+#define MEAS_4_GPIO_Port GPIOE
+#define MEAS_3_Pin GPIO_PIN_14
+#define MEAS_3_GPIO_Port GPIOE
+#define MEAS_2_Pin GPIO_PIN_15
+#define MEAS_2_GPIO_Port GPIOE
+#define MEAS_1_Pin GPIO_PIN_10
+#define MEAS_1_GPIO_Port GPIOB
+#define MEAS_0_Pin GPIO_PIN_11
+#define MEAS_0_GPIO_Port GPIOB
 #define LD3_Pin GPIO_PIN_14
 #define LD3_GPIO_Port GPIOB
 #define LCL_SET_Pin GPIO_PIN_8
@@ -135,8 +145,16 @@ void state_to_string(enum State state, char * string);
 #define LCL_OUT_EXTI_IRQn EXTI15_10_IRQn
 #define RELAY_Pin GPIO_PIN_7
 #define RELAY_GPIO_Port GPIOD
+#define MEAS_6_Pin GPIO_PIN_9
+#define MEAS_6_GPIO_Port GPIOG
+#define MEAS_7_Pin GPIO_PIN_14
+#define MEAS_7_GPIO_Port GPIOG
 #define LD2_Pin GPIO_PIN_7
 #define LD2_GPIO_Port GPIOB
+#define MEAS_4B8_Pin GPIO_PIN_8
+#define MEAS_4B8_GPIO_Port GPIOB
+#define MEAS_5_Pin GPIO_PIN_9
+#define MEAS_5_GPIO_Port GPIOB
 #define SR_RCLK_Pin GPIO_PIN_0
 #define SR_RCLK_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
