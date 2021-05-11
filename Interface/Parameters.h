@@ -43,6 +43,11 @@ public:
 
     std::function<void(T)> callback;
 
+    bool hasEngineering = false;
+    std::string engineeringUnits;
+    std::function<T(T)> rawToEngineering;
+    std::function<T(T)> engineeringToRaw;
+
     void callCallback() {
         if (callback) callback(value);
     }
@@ -68,8 +73,45 @@ public:
 
     template<class Archive>
     void serialize(Archive &archive) {
-        archive(CEREAL_NVP(name), CEREAL_NVP(value));
+        if (hasEngineering) {
+            archive(CEREAL_NVP(name), CEREAL_NVP(value), cereal::make_nvp("engineering_value", rawToEngineering(value)));
+        } else {
+            archive(CEREAL_NVP(name), CEREAL_NVP(value));
+        }
     }
+
+    void setEngineering(std::string engineeringUnits, std::function<T(T)> rawToEngineering, std::function<T(T)> engineeringToRaw) {
+        hasEngineering = true;
+        this->engineeringUnits = std::move(engineeringUnits);
+        this->rawToEngineering = std::move(rawToEngineering);
+        this->engineeringToRaw = std::move(engineeringToRaw);
+    }
+
+    std::string getEngineeringUnits() {
+        return hasEngineering ? engineeringUnits : units;
+    }
+
+    T getEngineeringValue() {
+        return hasEngineering ? rawToEngineering(value) : value;
+    }
+
+    T getEngineeringMin() {
+        return hasEngineering ? rawToEngineering(min) : min;
+    }
+
+    T getEngineeringMax() {
+        return hasEngineering ? rawToEngineering(max) : max;
+    }
+
+    void setEngineeringValue(T value) {
+        if (hasEngineering) {
+            this->value = engineeringToRaw(value);
+        } else {
+            this->value = value;
+        }
+    }
+
+    std::string dump();
 };
 
 template<typename Enum>
@@ -107,8 +149,10 @@ public:
 };
 
 extern std::array<Parameter<float>, 4> floatingParameters;
-extern std::array<Parameter<int>, 1> integerParameters;
+extern std::array<Parameter<int>, 0> integerParameters;
 extern std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters;
+
+void initialiseParameters();
 
 void parameterWindow();
 

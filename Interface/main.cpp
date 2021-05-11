@@ -119,6 +119,7 @@ int main(int argc, char *argv[]) {
 
     beep.emplace();
     csv.emplace();
+    initialiseParameters();
 
     serialHandler = std::make_unique<SerialHandler>(deviceLog);
     serialHandler->port = argv[1];
