@@ -35,6 +35,8 @@ add_executable(RadiationInterface ${SOURCE_FILES} ${VARIOUS})
 target_link_libraries(RadiationInterface ImGui ImGuiBackend ImGuiDemo ImPlot gl3w GL ${glfw3_LIBRARIES} Tonic RtAudio dl rt atomic)
 target_link_libraries(RadiationInterface pthread ${Boost_LIBRARIES} ${pulse_LIBRARIES})
 
+add_executable(LCG tests/LCG.cpp)
+
 add_compile_definitions(__LINUX_PULSE__)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
