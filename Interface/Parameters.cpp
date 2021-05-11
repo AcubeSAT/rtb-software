@@ -44,10 +44,28 @@ std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters = {
 };
 
 void initialiseParameters() {
-    static const float maxLCLmilliamps = 210;
+    static const float maxLCLmilliamps = 400;
+
+    static const float aSlope = -23.147729890082648;
+    static const float aIntercept = 261.9924477792994;
+    static const float bSlope = -226.6879456225355;
+    static const float bIntercept = -16.64498440165091;
+
+//    floatingParameters[1].setEngineering("mA",
+//                                         [](float v) { return v / floatingParameters[0].value * maxLCLmilliamps; },
+//                                         [](float i) { return i / maxLCLmilliamps * floatingParameters[0].value; });
+
     floatingParameters[1].setEngineering("mA",
-                                         [](float v) { return v / floatingParameters[0].value * maxLCLmilliamps; },
-                                         [](float i) { return i / maxLCLmilliamps * floatingParameters[0].value; });
+                                         [](float v) {
+                                             const float a = aSlope * floatingParameters[2].value + aIntercept;
+                                             const float b = bSlope * floatingParameters[2].value + bIntercept;
+                                             return a * v + b;
+                                         },
+                                         [](float i) {
+                                             const float a = aSlope * floatingParameters[2].value + aIntercept;
+                                             const float b = bSlope * floatingParameters[2].value + bIntercept;
+                                             return (i - b) / a;
+                                         });
 }
 
 namespace cereal {

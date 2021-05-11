@@ -1,9 +1,14 @@
 import glob
 import sys
 import re
-import numpy as mp
+import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from scipy.stats import linregress
+
+xoffset = []
+aoffset = []
+boffset = []
 
 results = {}
 
@@ -27,11 +32,32 @@ for directory in sys.argv[1:]:
 print(results)
 
 for key, value in results.items():
+    valueT = np.transpose(value)
+    np.savetxt(key + ".csv", valueT, delimiter=",")
     plt.plot(value[0], value[1], label="offset = " + key + " V")
+
+    slope, intercept, r, p, se = linregress(value[0], value[1])
+    print("Regression for Voff = {} V: {} {}".format(key, slope, intercept))
+    print("Correlation coefficient: {}".format(r))
+
+    xoffset.append(float(key))
+    aoffset.append(float(slope))
+    boffset.append(float(intercept))
+
+slope, intercept, r, p, se = linregress(xoffset, aoffset)
+print("Final Regression for Voff (a): {} {}".format(slope, intercept))
+print("Correlation coefficient: {}".format(r))
+
+slope, intercept, r, p, se = linregress(xoffset, boffset)
+print("Final Regression for Voff (b): {} {}".format(slope, intercept))
+print("Correlation coefficient: {}".format(r))
 
 plt.xlabel("Threshold voltage (V)")
 plt.ylabel("Current (mA)")
 plt.grid()
 plt.legend()
 
+
+
 plt.show()
+
