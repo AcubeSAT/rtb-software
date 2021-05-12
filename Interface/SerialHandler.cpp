@@ -70,6 +70,15 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
 
                         if (status.at(0) == '0') {
                             Experiment::modifyCurrentExperimentDowntime(true);
+
+                            try {
+                                if (status.at(1) == 'P') {
+                                    // Log non-latchup power cycle
+                                    powerCycles.logPowerCycle();
+                                }
+                            } catch (const std::exception &e) {
+                                LOG_WARNING << "Unknown power-off cause";
+                            }
                         } else if (status.at(0) == '1') {
                             Experiment::modifyCurrentExperimentDowntime(false);
                         } else {

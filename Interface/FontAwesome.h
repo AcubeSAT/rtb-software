@@ -9,6 +9,7 @@ struct FontAwesome {
     inline static const char Trash[] = "\uF1F8";
     inline static const char ExclamationTriangle[] = "\uF071";
     inline static const char CaretRight[] = "\uF0DA";
+    inline static const char Bolt[] = "\uF0E7";
 };
 
 #endif //RADIATIONINTERFACE_FONTAWESOME_H

@@ -116,7 +116,6 @@ public:
     void stopDowntime() {
         if (status == Started) {
             if (!underDowntime) {
-                LOG_WARNING << "Downtime must be stopped but it hasn't ever started?";
                 return;
             }
             stopTime = std::chrono::steady_clock::now();

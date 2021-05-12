@@ -66,17 +66,29 @@ void Measurement::window() {
         if (tooltips) {
             static std::vector<double> latchupTimes;
             static std::vector<double> latchupThresholds;
+            static std::vector<double> powerCycleTimes;
+            static std::vector<double> powerCycleValues;
 
             latchupTimes.clear();
             latchupThresholds.clear();
+            powerCycleTimes.clear();
+            powerCycleValues.clear();
 
             for (const auto &latchup: latchups.getAllLatchups()) {
                 latchupTimes.push_back(latchup.unixTime);
                 latchupThresholds.push_back(latchup.thresholdAtLatchup);
             }
 
+            for (const auto &powerCycle: powerCycles.getAllPowerCycles()) {
+                powerCycleTimes.push_back(powerCycle.unixTime);
+                powerCycleValues.push_back(2.5);
+            }
+
             ImPlot::SetNextMarkerStyle(ImPlotMarker_Cross, 18, IMPLOT_AUTO_COL, 3);
             ImPlot::PlotScatter("SEL", latchupTimes.data(), latchupThresholds.data(), latchupTimes.size());
+
+            ImPlot::SetNextMarkerStyle(ImPlotMarker_Diamond, 6, IMPLOT_AUTO_COL, 2);
+            ImPlot::PlotScatter("PC", powerCycleTimes.data(), powerCycleValues.data(), powerCycleTimes.size());
         }
         lastSamples = size;
 

@@ -35,6 +35,11 @@ CSV::CSV() : fileWriterThread(&CSV::thread, this) {
         "state",
         "" // This may be needed?
     });
+
+    createFile("powercycle", {
+            "state",
+            ""
+    });
 }
 
 void CSV::createFile(const std::string &filename, bool force) {

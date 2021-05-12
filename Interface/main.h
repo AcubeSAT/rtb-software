@@ -9,11 +9,13 @@
 #include "Beep.h"
 #include "CSV.h"
 #include "MRAM.h"
+#include "PowerCycles.h"
 
 const uint8_t UART_CONTROL = '\x11';
 
 extern std::unique_ptr<SerialHandler> serialHandler;
 extern Latchups latchups;
+extern PowerCycles powerCycles;
 extern Measurement measurements;
 extern CAN can;
 extern MRAM mram;

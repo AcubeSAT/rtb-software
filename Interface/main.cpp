@@ -39,13 +39,11 @@
 #include "Utilities.h"
 #include "MRAM.h"
 #include "ConsumptionChecker.h"
+#include "PowerCycles.h"
 
 const char* glsl_version = "#version 130";
 
 using namespace std::chrono_literals;
-
-// The number of points to include in the graph
-const int GRAPH_SIZE = 300;
 
 static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
@@ -57,6 +55,7 @@ bool ImguiStarted = false;
 
 std::unique_ptr<SerialHandler> serialHandler;
 Latchups latchups;
+PowerCycles powerCycles;
 Measurement measurements;
 CAN can;
 MRAM mram;

@@ -5,6 +5,7 @@
 #include "main.h"
 #include "Utilities.h"
 #include <ratio>
+#include "FontAwesome.h"
 
 std::vector<Experiment> Experiment::experiments = {
         Experiment("Clear", "No actions taken, just providing power."),
@@ -170,6 +171,17 @@ void Experiment::window() {
             ImGui::EndTable();
         }
 
+    }
+
+    if (currentExperiment.get().status == Experiment::Started || measurements.getLCLStatus()) {
+        ImGui::Spacing();
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImVec4) ImColor::HSV(2/7.0f, 0.6f, 0.535f));
+        ImGui::BeginChild("CircuitEnergised", ImVec2(0, 36), true);
+        FontAwesomeText(FontAwesome::Bolt);
+        ImGui::SameLine();
+        ImGui::Text("Output is ON");
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
     }
 
     resetPopup();

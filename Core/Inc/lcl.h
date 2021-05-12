@@ -65,6 +65,8 @@ inline void LCL_OFF() {
 inline void LCL_Power_Cycle() {
     LCL_OFF();
     LCL_ON();
+
+    printf(UART_CONTROL UART_C_POWER "0" "PC" "\r\n");
 }
 
 inline void Outputs_ON() {

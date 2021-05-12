@@ -35,7 +35,7 @@ public:
     void acquire(const std::array<float, SIZE>& value);
 
     bool getLCLStatus() {
-        const auto& measurement = measurements[2];
+        const auto& measurement = measurements[3];
         if (measurement.second.empty()) {
             return false;
         }
