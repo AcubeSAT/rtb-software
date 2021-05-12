@@ -120,8 +120,7 @@ void Experiment::window() {
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.592f, 0.3f, 0.4f, 0.4f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.592f, 0.4f, 0.5f, 0.4f));
     if (currentExperiment.get().status == Started && ImGui::Button("POWER CYCLE", ImVec2(ImGui::GetContentRegionAvail().x, 0.0f))) {
-        LOG_INFO << "User triggered power cycle";
-        serialHandler->write("p2\n");
+        sendExperimentCommand(ExperimentCommand::PowerCycle);
     }
     ImGui::PopStyleColor(3);
 
@@ -189,6 +188,11 @@ void Experiment::window() {
     // Signal/command handler
     if (experimentCommand == ExperimentCommand::Pause) {
         currentExperiment.get().stop();
+
+        experimentCommand = ExperimentCommand::None;
+    } else if (experimentCommand == ExperimentCommand::PowerCycle) {
+        LOG_INFO << "User triggered power cycle";
+        serialHandler->write("p2\n");
 
         experimentCommand = ExperimentCommand::None;
     }

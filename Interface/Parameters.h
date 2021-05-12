@@ -149,7 +149,7 @@ public:
 };
 
 extern std::array<Parameter<float>, 4> floatingParameters;
-extern std::array<Parameter<int>, 0> integerParameters;
+extern std::array<Parameter<int>, 1> integerParameters;
 extern std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters;
 
 void initialiseParameters();

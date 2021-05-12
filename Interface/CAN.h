@@ -40,6 +40,7 @@ public:
 
         enum GuessedType {
             SEFI,
+            Hard_SEFI,
             SEL,
             SET,
             MBU
@@ -71,6 +72,8 @@ private:
     std::vector<Event> timeLog;
 
     std::atomic<Stats> stats{};
+
+    int consecutiveSEFIs = 0;
 public:
     CAN() {
         stats = {0, 0, 0, 0};

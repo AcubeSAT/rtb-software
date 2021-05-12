@@ -6,6 +6,8 @@
 #include <plog/Log.h>
 #include "magic_enum.hpp"
 #include "Utilities.h"
+#include "Parameters.h"
+#include "Experiment.h"
 
 void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::State state, CAN::Event::MeasuredType type, const std::string& info) {
     const std::lock_guard lock(timeLogMutex);
@@ -22,6 +24,18 @@ void CAN::logEvent(CAN::Event::Data rx, CAN::Event::Data tx, CAN::Event::State s
         guessedType = Event::MBU;
     } else {
         guessedType = Event::SEFI;
+    }
+
+    if (guessedType == Event::SEFI) {
+        consecutiveSEFIs++;
+
+        if (integerParameters[0].value != 0 && consecutiveSEFIs >= integerParameters[0].value) {
+            consecutiveSEFIs = 0;
+            Experiment::sendExperimentCommand(Experiment::ExperimentCommand::PowerCycle);
+            guessedType = Event::Hard_SEFI;
+        }
+    } else {
+        consecutiveSEFIs = 0;
     }
 
     Event event {
@@ -123,7 +137,7 @@ void CAN::window() {
         ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed, 30);
         ImGui::TableSetupColumn("Experiment Time", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableSetupColumn("Dir.", ImGuiTableColumnFlags_WidthFixed, 40);
-        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 50);
+        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 70);
         ImGui::TableSetupColumn("#flips", ImGuiTableColumnFlags_WidthFixed, 100);
         ImGui::TableSetupColumn("Error Code", ImGuiTableColumnFlags_WidthStretch, 100);
         ImGui::TableHeadersRow();
@@ -195,6 +209,8 @@ ImColor CAN::Event::colour() const {
             return ImColor::HSV(0.37f, 0.7f, 0.9f);
         case SEFI:
             return ImColor::HSV(0.62f, 0.7f, 0.9f);
+        case Hard_SEFI:
+            return ImColor::HSV(0.62f, 0.5f, 1.0f);
         case MBU:
             return ImColor::HSV(0.09f, 0.8f, 0.87f);
         case SEL:

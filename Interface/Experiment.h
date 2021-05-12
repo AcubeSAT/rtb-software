@@ -23,7 +23,8 @@ public:
 
     enum class ExperimentCommand {
         None,
-        Pause
+        Pause,
+        PowerCycle
     };
 private:
     Duration previousDuration = 0s;

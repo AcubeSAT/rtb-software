@@ -28,7 +28,8 @@ std::array<Parameter<float>, 4> floatingParameters = {
         Parameter<float>{"Power-cycle delay", 20, 0, 500, "ms"},
 };
 
-std::array<Parameter<int>, 0> integerParameters = {
+std::array<Parameter<int>, 1> integerParameters = {
+        Parameter<int>{"SEFI power-cycle count", 10, 0, 50},
 };
 
 std::array<std::shared_ptr<EnumParameterBase>, 3> enumParameters = {
