@@ -5,7 +5,6 @@
 #include <thread>
 
 #include "sys/times.h"
-#include "sys/vtimes.h"
 
 ConsumptionChecker::ConsumptionChecker() {
     tms timeSample;
