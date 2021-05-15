@@ -53,6 +53,11 @@ inline void LCL_ON_Experiment() {
 inline void LCL_OFF() {
     output_status = false;
 
+    // Disable power-on timer to stop the attempt to power cycle
+    output_cycling = false;
+    __HAL_TIM_DISABLE(&htim14);
+    __HAL_TIM_SET_COUNTER(&htim14, 0);
+
     TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_3, TIM_CCx_DISABLE);
     TIM_CCxChannelCmd(htim8.Instance, TIM_CHANNEL_4, TIM_CCx_ENABLE);
     __HAL_TIM_ENABLE(&htim8);

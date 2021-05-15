@@ -170,6 +170,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
         if (!output_status) return;
 
+        // A falling edge occurred during a power cycle event. We can ignore it
+        if (output_cycling) return;
+
         // Latchup occurred
         stop_experiment(-1);
         if (currentExperiment == -1) {

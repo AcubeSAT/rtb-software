@@ -242,7 +242,6 @@ void Experiment::stop() {
     serialHandler->write("p0\n");
     serialHandler->write("ep\n");
 
-    status = Paused;
     stopTime = std::chrono::steady_clock::now();
 
     if (underDowntime) {
@@ -251,6 +250,8 @@ void Experiment::stop() {
         auto duration = stopTime.value() - startTime.value();
         previousDuration += duration;
     }
+
+    status = Paused;
 
     LOG_INFO << "Paused experiment " << name << " at " << formatDuration(previousDuration).str();
     dumpTimes();

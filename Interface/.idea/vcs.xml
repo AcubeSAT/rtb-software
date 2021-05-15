@@ -8,5 +8,6 @@
     <mapping directory="$PROJECT_DIR$/lib/implot" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/magic_enum" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/plog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/rtaudio" vcs="Git" />
   </component>
 </project>
