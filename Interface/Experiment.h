@@ -90,7 +90,7 @@ public:
     }
 
     Duration duration() {
-        if (status == Started && !underDowntime) {
+        if (status == Started) {
             auto now = std::chrono::steady_clock::now();
             return previousDuration + now - startTime.value();
         } else {
@@ -105,9 +105,8 @@ public:
 
             if (underDowntime) {
                 downtimeDuration += duration;
-            } else {
-                previousDuration += duration;
             }
+            previousDuration += duration;
 
             underDowntime = true;
             startTime = std::chrono::steady_clock::now();
@@ -122,6 +121,7 @@ public:
             stopTime = std::chrono::steady_clock::now();
             auto duration = stopTime.value() - startTime.value();
             downtimeDuration += duration;
+            previousDuration += duration;
 
             underDowntime = false;
             startTime = std::chrono::steady_clock::now();
