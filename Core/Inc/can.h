@@ -5,6 +5,7 @@
 
 void Experiment_CAN_Start();
 void Experiment_CAN_Loop();
+void Experiment_CAN_Silent_Loop();
 void Experiment_CAN_Stop();
 void Experiment_CAN_Reset();
 

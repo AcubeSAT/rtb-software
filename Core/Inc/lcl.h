@@ -105,6 +105,7 @@ inline void LCL_Check() {
 
         if (!actual_output) {
             log_error("LCL failure to set. Retrying");
+            printf(UART_CONTROL UART_C_POWER "0" "L" "\r\n");
             LCL_ON();
         }
     }

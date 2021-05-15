@@ -20,6 +20,7 @@ void start_experiment(int experiment) {
 
     switch (experiment) {
         case 1:
+        case 2:
             Experiment_CAN_Start();
             break;
         case 3:
@@ -45,6 +46,7 @@ void stop_experiment(int experiment) {
 
     switch (experiment) {
         case 1:
+        case 2:
             Experiment_CAN_Stop();
             break;
         case 3:
@@ -70,6 +72,7 @@ void reset_experiment(int experiment) {
 
     switch (experiment) {
         case 1:
+        case 2:
             Experiment_CAN_Reset();
             break;
         case 3:
@@ -94,6 +97,9 @@ void loop_experiment(int experiment) {
     switch (experiment) {
         case 1:
             Experiment_CAN_Loop();
+            break;
+        case 2:
+            Experiment_CAN_Silent_Loop();
             break;
         case 3:
             Experiment_MRAM_Loop();

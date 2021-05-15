@@ -81,6 +81,22 @@ static void Experiment_CAN_Statistics() {
     }
 }
 
+void Experiment_CAN_Silent_Loop() {
+    rxCAN = testedCAN;
+    txCAN = ambientCAN;
+
+    if (!experimentStatus) return;
+
+    if (HAL_FDCAN_AddMessageToTxFifoQ(txCAN, &TxHeader, &TxData[0]) != HAL_OK) {
+        log_debug("CAN TX error %#010lx", txCAN->ErrorCode);
+        HAL_Delay(200);
+    }
+
+    stats.bytesTX += 8;
+
+    Experiment_CAN_Statistics();
+}
+
 void Experiment_CAN_Loop() {
     if (state == canRX) {
         rxCAN = testedCAN;

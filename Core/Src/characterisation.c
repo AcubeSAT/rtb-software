@@ -71,6 +71,7 @@ void Experiment_Characterisation_Next() {
 
 void Experiment_Characterisation_Start() {
     start = true;
+    log_error("LCL characterisation started. All future results will be invalid. Please reset the MCU before proceeding with the next run.");
 }
 
 void Experiment_Characterisation_Loop() {
