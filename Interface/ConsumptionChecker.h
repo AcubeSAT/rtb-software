@@ -4,6 +4,7 @@
 #include <functional>
 #include <optional>
 #include <chrono>
+#include <string>
 
 class ConsumptionChecker {
     clock_t lastCPU, lastSysCPU, lastUserCPU;
