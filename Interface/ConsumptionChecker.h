@@ -12,6 +12,7 @@ public:
 
     double cpu();
     std::string memory();
+    bool isBatteryDischarging();
 };
 
 template<typename V, class R, class P>

@@ -71,3 +71,27 @@ double ConsumptionChecker::cpu() {
 
     return throttled();
 }
+
+bool ConsumptionChecker::isBatteryDischarging() {
+    using namespace std::literals::chrono_literals;
+
+    static Throttled throttled(3s, std::function([] () -> bool {
+        try {
+            std::ifstream batteryStatus("/sys/class/power_supply/BAT0/status");
+            std::string statusString;
+
+            batteryStatus >> statusString;
+
+            if (statusString == "Discharging") {
+                return true;
+            }
+        } catch (...) {
+            // We don't care if we can't read the battery status, probably this computer does not have a battery
+            return false;
+        }
+
+        return false;
+    }));
+
+    return throttled();
+}

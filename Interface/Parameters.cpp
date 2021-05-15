@@ -200,6 +200,16 @@ void parameterWindow() {
         ImGui::EndChild();
         ImGui::PopStyleColor();
     }
+
+    if (consumption.isBatteryDischarging()) {
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImVec4) ImColor::HSV(0.2f, 1.0f, 0.835f));
+        ImGui::BeginChild("ErrorWarning", ImVec2(0, 38), true);
+        FontAwesomeText(FontAwesome::ExclamationTriangle);
+        ImGui::SameLine();
+        ImGui::Text("Your laptop is not connected to power!");
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+    }
 }
 
 std::string dumpParameters() {

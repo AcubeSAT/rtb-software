@@ -10,6 +10,7 @@
 #include "CSV.h"
 #include "MRAM.h"
 #include "PowerCycles.h"
+#include "ConsumptionChecker.h"
 
 const uint8_t UART_CONTROL = '\x11';
 
@@ -19,6 +20,7 @@ extern PowerCycles powerCycles;
 extern Measurement measurements;
 extern CAN can;
 extern MRAM mram;
+extern ConsumptionChecker consumption;
 extern std::optional<Beep> beep;
 extern std::optional<CSV> csv;
 

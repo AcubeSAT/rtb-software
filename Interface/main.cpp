@@ -59,6 +59,7 @@ PowerCycles powerCycles;
 Measurement measurements;
 CAN can;
 MRAM mram;
+ConsumptionChecker consumption;
 std::optional<Settings> settings;
 std::optional<Beep> beep;
 std::optional<CSV> csv;
@@ -169,8 +170,6 @@ int main(int argc, char *argv[]) {
 
     std::string directory = __FILE__;
     directory.erase(directory.end() - 9, directory.end());
-
-    ConsumptionChecker consumption;
 
     imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 18.0f);
     largeFont = imguiIo.Fonts->AddFontFromFileTTF((directory + "/lib/imgui/misc/fonts/DroidSans.ttf").c_str(), 44.0f);
