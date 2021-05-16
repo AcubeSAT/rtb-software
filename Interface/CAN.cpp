@@ -165,6 +165,11 @@ void CAN::window() {
                 if (timeLog[index].measuredType == Event::BitFlip) {
                     ImGui::TableSetColumnIndex(4);
                     ImGui::Text("%d", timeLog[index].flips);
+
+                    if (!timeLog[index].info.empty()) {
+                        ImGui::TableSetColumnIndex(5);
+                        ImGui::Text("%s", timeLog[index].info.c_str());
+                    }
                 } else {
                     ImGui::TableSetColumnIndex(4);
                     std::string measuredType(magic_enum::enum_name(timeLog[index].measuredType));

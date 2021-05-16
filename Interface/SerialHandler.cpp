@@ -90,10 +90,11 @@ void SerialHandler::receiveHandler(const boost::system::error_code &error, std::
                         CAN::Event::Data tx;
                         CAN::Event::Data rx;
                         std::string state;
-                        ss >> std::hex >> state >> tx >> rx;
+                        std::string extraInfo;
+                        ss >> std::hex >> state >> tx >> rx >> extraInfo;
 
                         can.logEvent(rx, tx,
-                                     magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle));
+                                     magic_enum::enum_cast<CAN::Event::State>(state).value_or(CAN::Event::State::Idle), CAN::Event::BitFlip, extraInfo);
                     } else if (receivedRaw[1] == 'c') {
                         // CAN bus generic error
                         std::stringstream ss(receivedRaw.substr(2));

@@ -24,6 +24,8 @@ static struct Stats {
     uint64_t packetsRX;
 } stats = { 0, 0, 0, 0};
 
+const uint32_t CAN_IDENTIFIER = 0x111;
+
 void MX_FDCAN1_Init();
 
 static FDCAN_HandleTypeDef* testedCAN ;
@@ -45,7 +47,7 @@ uint64_t flipRandomBit(uint64_t input, uint32_t bits) {
 }
 
 void Experiment_CAN_Start() {
-    TxHeader.Identifier = 0x111;
+    TxHeader.Identifier = CAN_IDENTIFIER;
     TxHeader.IdType = FDCAN_STANDARD_ID;
     TxHeader.TxFrameType = FDCAN_DATA_FRAME;
     TxHeader.DataLength = FDCAN_DLC_BYTES_8;
@@ -143,7 +145,21 @@ void Experiment_CAN_Loop() {
 
 //            log_trace("CAN TXRX %#018llx %#018llx [%5d]", *TxInt, *RxInt, duration);
 
-            if (*RxInt != *TxInt && experimentStatus) {
+            if (RxHeader.Identifier != TxHeader.Identifier && experimentStatus) {
+                uint32_t diff = RxHeader.Identifier ^ TxHeader.Identifier;
+                uint32_t flips = __builtin_popcount(diff);
+
+                printf(UART_CONTROL UART_C_CANBITERROR "%s %lx %lx ID\r\n", state_string, RxHeader.Identifier, TxHeader.Identifier);
+                log_error("CAN header ID error [%db] %#018lx %#018lx", flips, TxHeader.Identifier, RxHeader.Identifier);
+            }
+
+            if (RxHeader.DataLength != TxHeader.DataLength && experimentStatus) {
+                uint32_t diff = RxHeader.DataLength ^ TxHeader.DataLength;
+                uint32_t flips = 4; // Not really but OK
+
+                printf(UART_CONTROL UART_C_CANBITERROR "%s %lx %lx Length\r\n", state_string, RxHeader.DataLength, TxHeader.DataLength);
+                log_error("CAN header ID error [%db] %#018lx %#018lx", flips, TxHeader.DataLength, RxHeader.DataLength);
+            } else if (*RxInt != *TxInt && experimentStatus) {
                 uint64_t diff = *RxInt ^ *TxInt;
                 uint32_t flips = __builtin_popcount(diff);
 
