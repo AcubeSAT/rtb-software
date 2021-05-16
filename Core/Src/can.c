@@ -88,11 +88,11 @@ void Experiment_CAN_Silent_Loop() {
     if (!experimentStatus) return;
 
     if (HAL_FDCAN_AddMessageToTxFifoQ(txCAN, &TxHeader, &TxData[0]) != HAL_OK) {
-        log_debug("CAN TX error %#010lx", txCAN->ErrorCode);
         HAL_Delay(200);
     }
 
     stats.bytesTX += 8;
+    stats.packetsTX++;
 
     Experiment_CAN_Statistics();
 }
