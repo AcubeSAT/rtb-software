@@ -32,8 +32,6 @@ void start_experiment(int experiment) {
         case 10:
             Experiment_Characterisation_Start();
             break;
-        default:
-            log_trace("No associated experimental procedure");
     }
 }
 
@@ -58,8 +56,6 @@ void stop_experiment(int experiment) {
         case 10:
             Experiment_Characterisation_Stop();
             break;
-        default:
-            log_trace("No associated experimental procedure");
     }
 }
 
@@ -84,8 +80,6 @@ void reset_experiment(int experiment) {
         case 10:
             Experiment_Characterisation_Reset();
             break;
-        default:
-            log_trace("No associated experimental procedure");
     }
 }
 
